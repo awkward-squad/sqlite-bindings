@@ -1,0 +1,10 @@
+cabal-version: 2.2
+
+name: sqlite-bindings
+version: 0
+
+library
+  build-depends: base
+  default-language: Haskell2010
+  exposed-modules: SqliteBindings
+  ghc-options: -Wall

@@ -1,12 +1,15 @@
 module SqliteBindings where
 
+import Foreign.Ptr (Ptr)
+import Foreign.C.Types
+
+-- todo - annotate safe/unsafe
+
 -- https://www.sqlite.org/cintro.html
 
 -- https://www.sqlite.org/c3ref/sqlite3.html
 --
 -- sqlite3 → The database connection object. Created by sqlite3_open() and destroyed by sqlite3_close().
---
--- 3 Constructors: sqlite3_open(), sqlite3_open16(), sqlite3_open_v2()
 --
 -- 2 Destructors: sqlite3_close(), sqlite3_close_v2()
 --
@@ -87,6 +90,29 @@ module SqliteBindings where
 -- sqlite3_wal_checkpoint_v2
 -- sqlite3_wal_hook
 
+data Sqlite3
+data Sqlite3Stmt
+
+foreign import ccall "sqlite3_bind_blob"
+  sqlite3BindBlob :: Ptr Sqlite3Stmt -> CInt -> Ptr () -> CInt -> Ptr (Ptr () -> IO ()) -> IO CInt
+
+foreign import ccall "sqlite3_bind_double"
+  sqlite3BindDouble :: Ptr Sqlite3Stmt -> CInt -> CDouble -> IO CInt
+
+foreign import ccall "sqlite3_bind_int"
+  sqlite3BindInt :: Ptr Sqlite3Stmt -> CInt -> CInt -> IO CInt
+
+foreign import ccall "sqlite3_bind_null"
+  sqlite3BindNull :: Ptr Sqlite3Stmt -> CInt -> IO CInt
+
+foreign import ccall "sqlite3_close_v2"
+  sqlite3CloseV2 :: Ptr Sqlite3 -> IO ()
+
+foreign import ccall "sqlite3_open_v2"
+  sqlite3OpenV2 :: Ptr CChar -> Ptr (Ptr Sqlite3) -> CInt -> Ptr CChar -> IO CInt
+
+foreign import ccall "sqlite3_prepare_v2"
+  sqlite3PrepareV2 :: Ptr Sqlite3 -> Ptr CChar -> CInt -> Ptr (Ptr Sqlite3Stmt) -> Ptr (Ptr CChar) -> IO CInt
 
 
 -- https://www.sqlite.org/c3ref/stmt.html
