@@ -3,8 +3,14 @@ cabal-version: 2.2
 name: sqlite-bindings
 version: 0
 
+extra-source-files:
+  README.md
+  cbits/sqlite.c
+  cbits/sqlite.h
+
 library
   build-depends: base
+  c-sources: cbits/sqlite3.c
   default-extensions:
     CApiFFI
   default-language: Haskell2010
