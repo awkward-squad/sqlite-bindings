@@ -1,18 +1,13 @@
-module SqliteBindings where
+module Sqlite.Bindings.Internal.Functions where
 
 import Data.Int (Int64)
 import Foreign.C.String (CString)
-import Foreign.C.Types
+import Foreign.C.Types (CChar (..), CDouble (..), CInt (..), CUChar (..))
 import Foreign.Ptr (FunPtr, Ptr)
-
-data Sqlite3
-
-data Sqlite3_blob
-
-data Sqlite3_stmt
+import Sqlite.Bindings.Internal.Objects
 
 -- | https://www.sqlite.org/c3ref/bind_blob.html
-foreign import ccall unsafe "sqlite3_bind_blob"
+foreign import capi unsafe "sqlite3.h sqlite3_bind_blob"
   sqlite3_bind_blob ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
@@ -26,7 +21,7 @@ foreign import ccall unsafe "sqlite3_bind_blob"
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/bind_blob.html
-foreign import ccall unsafe "sqlite3_bind_double"
+foreign import capi unsafe "sqlite3.h sqlite3_bind_double"
   sqlite3_bind_double ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
@@ -37,7 +32,7 @@ foreign import ccall unsafe "sqlite3_bind_double"
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/bind_blob.html
-foreign import ccall unsafe "sqlite3_bind_int"
+foreign import capi unsafe "sqlite3.h sqlite3_bind_int"
   sqlite3_bind_int ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
@@ -48,7 +43,7 @@ foreign import ccall unsafe "sqlite3_bind_int"
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/bind_blob.html
-foreign import ccall unsafe "sqlite3_bind_null"
+foreign import capi unsafe "sqlite3.h sqlite3_bind_null"
   sqlite3_bind_null ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
@@ -57,7 +52,7 @@ foreign import ccall unsafe "sqlite3_bind_null"
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/bind_blob.html
-foreign import ccall unsafe "sqlite3_bind_text"
+foreign import capi unsafe "sqlite3.h sqlite3_bind_text"
   sqlite3_bind_text ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
@@ -71,7 +66,7 @@ foreign import ccall unsafe "sqlite3_bind_text"
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/bind_blob.html
-foreign import ccall unsafe "sqlite3_bind_zeroblob"
+foreign import capi unsafe "sqlite3.h sqlite3_bind_zeroblob"
   sqlite3_bind_zeroblob ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
@@ -82,21 +77,21 @@ foreign import ccall unsafe "sqlite3_bind_zeroblob"
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/blob_bytes.html
-foreign import ccall unsafe "sqlite3_blob_bytes"
+foreign import capi unsafe "sqlite3.h sqlite3_blob_bytes"
   sqlite3_blob_bytes ::
     -- | Blob.
     Ptr Sqlite3_blob ->
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/blob_close.html
-foreign import ccall unsafe "sqlite3_blob_close"
+foreign import capi unsafe "sqlite3.h sqlite3_blob_close"
   sqlite3_blob_close ::
     -- | Blob.
     Ptr Sqlite3_blob ->
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/blob_open.html
-foreign import ccall unsafe "sqlite3_blob_open"
+foreign import capi unsafe "sqlite3.h sqlite3_blob_open"
   sqlite3_blob_open ::
     -- | Database.
     Ptr Sqlite3 ->
@@ -115,7 +110,7 @@ foreign import ccall unsafe "sqlite3_blob_open"
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/blob_read.html
-foreign import ccall unsafe "sqlite3_blob_read"
+foreign import capi unsafe "sqlite3.h sqlite3_blob_read"
   sqlite3_blob_read ::
     -- | Blob.
     Ptr Sqlite3_blob ->
@@ -128,7 +123,7 @@ foreign import ccall unsafe "sqlite3_blob_read"
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/blob_write.html
-foreign import ccall unsafe "sqlite3_blob_write"
+foreign import capi unsafe "sqlite3.h sqlite3_blob_write"
   sqlite3_blob_write ::
     -- | Blob.
     Ptr Sqlite3_blob ->
@@ -141,7 +136,7 @@ foreign import ccall unsafe "sqlite3_blob_write"
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/busy_handler.html
-foreign import ccall unsafe "sqlite3_busy_handler"
+foreign import capi unsafe "sqlite3.h sqlite3_busy_handler"
   sqlite3_busy_handler ::
     -- | Database.
     Ptr Sqlite3 ->
@@ -150,35 +145,35 @@ foreign import ccall unsafe "sqlite3_busy_handler"
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/changes.html
-foreign import ccall unsafe "sqlite3_changes"
+foreign import capi unsafe "sqlite3.h sqlite3_changes"
   sqlite3_changes ::
     -- | Database.
     Ptr Sqlite3 ->
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/clear_bindings.html
-foreign import ccall unsafe "sqlite3_clear_bindings"
+foreign import capi unsafe "sqlite3.h sqlite3_clear_bindings"
   sqlite3_clear_bindings ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/close.html
-foreign import ccall unsafe "sqlite3_close"
+foreign import capi unsafe "sqlite3.h sqlite3_close"
   sqlite3_close ::
     -- | Database.
     Ptr Sqlite3 ->
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/close.html
-foreign import ccall unsafe "sqlite3_close_v2"
+foreign import capi unsafe "sqlite3.h sqlite3_close_v2"
   sqlite3_close_v2 ::
     -- | Database.
     Ptr Sqlite3 ->
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/column_blob.html
-foreign import ccall unsafe "sqlite3_column_blob"
+foreign import capi unsafe "sqlite3.h sqlite3_column_blob"
   sqlite3_column_blob ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
@@ -187,7 +182,7 @@ foreign import ccall unsafe "sqlite3_column_blob"
     IO (Ptr a)
 
 -- | https://www.sqlite.org/c3ref/column_blob.html
-foreign import ccall unsafe "sqlite3_column_bytes"
+foreign import capi unsafe "sqlite3.h sqlite3_column_bytes"
   sqlite3_column_bytes ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
@@ -196,14 +191,14 @@ foreign import ccall unsafe "sqlite3_column_bytes"
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/column_count.html
-foreign import ccall unsafe "sqlite3_column_count"
+foreign import capi unsafe "sqlite3.h sqlite3_column_count"
   sqlite3_column_count ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/column_blob.html
-foreign import ccall unsafe "sqlite3_column_double"
+foreign import capi unsafe "sqlite3.h sqlite3_column_double"
   sqlite3_column_double ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
@@ -212,7 +207,7 @@ foreign import ccall unsafe "sqlite3_column_double"
     IO CDouble
 
 -- | https://www.sqlite.org/c3ref/column_blob.html
-foreign import ccall unsafe "sqlite3_column_int"
+foreign import capi unsafe "sqlite3.h sqlite3_column_int"
   sqlite3_column_int ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
@@ -221,7 +216,7 @@ foreign import ccall unsafe "sqlite3_column_int"
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/column_blob.html
-foreign import ccall unsafe "sqlite3_column_text"
+foreign import capi unsafe "sqlite3.h sqlite3_column_text"
   sqlite3_column_text ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
@@ -230,7 +225,7 @@ foreign import ccall unsafe "sqlite3_column_text"
     IO (Ptr CUChar)
 
 -- | https://www.sqlite.org/c3ref/extended_result_codes.html
-foreign import ccall unsafe "sqlite3_extended_result_codes"
+foreign import capi unsafe "sqlite3.h sqlite3_extended_result_codes"
   sqlite3_extended_result_codes ::
     -- | Database.
     Ptr Sqlite3 ->
@@ -238,42 +233,42 @@ foreign import ccall unsafe "sqlite3_extended_result_codes"
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/errcode.html
-foreign import ccall unsafe "sqlite3_errcode"
+foreign import capi unsafe "sqlite3.h sqlite3_errcode"
   sqlite3_errcode ::
     -- | Database
     Ptr Sqlite3 ->
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/errcode.html
-foreign import ccall unsafe "sqlite3_errmsg"
+foreign import capi unsafe "sqlite3.h sqlite3_errmsg"
   sqlite3_errmsg ::
     -- | Database
     Ptr Sqlite3 ->
     IO CString
 
 -- | https://www.sqlite.org/c3ref/errcode.html
-foreign import ccall unsafe "sqlite3_error_offset"
+foreign import capi unsafe "sqlite3.h sqlite3_error_offset"
   sqlite3_error_offset ::
     -- | Database
     Ptr Sqlite3 ->
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/errcode.html
-foreign import ccall unsafe "sqlite3_extended_errcode"
+foreign import capi unsafe "sqlite3.h sqlite3_extended_errcode"
   sqlite3_extended_errcode ::
     -- | Database
     Ptr Sqlite3 ->
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/finalize.html
-foreign import ccall unsafe "sqlite3_finalize"
+foreign import capi unsafe "sqlite3.h sqlite3_finalize"
   sqlite3_finalize ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/open.html
-foreign import ccall unsafe "sqlite3_open_v2"
+foreign import capi unsafe "sqlite3.h sqlite3_open_v2"
   sqlite3_open_v2 ::
     -- | Database file (UTF-8).
     CString ->
@@ -286,7 +281,7 @@ foreign import ccall unsafe "sqlite3_open_v2"
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/prepare.html
-foreign import ccall unsafe "sqlite3_prepare_v2"
+foreign import capi unsafe "sqlite3.h sqlite3_prepare_v2"
   sqlite3_prepare_v2 ::
     -- | Database.
     Ptr Sqlite3 ->
@@ -301,21 +296,21 @@ foreign import ccall unsafe "sqlite3_prepare_v2"
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/reset.html
-foreign import ccall unsafe "sqlite3_reset"
+foreign import capi unsafe "sqlite3.h sqlite3_reset"
   sqlite3_reset ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/step.html
-foreign import ccall safe "sqlite3_step"
+foreign import capi safe "sqlite3.h sqlite3_step"
   sqlite3_step__safe ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/step.html
-foreign import ccall unsafe "sqlite3_step"
+foreign import capi unsafe "sqlite3.h sqlite3_step"
   sqlite3_step__unsafe ::
     -- | Statement.
     Ptr Sqlite3_stmt ->

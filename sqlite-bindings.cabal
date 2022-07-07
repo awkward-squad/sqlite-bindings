@@ -5,6 +5,15 @@ version: 0
 
 library
   build-depends: base
+  default-extensions:
+    CApiFFI
   default-language: Haskell2010
-  exposed-modules: SqliteBindings
+  exposed-modules: Sqlite.Bindings
   ghc-options: -Wall
+  hs-source-dirs: src
+  include-dirs: cbits
+  includes: sqlite3.h
+  other-modules:
+    Sqlite.Bindings.Internal.Constants
+    Sqlite.Bindings.Internal.Functions
+    Sqlite.Bindings.Internal.Objects
