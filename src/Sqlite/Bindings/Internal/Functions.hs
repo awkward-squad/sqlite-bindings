@@ -224,6 +224,37 @@ foreign import capi unsafe "sqlite3.h sqlite3_column_text"
     CInt ->
     IO (Ptr CUChar)
 
+-- | https://www.sqlite.org/c3ref/commit_hook.html
+foreign import capi unsafe "sqlite3.h sqlite3_commit_hook"
+  sqlite3_commit_hook ::
+    -- | Database
+    Ptr Sqlite3 ->
+    -- | Commit hook.
+    FunPtr (Ptr a -> IO CInt) ->
+    Ptr a ->
+    IO (Ptr b)
+
+-- | https://www.sqlite.org/c3ref/complete.html
+foreign import capi unsafe "sqlite3.h sqlite3_complete"
+  sqlite3_complete ::
+    -- | SQL.
+    CString ->
+    CInt
+
+-- | https://www.sqlite.org/c3ref/db_cacheflush.html
+foreign import capi safe "sqlite3.h sqlite3_db_cacheflush"
+  sqlite3_db_cacheflush__safe ::
+    -- | Database.
+    Ptr Sqlite3 ->
+    IO CInt
+
+-- | https://www.sqlite.org/c3ref/db_cacheflush.html
+foreign import capi unsafe "sqlite3.h sqlite3_db_cacheflush"
+  sqlite3_db_cacheflush__unsafe ::
+    -- | Database.
+    Ptr Sqlite3 ->
+    IO CInt
+
 -- | https://www.sqlite.org/c3ref/extended_result_codes.html
 foreign import capi unsafe "sqlite3.h sqlite3_extended_result_codes"
   sqlite3_extended_result_codes ::
@@ -252,6 +283,10 @@ foreign import capi unsafe "sqlite3.h sqlite3_error_offset"
     -- | Database
     Ptr Sqlite3 ->
     IO CInt
+
+-- | https://www.sqlite.org/c3ref/errcode.html
+foreign import capi unsafe "sqlite3.h sqlite3_errstr"
+  sqlite3_errstr :: CInt -> CString
 
 -- | https://www.sqlite.org/c3ref/errcode.html
 foreign import capi unsafe "sqlite3.h sqlite3_extended_errcode"
@@ -302,6 +337,16 @@ foreign import capi unsafe "sqlite3.h sqlite3_reset"
     Ptr Sqlite3_stmt ->
     IO CInt
 
+-- | https://www.sqlite.org/c3ref/commit_hook.html
+foreign import capi unsafe "sqlite3.h sqlite3_rollback_hook"
+  sqlite3_rollback_hook ::
+    -- | Database
+    Ptr Sqlite3 ->
+    -- | Rollback hook.
+    FunPtr (Ptr a -> IO CInt) ->
+    Ptr a ->
+    IO (Ptr b)
+
 -- | https://www.sqlite.org/c3ref/step.html
 foreign import capi safe "sqlite3.h sqlite3_step"
   sqlite3_step__safe ::
@@ -319,4 +364,7 @@ foreign import capi unsafe "sqlite3.h sqlite3_step"
 ------------------------------------------------------------------------------------------------------------------------
 
 foreign import ccall "wrapper"
-  createBusyHandler :: (Ptr a -> CInt -> IO CInt) -> IO (FunPtr (Ptr a -> CInt -> IO CInt))
+  createCallback0 :: (Ptr a -> CInt -> IO CInt) -> IO (FunPtr (Ptr a -> CInt -> IO CInt))
+
+foreign import ccall "wrapper"
+  createCallback1 :: (Ptr a -> IO CInt) -> IO (FunPtr (Ptr a -> IO CInt))

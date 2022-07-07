@@ -461,8 +461,8 @@ module Sqlite.Bindings
     sqlite3_bind_zeroblob,
     sqlite3_blob_bytes,
     sqlite3_blob_close,
-    sqlite3_blob_read,
     sqlite3_blob_open,
+    sqlite3_blob_read,
     sqlite3_blob_write,
     sqlite3_busy_handler,
     sqlite3_changes,
@@ -475,23 +475,30 @@ module Sqlite.Bindings
     sqlite3_column_double,
     sqlite3_column_int,
     sqlite3_column_text,
-    sqlite3_extended_result_codes,
+    sqlite3_commit_hook,
+    sqlite3_complete,
+    sqlite3_db_cacheflush__safe,
+    sqlite3_db_cacheflush__unsafe,
     sqlite3_errcode,
     sqlite3_errmsg,
     sqlite3_error_offset,
+    sqlite3_errstr,
     sqlite3_extended_errcode,
+    sqlite3_extended_result_codes,
     sqlite3_finalize,
     sqlite3_open_v2,
     sqlite3_prepare_v2,
     sqlite3_reset,
+    sqlite3_rollback_hook,
     sqlite3_step__safe,
     sqlite3_step__unsafe,
 
     -- ** Callback makers
-    createBusyHandler,
+    createCallback0,
+    createCallback1,
   )
 where
 
+import Sqlite.Bindings.Internal.Constants
 import Sqlite.Bindings.Internal.Functions
 import Sqlite.Bindings.Internal.Objects
-import Sqlite.Bindings.Internal.Constants

@@ -16,22 +16,27 @@
 | `sqlite3_busy_handler` |
 | `sqlite3_changes` |
 | `sqlite3_clear_bindings` |
-| `sqlite3_close` |
 | `sqlite3_close_v2` |
+| `sqlite3_close` |
 | `sqlite3_column_blob` |
 | `sqlite3_column_bytes` |
 | `sqlite3_column_count` |
 | `sqlite3_column_double` |
 | `sqlite3_column_int` |
 | `sqlite3_column_text` |
+| `sqlite3_commit_hook` |
+| `sqlite3_complete` |
+| `sqlite3_db_cacheflush` |
 | `sqlite3_errcode` |
 | `sqlite3_errmsg` |
 | `sqlite3_error_offset` |
+| `sqlite3_errstr` |
 | `sqlite3_extended_errcode` |
 | `sqlite3_finalize` |
 | `sqlite3_open_v2` |
 | `sqlite3_prepare_v2` |
 | `sqlite3_reset` |
+| `sqlite3_rollback_hook` |
 | `sqlite3_step` |
 
 #### Functions without bindings
@@ -62,10 +67,8 @@
 | `sqlite3_column_table_name` |
 | `sqlite3_column_type` |
 | `sqlite3_column_value` |
-| `sqlite3_commit_hook` |
 | `sqlite3_compileoption_get` |
 | `sqlite3_compileoption_used` |
-| `sqlite3_complete` |
 | `sqlite3_config` |
 | `sqlite3_context_db_handle` |
 | `sqlite3_create_collation` |
@@ -78,7 +81,6 @@
 | `sqlite3_create_window_function` |
 | `sqlite3_data_count` |
 | `sqlite3_database_file_object` |
-| `sqlite3_db_cacheflush` |
 | `sqlite3_db_config` |
 | `sqlite3_db_filename` |
 | `sqlite3_db_handle` |
@@ -92,7 +94,6 @@
 | `sqlite3_drop_modules` |
 | `sqlite3_enable_load_extension` |
 | `sqlite3_enable_shared_cache` |
-| `sqlite3_errstr` |
 | `sqlite3_exec` |
 | `sqlite3_expanded_sql` |
 | `sqlite3_extended_result_codes` |
@@ -168,7 +169,6 @@
 | `sqlite3_result_value` |
 | `sqlite3_result_zeroblob` |
 | `sqlite3_result_zeroblob64` |
-| `sqlite3_rollback_hook` |
 | `sqlite3_serialize` |
 | `sqlite3_set_authorizer` |
 | `sqlite3_set_auxdata` |
