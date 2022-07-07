@@ -1,12 +1,13 @@
--- | https://www.sqlite.org/cintro.html
 module SqliteBindings where
 
+import Data.Int (Int64)
+import Foreign.C.String (CString)
 import Foreign.C.Types
-import Foreign.Ptr (Ptr)
-
--- todo - annotate safe/unsafe
+import Foreign.Ptr (FunPtr, Ptr)
 
 data Sqlite3
+
+data Sqlite3_blob
 
 data Sqlite3_stmt
 
@@ -17,11 +18,11 @@ foreign import ccall unsafe "sqlite3_bind_blob"
     Ptr Sqlite3_stmt ->
     -- | Parameter index (1-based).
     CInt ->
-    -- | Parameter value.
+    -- | Blob.
     Ptr a ->
-    -- | Length of parameter value in bytes.
+    -- | Length of blob in bytes.
     CInt ->
-    Ptr (Ptr () -> IO ()) ->
+    FunPtr (Ptr a -> IO ()) ->
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/bind_blob.html
@@ -31,7 +32,7 @@ foreign import ccall unsafe "sqlite3_bind_double"
     Ptr Sqlite3_stmt ->
     -- | Parameter index (1-based).
     CInt ->
-    -- | Parameter value.
+    -- | Double.
     CDouble ->
     IO CInt
 
@@ -42,7 +43,7 @@ foreign import ccall unsafe "sqlite3_bind_int"
     Ptr Sqlite3_stmt ->
     -- | Parameter index (1-based).
     CInt ->
-    -- | Parameter value.
+    -- | Integer.
     CInt ->
     IO CInt
 
@@ -62,11 +63,97 @@ foreign import ccall unsafe "sqlite3_bind_text"
     Ptr Sqlite3_stmt ->
     -- | Parameter index (1-based).
     CInt ->
-    -- | Parameter value (UTF-8).
+    -- | String (UTF-8).
     Ptr CChar ->
-    -- | Length of parameter value in bytes.
+    -- | Length of string in bytes.
     CInt ->
-    Ptr (Ptr () -> IO ()) ->
+    FunPtr (Ptr CChar -> IO ()) ->
+    IO CInt
+
+-- | https://www.sqlite.org/c3ref/bind_blob.html
+foreign import ccall unsafe "sqlite3_bind_zeroblob"
+  sqlite3_bind_zeroblob ::
+    -- | Statement.
+    Ptr Sqlite3_stmt ->
+    -- | Parameter index (1-based).
+    CInt ->
+    -- | Length of blob in bytes.
+    CInt ->
+    IO CInt
+
+-- | https://www.sqlite.org/c3ref/blob_bytes.html
+foreign import ccall unsafe "sqlite3_blob_bytes"
+  sqlite3_blob_bytes ::
+    -- | Blob.
+    Ptr Sqlite3_blob ->
+    IO CInt
+
+-- | https://www.sqlite.org/c3ref/blob_close.html
+foreign import ccall unsafe "sqlite3_blob_close"
+  sqlite3_blob_close ::
+    -- | Blob.
+    Ptr Sqlite3_blob ->
+    IO CInt
+
+-- | https://www.sqlite.org/c3ref/blob_open.html
+foreign import ccall unsafe "sqlite3_blob_open"
+  sqlite3_blob_open ::
+    -- | Database.
+    Ptr Sqlite3 ->
+    -- | Database name.
+    CString ->
+    -- | Table name.
+    CString ->
+    -- | Column name
+    CString ->
+    -- | Row id.
+    Int64 ->
+    -- | Flags.
+    CInt ->
+    -- | Out: blob.
+    Ptr (Ptr Sqlite3_blob) ->
+    IO CInt
+
+-- | https://www.sqlite.org/c3ref/blob_read.html
+foreign import ccall unsafe "sqlite3_blob_read"
+  sqlite3_blob_read ::
+    -- | Blob.
+    Ptr Sqlite3_blob ->
+    -- | Buffer to read into.
+    Ptr a ->
+    -- | Length of buffer to read into.
+    CInt ->
+    -- | Byte offset into blob to read from.
+    CInt ->
+    IO CInt
+
+-- | https://www.sqlite.org/c3ref/blob_write.html
+foreign import ccall unsafe "sqlite3_blob_write"
+  sqlite3_blob_write ::
+    -- | Blob.
+    Ptr Sqlite3_blob ->
+    -- | Buffer of data to write.
+    Ptr a ->
+    -- | Length of buffer to write.
+    CInt ->
+    -- | Byte offset into blob to write to.
+    CInt ->
+    IO CInt
+
+-- | https://www.sqlite.org/c3ref/busy_handler.html
+foreign import ccall unsafe "sqlite3_busy_handler"
+  sqlite3_busy_handler ::
+    -- | Database.
+    Ptr Sqlite3 ->
+    FunPtr (Ptr a -> CInt -> IO CInt) ->
+    Ptr a ->
+    IO CInt
+
+-- | https://www.sqlite.org/c3ref/changes.html
+foreign import ccall unsafe "sqlite3_changes"
+  sqlite3_changes ::
+    -- | Database.
+    Ptr Sqlite3 ->
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/clear_bindings.html
@@ -77,8 +164,18 @@ foreign import ccall unsafe "sqlite3_clear_bindings"
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/close.html
+foreign import ccall unsafe "sqlite3_close"
+  sqlite3_close ::
+    -- | Database.
+    Ptr Sqlite3 ->
+    IO CInt
+
+-- | https://www.sqlite.org/c3ref/close.html
 foreign import ccall unsafe "sqlite3_close_v2"
-  sqlite3_close_v2 :: Ptr Sqlite3 -> IO CInt
+  sqlite3_close_v2 ::
+    -- | Database.
+    Ptr Sqlite3 ->
+    IO CInt
 
 -- | https://www.sqlite.org/c3ref/column_blob.html
 foreign import ccall unsafe "sqlite3_column_blob"
@@ -140,6 +237,34 @@ foreign import ccall unsafe "sqlite3_extended_result_codes"
     CInt ->
     IO CInt
 
+-- | https://www.sqlite.org/c3ref/errcode.html
+foreign import ccall unsafe "sqlite3_errcode"
+  sqlite3_errcode ::
+    -- | Database
+    Ptr Sqlite3 ->
+    IO CInt
+
+-- | https://www.sqlite.org/c3ref/errcode.html
+foreign import ccall unsafe "sqlite3_errmsg"
+  sqlite3_errmsg ::
+    -- | Database
+    Ptr Sqlite3 ->
+    IO CString
+
+-- | https://www.sqlite.org/c3ref/errcode.html
+foreign import ccall unsafe "sqlite3_error_offset"
+  sqlite3_error_offset ::
+    -- | Database
+    Ptr Sqlite3 ->
+    IO CInt
+
+-- | https://www.sqlite.org/c3ref/errcode.html
+foreign import ccall unsafe "sqlite3_extended_errcode"
+  sqlite3_extended_errcode ::
+    -- | Database
+    Ptr Sqlite3 ->
+    IO CInt
+
 -- | https://www.sqlite.org/c3ref/finalize.html
 foreign import ccall unsafe "sqlite3_finalize"
   sqlite3_finalize ::
@@ -151,13 +276,13 @@ foreign import ccall unsafe "sqlite3_finalize"
 foreign import ccall unsafe "sqlite3_open_v2"
   sqlite3_open_v2 ::
     -- | Database file (UTF-8).
-    Ptr CChar ->
+    CString ->
     -- | Out: database.
     Ptr (Ptr Sqlite3) ->
     -- | Flags.
     CInt ->
     -- | VFS module name.
-    Ptr CChar ->
+    CString ->
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/prepare.html
@@ -195,3 +320,8 @@ foreign import ccall unsafe "sqlite3_step"
     -- | Statement.
     Ptr Sqlite3_stmt ->
     IO CInt
+
+------------------------------------------------------------------------------------------------------------------------
+
+foreign import ccall "wrapper"
+  createBusyHandler :: (Ptr a -> CInt -> IO CInt) -> IO (FunPtr (Ptr a -> CInt -> IO CInt))
