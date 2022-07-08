@@ -2,25 +2,73 @@ module Sqlite.Bindings.Internal.Functions where
 
 import Data.Int (Int64)
 import Foreign.C.String (CString)
-import Foreign.C.Types (CChar (..), CDouble (..), CInt (..), CUChar (..))
+import Foreign.C.Types (CChar (..), CDouble (..), CInt (..), CUChar (..), CUInt (..))
 import Foreign.Ptr (FunPtr, Ptr)
 import Sqlite.Bindings.Internal.Objects
 
-sqlite3_aggregate_context = undefined
+-- | https://www.sqlite.org/c3ref/aggregate_context.html
+foreign import capi unsafe "sqlite3.h sqlite3_aggregate_context"
+  sqlite3_aggregate_context ::
+    -- | Context.
+    Ptr Sqlite3_context ->
+    -- | Number of bytes.
+    CInt ->
+    IO (Ptr a)
 
 sqlite3_auto_extension = undefined
 
-sqlite3_autovacuum_pages = undefined
+-- | https://www.sqlite.org/c3ref/autovacuum_pages.html
+foreign import capi unsafe "sqlite3.h sqlite3_autovacuum_pages"
+  sqlite3_autovacuum_pages ::
+    -- | Database.
+    Ptr Sqlite3 ->
+    FunPtr (Ptr a -> CString -> CUInt -> CUInt -> CUInt -> IO CUInt) ->
+    Ptr a ->
+    FunPtr (Ptr a -> IO ()) ->
+    IO CInt
 
-sqlite3_backup_finish = undefined
+-- | https://www.sqlite.org/c3ref/backup_finish.html
+foreign import capi unsafe "sqlite3.h sqlite3_backup_finish"
+  sqlite3_backup_finish ::
+    -- | Backup.
+    Ptr Sqlite3_backup ->
+    IO CInt
 
-sqlite3_backup_init = undefined
+-- | https://www.sqlite.org/c3ref/backup_finish.html
+foreign import capi unsafe "sqlite3.h sqlite3_backup_init"
+  sqlite3_backup_init ::
+    -- | Destination database.
+    Ptr Sqlite3 ->
+    -- | Destination database name.
+    CString ->
+    -- | Source database.
+    Ptr Sqlite3 ->
+    -- | Source database name.
+    CString ->
+    IO (Ptr Sqlite3_backup)
 
-sqlite3_backup_pagecount = undefined
+-- | https://www.sqlite.org/c3ref/backup_finish.html
+foreign import capi unsafe "sqlite3.h sqlite3_backup_pagecount"
+  sqlite3_backup_pagecount ::
+    -- | Backup.
+    Ptr Sqlite3_backup ->
+    IO CInt
 
-sqlite3_backup_remaining = undefined
+-- | https://www.sqlite.org/c3ref/backup_finish.html
+foreign import capi unsafe "sqlite3.h sqlite3_backup_remaining"
+  sqlite3_backup_remaining ::
+    -- | Backup.
+    Ptr Sqlite3_backup ->
+    IO CInt
 
-sqlite3_backup_step = undefined
+-- | https://www.sqlite.org/c3ref/backup_finish.html
+foreign import capi safe "sqlite3.h sqlite3_backup_step"
+  sqlite3_backup_step ::
+    -- | Backup.
+    Ptr Sqlite3_backup ->
+    -- | Number of pages to copy.
+    CInt ->
+    IO CInt
 
 -- | https://www.sqlite.org/c3ref/bind_blob.html
 foreign import capi unsafe "sqlite3.h sqlite3_bind_blob"
