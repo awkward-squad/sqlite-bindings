@@ -895,7 +895,7 @@ sqlite3_open16 = undefined
 -- Open a new database connection.
 foreign import capi unsafe "sqlite3.h sqlite3_open_v2"
   sqlite3_open_v2 ::
-    -- | Database file (UTF-8), `":memory:"` (temporary in-memory database), or `""` (temporary on-disk database).
+    -- | Database file (UTF-8), @":memory:"@ (temporary in-memory database), or @""@ (temporary on-disk database).
     CString ->
     -- | Out: connection.
     Ptr (Ptr Sqlite3) ->
@@ -923,42 +923,6 @@ foreign import capi unsafe "sqlite3.h sqlite3_prepare_v2"
     Ptr (Ptr Sqlite3_stmt) ->
     -- | Out: unused SQL.
     Ptr (Ptr CChar) ->
-    IO CInt
-
--- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
-foreign import capi unsafe "sqlite3.h sqlite3_preupdate_blobwrite"
-  sqlite3_preupdate_blobwrite :: Ptr Sqlite3 -> IO CInt
-
--- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
-foreign import capi unsafe "sqlite3.h sqlite3_preupdate_count"
-  sqlite3_preupdate_count :: Ptr Sqlite3 -> IO CInt
-
--- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
-foreign import capi unsafe "sqlite3.h sqlite3_preupdate_depth"
-  sqlite3_preupdate_depth :: Ptr Sqlite3 -> IO CInt
-
--- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
-foreign import capi unsafe "sqlite3.h sqlite3_preupdate_hook"
-  sqlite3_preupdate_hook ::
-    Ptr Sqlite3 ->
-    FunPtr (Ptr a -> Ptr Sqlite3 -> CInt -> CString -> CString -> Int64 -> Int64 -> IO ()) ->
-    Ptr a ->
-    IO (Ptr b)
-
--- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
-foreign import capi unsafe "sqlite3.h sqlite3_preupdate_new"
-  sqlite3_preupdate_new ::
-    Ptr Sqlite3 ->
-    CInt ->
-    Ptr (Ptr Sqlite3_value) ->
-    IO CInt
-
--- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
-foreign import capi unsafe "sqlite3.h sqlite3_preupdate_old"
-  sqlite3_preupdate_old ::
-    Ptr Sqlite3 ->
-    CInt ->
-    Ptr (Ptr Sqlite3_value) ->
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/progress_handler.html
@@ -1475,7 +1439,7 @@ foreign import capi unsafe "sqlite3.h sqlite3_value_type"
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/libversion.html
-foreign import capi unsafe "sqlite3.h sqlite3_version"
+foreign import capi unsafe "sqlite3.h value sqlite3_version"
   sqlite3_version :: CString
 
 sqlite3_vfs_find = undefined

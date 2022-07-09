@@ -1,3 +1,5 @@
+{-# LANGUAGE CPP #-}
+
 module Sqlite.Bindings
   ( -- * Objects
     Sqlite3,
@@ -250,12 +252,14 @@ module Sqlite.Bindings
     sqlite3_overload_function,
 
     -- ** The pre-update hook
+#ifdef SQLITE_ENABLE_PREUPDATE_HOOK
     sqlite3_preupdate_blobwrite,
     sqlite3_preupdate_count,
     sqlite3_preupdate_depth,
     sqlite3_preupdate_hook,
     sqlite3_preupdate_new,
     sqlite3_preupdate_old,
+#endif
 
     -- ** SQL trace hook
     sqlite3_trace_v2,
