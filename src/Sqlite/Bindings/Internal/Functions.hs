@@ -360,7 +360,11 @@ foreign import ccall unsafe "sqlite3_clear_bindings"
 --
 -- Close a database connection.
 foreign import ccall unsafe "sqlite3_close"
-  sqlite3_close :: Ptr Sqlite3 -> IO CInt
+  sqlite3_close ::
+    -- | Connection.
+    Ptr Sqlite3 ->
+    -- | Result code.
+    IO CInt
 
 -- | https://www.sqlite.org/c3ref/close.html
 --
@@ -368,7 +372,11 @@ foreign import ccall unsafe "sqlite3_close"
 -- the connection as unusable and make arrangements to deallocate it after all statements are finalized, BLOB handlers
 -- are closed, and backups are finished.
 foreign import ccall unsafe "sqlite3_close_v2"
-  sqlite3_close_v2 :: Ptr Sqlite3 -> IO CInt
+  sqlite3_close_v2 ::
+    -- | Connection.
+    Ptr Sqlite3 ->
+    -- | Result code.
+    IO CInt
 
 -- | [__Collation needed callbacks__](https://www.sqlite.org/c3ref/collation_needed.html)
 foreign import ccall unsafe "sqlite3_collation_needed"
@@ -717,10 +725,7 @@ foreign import ccall unsafe "sqlite3_db_readonly"
 
 -- | [__Free memory used by a database connection__](https://www.sqlite.org/c3ref/db_release_memory.html)
 foreign import ccall unsafe "sqlite3_db_release_memory"
-  sqlite3_db_release_memory ::
-    -- | Connection.
-    Ptr Sqlite3 ->
-    IO CInt
+  sqlite3_db_release_memory :: Ptr Sqlite3 -> IO CInt
 
 -- | https://www.sqlite.org/c3ref/db_status.html
 --
@@ -729,31 +734,31 @@ foreign import ccall unsafe "sqlite3_db_release_memory"
 -- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
 -- | Status option                          | Meaning                                                                                                                              |
 -- +========================================+======================================================================================================================================+
--- | @SQLITE_DBSTATUS_LOOKASIDE_USED@       | Lookaside memory slots currently checked out.                                                                                        |
+-- | @SQLITE_DBSTATUS_CACHE_HIT@₁           | Pager cache hits.                                                                                                                    |
 -- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_DBSTATUS_LOOKASIDE_HIT@₂       | Malloc attempts satisfied using lookaside memory.                                                                                    |
+-- | @SQLITE_DBSTATUS_CACHE_MISS@₁          | Pager cache misses.                                                                                                                  |
 -- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_DBSTATUS_LOOKASIDE_MISS_SIZE@₂ | Malloc attempts not satisfied using lookaside memory because the amount of memory requested was larger than the lookaside slot size. |
--- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_DBSTATUS_LOOKASIDE_MISS_FULL@₂ | Malloc attempts not satisfied using lookaside memory because all lookaside memory was in use.                                        |
+-- | @SQLITE_DBSTATUS_CACHE_SPILL@          | Dirty cache entries written to disk in the middle of a transaction due to the page cache overflowing.                                |
 -- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
 -- | @SQLITE_DBSTATUS_CACHE_USED@₁          | Approximate bytes of heap memory used by all pager caches.                                                                           |
 -- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
 -- | @SQLITE_DBSTATUS_CACHE_USED_SHARED@₁   | @DBSTATUS_CACHE_USED@, but evenly divide bytes of shared pager caches among all associated connections.                              |
 -- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
+-- | @SQLITE_DBSTATUS_CACHE_WRITE@₁         | Dirty cache entries written to disk.                                                                                                 |
+-- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
+-- | @SQLITE_DBSTATUS_DEFERRED_FKS@₁        | Zero if and only if all foreign key constraints (deferred or immediate) have been resolved.                                          |
+-- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
+-- | @SQLITE_DBSTATUS_LOOKASIDE_HIT@₂       | Malloc attempts satisfied using lookaside memory.                                                                                    |
+-- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
+-- | @SQLITE_DBSTATUS_LOOKASIDE_MISS_FULL@₂ | Malloc attempts not satisfied using lookaside memory because all lookaside memory was in use.                                        |
+-- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
+-- | @SQLITE_DBSTATUS_LOOKASIDE_MISS_SIZE@₂ | Malloc attempts not satisfied using lookaside memory because the amount of memory requested was larger than the lookaside slot size. |
+-- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
+-- | @SQLITE_DBSTATUS_LOOKASIDE_USED@       | Lookaside memory slots currently checked out.                                                                                        |
+-- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
 -- | @SQLITE_DBSTATUS_SCHEMA_USED@₁         | Approximate bytes of heap memory used to store the schema for all attached databases.                                                |
 -- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
 -- | @SQLITE_DBSTATUS_STMT_USED@₁           | Approximate bytes of heap and lookaside memory used by all statements                                                                |
--- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_DBSTATUS_CACHE_HIT@₁           | Pager cache hits.                                                                                                                    |
--- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_DBSTATUS_CACHE_MISS@₁          | Pager cache misses.                                                                                                                  |
--- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_DBSTATUS_CACHE_WRITE@₁         | Dirty cache entries written to disk.                                                                                                 |
--- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_DBSTATUS_CACHE_SPILL@          | Dirty cache entries written to disk in the middle of a transaction due to the page cache overflowing.                                |
--- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_DBSTATUS_DEFERRED_FKS@₁        | Zero if and only if all foreign key constraints (deferred or immediate) have been resolved.                                          |
 -- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
 --
 -- /₁ only has current value/
@@ -808,7 +813,9 @@ foreign import ccall unsafe "sqlite3_drop_modules"
 -- database.
 foreign import ccall unsafe "sqlite3_enable_shared_cache"
   sqlite3_enable_shared_cache ::
+    -- | 0 or 1.
     CInt ->
+    -- | Result code.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/extended_result_codes.html
