@@ -356,7 +356,9 @@ foreign import capi unsafe "sqlite3.h sqlite3_clear_bindings"
     Ptr Sqlite3_stmt ->
     IO CInt
 
--- | [__Closing a database connection__](https://www.sqlite.org/c3ref/close.html)
+-- | https://www.sqlite.org/c3ref/close.html
+--
+-- Close a database connection.
 foreign import capi unsafe "sqlite3.h sqlite3_close"
   sqlite3_close ::
     -- | Connection.
@@ -368,6 +370,7 @@ foreign import capi unsafe "sqlite3.h sqlite3_close_v2"
   sqlite3_close_v2 ::
     -- | Connection.
     Ptr Sqlite3 ->
+    -- | Result code.
     IO CInt
 
 -- | [__Collation needed callbacks__](https://www.sqlite.org/c3ref/collation_needed.html)
@@ -638,13 +641,16 @@ foreign import capi unsafe "sqlite3.h sqlite3_db_cacheflush"
 -- | [__Configure database connections__](https://www.sqlite.org/c3ref/db_config.html)
 sqlite3_db_config = undefined
 
--- | [__Return the filename for a database connection__](https://www.sqlite.org/c3ref/db_filename.html)
+-- | https://www.sqlite.org/c3ref/db_filename.html
+--
+-- Get the filename for a database connection.
 foreign import capi unsafe "sqlite3.h sqlite3_db_filename"
   sqlite3_db_filename ::
     -- | Connection.
     Ptr Sqlite3 ->
     -- | Database name.
     CString ->
+    -- | Filename.
     IO CString
 
 -- | [__Find the database handle of a prepared statement__](https://www.sqlite.org/c3ref/db_handle.html)
@@ -661,13 +667,16 @@ foreign import capi unsafe "sqlite3.h sqlite3_db_mutex"
     Ptr Sqlite3 ->
     Ptr Sqlite3_mutex
 
--- | [__Return the schema name for a database connection__](https://www.sqlite.org/c3ref/db_name.html)
+-- | https://www.sqlite.org/c3ref/db_name.html
+--
+-- Get the name of an attached schema.
 foreign import capi unsafe "sqlite3.h sqlite3_db_name"
   sqlite3_db_name ::
     -- | Connection
     Ptr Sqlite3 ->
     -- | Database index (0-based; 0 is the main database file).
     CInt ->
+    -- | Schema name.
     IO CString
 
 -- | [__Determine if a database is read-only__](https://www.sqlite.org/c3ref/db_readonly.html)
@@ -730,7 +739,10 @@ foreign import capi unsafe "sqlite3.h sqlite3_drop_modules"
     Ptr CString ->
     IO CInt
 
--- | [__Enable or disable shared pager cache__](https://www.sqlite.org/c3ref/enable_shared_cache.html)
+-- | https://www.sqlite.org/c3ref/enable_shared_cache.html
+--
+-- Enable or disable the sharing of the database cache and schema data structures between connections to the same
+-- database.
 foreign import capi unsafe "sqlite3.h sqlite3_enable_shared_cache"
   sqlite3_enable_shared_cache ::
     CInt ->
@@ -879,16 +891,19 @@ sqlite3_open = undefined
 sqlite3_open16 = undefined
 
 -- | https://www.sqlite.org/c3ref/open.html
+--
+-- Open a new database connection.
 foreign import capi unsafe "sqlite3.h sqlite3_open_v2"
   sqlite3_open_v2 ::
-    -- | Database file (UTF-8).
+    -- | Database file (UTF-8), `":memory:"` (temporary in-memory database), or `""` (temporary on-disk database).
     CString ->
-    -- | Out: database.
+    -- | Out: connection.
     Ptr (Ptr Sqlite3) ->
     -- | Flags.
     CInt ->
     -- | VFS module name.
     CString ->
+    -- | Result code.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/overload_function.html

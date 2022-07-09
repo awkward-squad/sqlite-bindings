@@ -1,8 +1,12 @@
 module Sqlite.Bindings
   ( -- * Objects
     Sqlite3,
+    Sqlite3_backup,
     Sqlite3_blob,
+    Sqlite3_context,
+    Sqlite3_mutex,
     Sqlite3_stmt,
+    Sqlite3_value,
 
     -- ** Database
     sqlite3_config,
