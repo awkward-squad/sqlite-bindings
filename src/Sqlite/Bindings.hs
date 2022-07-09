@@ -7,6 +7,7 @@ module Sqlite.Bindings
     Sqlite3_blob,
     Sqlite3_context,
     Sqlite3_mutex,
+    Sqlite3_snapshot,
     Sqlite3_stmt,
     Sqlite3_value,
 
