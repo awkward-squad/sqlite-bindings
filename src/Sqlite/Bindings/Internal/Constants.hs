@@ -67,8 +67,6 @@ foreign import capi "sqlite3.h value SQLITE_CONFIG_GETMALLOC" _SQLITE_CONFIG_GET
 
 foreign import capi "sqlite3.h value SQLITE_CONFIG_GETMUTEX" _SQLITE_CONFIG_GETMUTEX :: CInt
 
-foreign import capi "sqlite3.h value SQLITE_CONFIG_GETPCACHE" _SQLITE_CONFIG_GETPCACHE :: CInt
-
 foreign import capi "sqlite3.h value SQLITE_CONFIG_GETPCACHE2" _SQLITE_CONFIG_GETPCACHE2 :: CInt
 
 foreign import capi "sqlite3.h value SQLITE_CONFIG_HEAP" _SQLITE_CONFIG_HEAP :: CInt
@@ -91,15 +89,11 @@ foreign import capi "sqlite3.h value SQLITE_CONFIG_MUTEX" _SQLITE_CONFIG_MUTEX :
 
 foreign import capi "sqlite3.h value SQLITE_CONFIG_PAGECACHE" _SQLITE_CONFIG_PAGECACHE :: CInt
 
-foreign import capi "sqlite3.h value SQLITE_CONFIG_PCACHE" _SQLITE_CONFIG_PCACHE :: CInt
-
 foreign import capi "sqlite3.h value SQLITE_CONFIG_PCACHE2" _SQLITE_CONFIG_PCACHE2 :: CInt
 
 foreign import capi "sqlite3.h value SQLITE_CONFIG_PCACHE_HDRSZ" _SQLITE_CONFIG_PCACHE_HDRSZ :: CInt
 
 foreign import capi "sqlite3.h value SQLITE_CONFIG_PMASZ" _SQLITE_CONFIG_PMASZ :: CInt
-
-foreign import capi "sqlite3.h value SQLITE_CONFIG_SCRATCH" _SQLITE_CONFIG_SCRATCH :: CInt
 
 foreign import capi "sqlite3.h value SQLITE_CONFIG_SERIALIZED" _SQLITE_CONFIG_SERIALIZED :: CInt
 

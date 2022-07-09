@@ -1,35 +1,49 @@
 {-# LANGUAGE CPP #-}
 
 module Sqlite.Bindings
-  ( -- * Objects
-    Sqlite3,
-    Sqlite3_backup,
-    Sqlite3_blob,
-    Sqlite3_context,
-    Sqlite3_mutex,
-    Sqlite3_snapshot,
-    Sqlite3_stmt,
-    Sqlite3_value,
-
-    -- ** Database
-    sqlite3_config,
+  ( -- ** SQLite
+    -- *** Configuration
+    -- $sqlite-configuration
+    sqlite3_config__1,
+    sqlite3_config__2,
+    sqlite3_config__3,
+    sqlite3_config__4,
+    sqlite3_config__5,
+    sqlite3_config__6,
+    sqlite3_config__7,
+    sqlite3_config__8,
+    sqlite3_config__9,
+    sqlite3_config__10,
+    sqlite3_config__11,
+    sqlite3_config__12,
+    sqlite3_config__13,
     sqlite3_enable_shared_cache,
 
-    -- ** Database connections
+    -- ** Connections
     sqlite3_open,
     sqlite3_open_v2,
     sqlite3_close,
     sqlite3_close_v2,
-    sqlite3_db_config,
-    sqlite3_db_filename,
-    sqlite3_db_name,
     sqlite3_get_autocommit,
-    sqlite3_db_readonly,
     sqlite3_db_mutex,
     sqlite3_db_status,
+    -- $connections-configuration
+    sqlite3_db_config__1,
+    sqlite3_db_config__2,
+    sqlite3_db_config__3,
     sqlite3_db_release_memory,
 
-    -- ** Binding values to prepared statements
+    -- ** Attached databases
+    sqlite3_db_filename,
+    sqlite3_db_name,
+    sqlite3_db_readonly,
+
+    -- ** Statements
+    sqlite3_prepare_v2,
+    sqlite3_finalize,
+    sqlite3_db_handle,
+
+    -- ** Binding values to statements
     sqlite3_bind_blob,
     sqlite3_bind_blob64,
     sqlite3_bind_double,
@@ -180,11 +194,6 @@ module Sqlite.Bindings
     sqlite3_filename_journal,
     sqlite3_filename_wal,
 
-    -- ** Prepared statement objects
-    sqlite3_prepare_v2,
-    sqlite3_finalize,
-    sqlite3_db_handle,
-
     -- ** Memory allocation subsystem
     sqlite3_free,
     sqlite3_malloc,
@@ -253,6 +262,7 @@ module Sqlite.Bindings
     sqlite3_overload_function,
 
     -- ** The pre-update hook
+
 #ifdef SQLITE_ENABLE_PREUPDATE_HOOK
     sqlite3_preupdate_blobwrite,
     sqlite3_preupdate_count,
@@ -457,7 +467,6 @@ module Sqlite.Bindings
     _SQLITE_CONFIG_COVERING_INDEX_SCAN,
     _SQLITE_CONFIG_GETMALLOC,
     _SQLITE_CONFIG_GETMUTEX,
-    _SQLITE_CONFIG_GETPCACHE,
     _SQLITE_CONFIG_GETPCACHE2,
     _SQLITE_CONFIG_HEAP,
     _SQLITE_CONFIG_LOG,
@@ -469,11 +478,9 @@ module Sqlite.Bindings
     _SQLITE_CONFIG_MULTITHREAD,
     _SQLITE_CONFIG_MUTEX,
     _SQLITE_CONFIG_PAGECACHE,
-    _SQLITE_CONFIG_PCACHE,
     _SQLITE_CONFIG_PCACHE2,
     _SQLITE_CONFIG_PCACHE_HDRSZ,
     _SQLITE_CONFIG_PMASZ,
-    _SQLITE_CONFIG_SCRATCH,
     _SQLITE_CONFIG_SERIALIZED,
     _SQLITE_CONFIG_SINGLETHREAD,
     _SQLITE_CONFIG_SMALL_MALLOC,
@@ -873,9 +880,47 @@ module Sqlite.Bindings
     _SQLITE_WARNING_AUTOINDEX,
     _SQLITE_WIN32_DATA_DIRECTORY_TYPE,
     _SQLITE_WIN32_TEMP_DIRECTORY_TYPE,
+
+    -- * Objects
+    Sqlite3,
+    Sqlite3_api_routines,
+    Sqlite3_backup,
+    Sqlite3_blob,
+    Sqlite3_context,
+    Sqlite3_data_directory,
+    Sqlite3_file,
+    Sqlite3_index_info,
+    Sqlite3_io_methods,
+    Sqlite3_mem_methods,
+    Sqlite3_mutex,
+    Sqlite3_mutex_methods,
+    Sqlite3_pcache,
+    Sqlite3_pcache_page,
+    Sqlite3_snapshot,
+    Sqlite3_stmt,
+    Sqlite3_str,
+    Sqlite3_temp_directory,
+    Sqlite3_value,
+    Sqlite3_vfs,
+    Sqlite3_vtab,
+    Sqlite3_vtab_cursor,
   )
 where
 
 import Sqlite.Bindings.Internal.Constants
 import Sqlite.Bindings.Internal.Functions
 import Sqlite.Bindings.Internal.Objects
+
+-- $sqlite-configuration
+--
+-- https://www.sqlite.org/c3ref/config.html
+--
+-- Configure SQLite.
+
+-- $connections-configuration
+--
+-- ==== Configuration
+--
+-- https://www.sqlite.org/c3ref/db_config.html
+--
+-- Configure a connection.

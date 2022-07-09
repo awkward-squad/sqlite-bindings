@@ -8,7 +8,7 @@ import Sqlite.Bindings.Internal.Objects
 
 -- TODO look over all FunPtr and decide which functions need safe variants
 
--- | [__Obtain aggregate function context__](https://www.sqlite.org/c3ref/aggregate_context.html)
+-- | https://www.sqlite.org/c3ref/aggregate_context.html
 foreign import ccall unsafe "sqlite3_aggregate_context"
   sqlite3_aggregate_context ::
     -- | Context.
@@ -17,10 +17,10 @@ foreign import ccall unsafe "sqlite3_aggregate_context"
     CInt ->
     IO (Ptr a)
 
--- | [__Automatically load statically linked extensions__](https://www.sqlite.org/c3ref/auto_extension.html)
+-- | https://www.sqlite.org/c3ref/auto_extension.html
 sqlite3_auto_extension = undefined
 
--- | [__Autovacuum compaction amount callback__](https://www.sqlite.org/c3ref/autovacuum_pages.html)
+-- | https://www.sqlite.org/c3ref/autovacuum_pages.html
 foreign import ccall unsafe "sqlite3_autovacuum_pages"
   sqlite3_autovacuum_pages ::
     -- | Connection.
@@ -275,7 +275,7 @@ foreign import ccall unsafe "sqlite3_blob_open"
     Int64 ->
     -- | Flags.
     CInt ->
-    -- | Out: blob.
+    -- | /Out/: blob.
     Ptr (Ptr Sqlite3_blob) ->
     IO CInt
 
@@ -360,21 +360,15 @@ foreign import ccall unsafe "sqlite3_clear_bindings"
 --
 -- Close a database connection.
 foreign import ccall unsafe "sqlite3_close"
-  sqlite3_close ::
-    -- | Connection.
-    Ptr Sqlite3 ->
-    -- | Result code.
-    IO CInt
+  sqlite3_close :: Ptr Sqlite3 -> IO CInt
 
 -- | https://www.sqlite.org/c3ref/close.html
 --
--- Close a database connection.
+-- Close a database connection. If it has any unfinalized statements, open BLOB handlers, or unfinished backups, mark
+-- the connection as unusable and make arrangements to deallocate it after all statements are finalized, BLOB handlers
+-- are closed, and backups are finished.
 foreign import ccall unsafe "sqlite3_close_v2"
-  sqlite3_close_v2 ::
-    -- | Connection.
-    Ptr Sqlite3 ->
-    -- | Result code.
-    IO CInt
+  sqlite3_close_v2 :: Ptr Sqlite3 -> IO CInt
 
 -- | [__Collation needed callbacks__](https://www.sqlite.org/c3ref/collation_needed.html)
 foreign import ccall unsafe "sqlite3_collation_needed"
@@ -539,7 +533,31 @@ foreign import ccall unsafe "sqlite3_complete"
     CString ->
     CInt
 
-sqlite3_config = undefined
+foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__1 :: CInt -> IO CInt
+
+foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__2 :: CInt -> Ptr Sqlite3_mem_methods -> IO CInt
+
+foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__3 :: CInt -> Ptr a -> CInt -> CInt -> IO CInt
+
+foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__4 :: CInt -> CInt -> IO CInt
+
+foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__5 :: CInt -> Ptr Sqlite3_mutex_methods -> IO CInt
+
+foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__6 :: CInt -> CInt -> CInt -> IO CInt
+
+foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__7 :: CInt -> FunPtr (Ptr a -> CInt -> CString -> IO ()) -> Ptr a -> IO CInt
+
+foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__8 :: CInt -> Ptr Sqlite3_pcache_methods2 -> IO CInt
+
+foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__9 :: CInt -> FunPtr (Ptr a -> Ptr Sqlite3 -> CString -> CInt -> IO ()) -> Ptr a -> IO CInt
+
+foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__10 :: CInt -> Int64 -> Int64 -> IO CInt
+
+foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__11 :: CInt -> Ptr CInt -> IO CInt
+
+foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__12 :: CInt -> CUInt -> IO CInt
+
+foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__13 :: CInt -> Int64 -> IO CInt
 
 -- | [__Database connection for functions__](https://www.sqlite.org/c3ref/context_db_handle.html)
 foreign import ccall unsafe "sqlite3_context_db_handle"
@@ -641,12 +659,15 @@ foreign import ccall unsafe "sqlite3_db_cacheflush"
     Ptr Sqlite3 ->
     IO CInt
 
--- | [__Configure database connections__](https://www.sqlite.org/c3ref/db_config.html)
-sqlite3_db_config = undefined
+foreign import capi unsafe "sqlite3.h sqlite3_db_config" sqlite3_db_config__1 :: Ptr Sqlite3 -> CInt -> CString -> IO CInt
+
+foreign import capi unsafe "sqlite3.h sqlite3_db_config" sqlite3_db_config__2 :: Ptr Sqlite3 -> CInt -> Ptr a -> CInt -> CInt -> IO CInt
+
+foreign import capi unsafe "sqlite3.h sqlite3_db_config" sqlite3_db_config__3 :: Ptr Sqlite3 -> CInt -> CInt -> Ptr CInt -> IO CInt
 
 -- | https://www.sqlite.org/c3ref/db_filename.html
 --
--- Get the filename for a database connection.
+-- Get the filename for an attached database.
 foreign import ccall unsafe "sqlite3_db_filename"
   sqlite3_db_filename ::
     -- | Connection.
@@ -656,33 +677,36 @@ foreign import ccall unsafe "sqlite3_db_filename"
     -- | Filename.
     IO CString
 
--- | [__Find the database handle of a prepared statement__](https://www.sqlite.org/c3ref/db_handle.html)
+-- | https://www.sqlite.org/c3ref/db_handle.html
+--
+-- Get the connection for a statement.
 foreign import ccall unsafe "sqlite3_db_handle"
   sqlite3_db_handle ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
     Ptr Sqlite3
 
--- | [__Retrieve the mutex for a database connection__](https://www.sqlite.org/c3ref/db_mutex.html)
+-- | https://www.sqlite.org/c3ref/db_mutex.html
+--
+-- Get the mutex of a connection.
 foreign import ccall unsafe "sqlite3_db_mutex"
-  sqlite3_db_mutex ::
-    -- | Connection.
-    Ptr Sqlite3 ->
-    Ptr Sqlite3_mutex
+  sqlite3_db_mutex :: Ptr Sqlite3 -> IO (Ptr Sqlite3_mutex)
 
 -- | https://www.sqlite.org/c3ref/db_name.html
 --
--- Get the name of an attached schema.
+-- Get the name of an attached database.
 foreign import ccall unsafe "sqlite3_db_name"
   sqlite3_db_name ::
     -- | Connection
     Ptr Sqlite3 ->
     -- | Database index (0-based; 0 is the main database file).
     CInt ->
-    -- | Schema name.
+    -- | Database name.
     IO CString
 
--- | [__Determine if a database is read-only__](https://www.sqlite.org/c3ref/db_readonly.html)
+-- | https://www.sqlite.org/c3ref/db_readonly.html
+--
+-- Get whether an attached database is read-only.
 foreign import ccall unsafe "sqlite3_db_readonly"
   sqlite3_db_readonly ::
     -- | Connection.
@@ -698,18 +722,54 @@ foreign import ccall unsafe "sqlite3_db_release_memory"
     Ptr Sqlite3 ->
     IO CInt
 
--- | [__Database connection status__](https://www.sqlite.org/c3ref/db_status.html)
+-- | https://www.sqlite.org/c3ref/db_status.html
+--
+-- Get a statistic of a connection.
+--
+-- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
+-- | Status option                          | Meaning                                                                                                                              |
+-- +========================================+======================================================================================================================================+
+-- | @SQLITE_DBSTATUS_LOOKASIDE_USED@       | Lookaside memory slots currently checked out.                                                                                        |
+-- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
+-- | @SQLITE_DBSTATUS_LOOKASIDE_HIT@₂       | Malloc attempts satisfied using lookaside memory.                                                                                    |
+-- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
+-- | @SQLITE_DBSTATUS_LOOKASIDE_MISS_SIZE@₂ | Malloc attempts not satisfied using lookaside memory because the amount of memory requested was larger than the lookaside slot size. |
+-- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
+-- | @SQLITE_DBSTATUS_LOOKASIDE_MISS_FULL@₂ | Malloc attempts not satisfied using lookaside memory because all lookaside memory was in use.                                        |
+-- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
+-- | @SQLITE_DBSTATUS_CACHE_USED@₁          | Approximate bytes of heap memory used by all pager caches.                                                                           |
+-- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
+-- | @SQLITE_DBSTATUS_CACHE_USED_SHARED@₁   | @DBSTATUS_CACHE_USED@, but evenly divide bytes of shared pager caches among all associated connections.                              |
+-- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
+-- | @SQLITE_DBSTATUS_SCHEMA_USED@₁         | Approximate bytes of heap memory used to store the schema for all attached databases.                                                |
+-- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
+-- | @SQLITE_DBSTATUS_STMT_USED@₁           | Approximate bytes of heap and lookaside memory used by all statements                                                                |
+-- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
+-- | @SQLITE_DBSTATUS_CACHE_HIT@₁           | Pager cache hits.                                                                                                                    |
+-- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
+-- | @SQLITE_DBSTATUS_CACHE_MISS@₁          | Pager cache misses.                                                                                                                  |
+-- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
+-- | @SQLITE_DBSTATUS_CACHE_WRITE@₁         | Dirty cache entries written to disk.                                                                                                 |
+-- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
+-- | @SQLITE_DBSTATUS_CACHE_SPILL@          | Dirty cache entries written to disk in the middle of a transaction due to the page cache overflowing.                                |
+-- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
+-- | @SQLITE_DBSTATUS_DEFERRED_FKS@₁        | Zero if and only if all foreign key constraints (deferred or immediate) have been resolved.                                          |
+-- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
+--
+-- /₁ only has current value/
+--
+-- /₂ only has highest value/
 foreign import ccall unsafe "sqlite3_db_status"
   sqlite3_db_status ::
     -- | Connection.
     Ptr Sqlite3 ->
-    -- | Which status to query.
+    -- | Status option.
     CInt ->
-    -- | Out: current status.
+    -- | /Out/: current value.
     Ptr CInt ->
-    -- | Out: highest status.
+    -- | /Out/: highest value.
     Ptr CInt ->
-    -- | Reset the highest status to the current status?
+    -- | Reset the highest value to the current value?
     CInt ->
     IO CInt
 
@@ -823,12 +883,11 @@ foreign import ccall unsafe "sqlite3_free"
 foreign import ccall unsafe "sqlite3_free_filename"
   sqlite3_free_filename :: CString -> IO ()
 
--- | [__Test for auto-commit mode__](https://www.sqlite.org/c3ref/get_autocommit.html)
+-- | https://www.sqlite.org/c3ref/get_autocommit.html
+--
+-- Get whether a connection is in autocommit mode.
 foreign import ccall unsafe "sqlite3_get_autocommit"
-  sqlite3_get_autocommit ::
-    -- | Connection.
-    Ptr Sqlite3 ->
-    IO CInt
+  sqlite3_get_autocommit :: Ptr Sqlite3 -> IO CInt
 
 -- | https://www.sqlite.org/c3ref/get_auxdata.html
 foreign import ccall unsafe "sqlite3_get_auxdata"
@@ -889,22 +948,38 @@ sqlite3_next_stmt = undefined
 
 sqlite3_normalized_sql = undefined
 
-sqlite3_open = undefined
-
-sqlite3_open16 = undefined
+-- | https://www.sqlite.org/c3ref/open.html
+--
+-- Open a new database connection.
+foreign import ccall unsafe "sqlite3_open"
+  sqlite3_open ::
+    -- |
+    -- * Database file (UTF-8).
+    -- * @":memory:"@: temporary in-memory database.
+    -- * @""@: temporary on-disk database.
+    CString ->
+    -- | /Out/: connection.
+    Ptr (Ptr Sqlite3) ->
+    -- | Result code.
+    IO CInt
 
 -- | https://www.sqlite.org/c3ref/open.html
 --
 -- Open a new database connection.
 foreign import ccall unsafe "sqlite3_open_v2"
   sqlite3_open_v2 ::
-    -- | Database file (UTF-8), @":memory:"@ (temporary in-memory database), or @""@ (temporary on-disk database).
+    -- |
+    -- * Database file (UTF-8).
+    -- * @":memory:"@: temporary in-memory database.
+    -- * @""@: temporary on-disk database.
     CString ->
-    -- | Out: connection.
+    -- | /Out/: connection.
     Ptr (Ptr Sqlite3) ->
     -- | Flags.
     CInt ->
-    -- | VFS module name.
+    -- |
+    -- * Name of VFS to use.
+    -- * /null/: use the default VFS.
     CString ->
     -- | Result code.
     IO CInt
@@ -922,9 +997,9 @@ foreign import ccall unsafe "sqlite3_prepare_v2"
     Ptr CChar ->
     -- | Length of SQL in bytes.
     CInt ->
-    -- | Out: statement.
+    -- | /Out/: statement.
     Ptr (Ptr Sqlite3_stmt) ->
-    -- | Out: unused SQL.
+    -- | /Out/: unused SQL.
     Ptr (Ptr CChar) ->
     IO CInt
 

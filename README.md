@@ -1,6 +1,6 @@
-#### Functions that probably won't get bindings
+#### Things that probably won't get bindings
 
-| Function | Reason |
+| Symbol | Reason |
 | --- | --- |
 | `sqlite3_aggregate_count` | Deprecated |
 | `sqlite3_enable_load_extension` | Insecure |
@@ -18,3 +18,7 @@
 | `sqlite3_thread_cleanup` | Deprecated |
 | `sqlite3_trace` | Deprecated |
 | `sqlite3_transfer_bindings` | Deprecated |
+| `SQLITE_CONFIG_GETPCACHE` | Unused |
+| `SQLITE_CONFIG_PCACHE` | Unused |
+| `SQLITE_CONFIG_SCRATCH` | Unused |
+
