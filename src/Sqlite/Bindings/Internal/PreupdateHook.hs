@@ -15,19 +15,19 @@ import Foreign.Ptr (FunPtr, Ptr)
 import Sqlite.Bindings.Internal.Objects
 
 -- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
-foreign import capi unsafe "sqlite3.h sqlite3_preupdate_blobwrite"
+foreign import ccall unsafe
   sqlite3_preupdate_blobwrite :: Ptr Sqlite3 -> IO CInt
 
 -- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
-foreign import capi unsafe "sqlite3.h sqlite3_preupdate_count"
+foreign import ccall unsafe
   sqlite3_preupdate_count :: Ptr Sqlite3 -> IO CInt
 
 -- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
-foreign import capi unsafe "sqlite3.h sqlite3_preupdate_depth"
+foreign import ccall unsafe
   sqlite3_preupdate_depth :: Ptr Sqlite3 -> IO CInt
 
 -- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
-foreign import capi unsafe "sqlite3.h sqlite3_preupdate_hook"
+foreign import ccall unsafe
   sqlite3_preupdate_hook ::
     Ptr Sqlite3 ->
     FunPtr (Ptr a -> Ptr Sqlite3 -> CInt -> CString -> CString -> Int64 -> Int64 -> IO ()) ->
@@ -35,7 +35,7 @@ foreign import capi unsafe "sqlite3.h sqlite3_preupdate_hook"
     IO (Ptr b)
 
 -- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
-foreign import capi unsafe "sqlite3.h sqlite3_preupdate_new"
+foreign import ccall unsafe
   sqlite3_preupdate_new ::
     Ptr Sqlite3 ->
     CInt ->
@@ -43,7 +43,7 @@ foreign import capi unsafe "sqlite3.h sqlite3_preupdate_new"
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
-foreign import capi unsafe "sqlite3.h sqlite3_preupdate_old"
+foreign import ccall unsafe
   sqlite3_preupdate_old ::
     Ptr Sqlite3 ->
     CInt ->
