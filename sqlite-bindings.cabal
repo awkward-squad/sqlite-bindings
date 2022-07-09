@@ -11,6 +11,8 @@ extra-source-files:
 library
   build-depends: base
   c-sources: cbits/sqlite3.c
+  cc-options:
+    -DSQLITE_ENABLE_PREUPDATE_HOOK
   default-extensions:
     CApiFFI
   default-language: Haskell2010

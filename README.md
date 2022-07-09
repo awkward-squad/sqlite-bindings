@@ -1,4 +1,4 @@
-#### Functions that (probably?) won't get bindings
+#### Functions that probably won't get bindings
 
 | Function | Reason |
 | --- | --- |
@@ -10,8 +10,11 @@
 | `sqlite3_get_table` | Deprecated |
 | `sqlite3_global_recover` | Deprecated |
 | `sqlite3_memory_alarm` | Deprecated |
+| `sqlite3_os_end` | Shouldn't be called by application |
+| `sqlite3_os_init` | Shouldn't be called by application |
 | `sqlite3_profile` | Deprecated |
 | `sqlite3_soft_heap_limit` | Deprecated |
+| `sqlite3_test_control` | Shouldn't be called by application |
 | `sqlite3_thread_cleanup` | Deprecated |
 | `sqlite3_trace` | Deprecated |
 | `sqlite3_transfer_bindings` | Deprecated |

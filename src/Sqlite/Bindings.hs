@@ -84,6 +84,23 @@ module Sqlite.Bindings
     sqlite3_create_window_function,
     sqlite3_context_db_handle,
     sqlite3_user_data,
+    sqlite3_result_subtype,
+    sqlite3_result_blob,
+    sqlite3_result_blob64,
+    sqlite3_result_double,
+    sqlite3_result_error,
+    sqlite3_result_error_code,
+    sqlite3_result_error_nomem,
+    sqlite3_result_error_toobig,
+    sqlite3_result_int,
+    sqlite3_result_int64,
+    sqlite3_result_null,
+    sqlite3_result_pointer,
+    sqlite3_result_text,
+    sqlite3_result_text64,
+    sqlite3_result_value,
+    sqlite3_result_zeroblob,
+    sqlite3_result_zeroblob64,
 
     -- ** Virtual tables
     sqlite3_create_module,
@@ -122,10 +139,6 @@ module Sqlite.Bindings
 
     -- ** Determine if an SQL statement is complete
     sqlite3_complete,
-
-    -- ** Create and destroy VFS filenames
-    sqlite3_create_filename,
-    sqlite3_free_filename,
 
     -- ** Flush caches to disk mid-transaction
     sqlite3_db_cacheflush__safe,
@@ -183,8 +196,6 @@ module Sqlite.Bindings
 
     -- ** Initialize the SQLite library
     sqlite3_initialize,
-    sqlite3_os_end,
-    sqlite3_os_init,
     sqlite3_shutdown,
 
     -- ** Interrupt a long-running query
@@ -256,27 +267,6 @@ module Sqlite.Bindings
 
     -- ** Reset a prepared statement object
     sqlite3_reset,
-
-    -- ** Setting the result of an SQL function
-    sqlite3_result_blob,
-    sqlite3_result_blob64,
-    sqlite3_result_double,
-    sqlite3_result_error,
-    sqlite3_result_error_code,
-    sqlite3_result_error_nomem,
-    sqlite3_result_error_toobig,
-    sqlite3_result_int,
-    sqlite3_result_int64,
-    sqlite3_result_null,
-    sqlite3_result_pointer,
-    sqlite3_result_text,
-    sqlite3_result_text64,
-    sqlite3_result_value,
-    sqlite3_result_zeroblob,
-    sqlite3_result_zeroblob64,
-
-    -- ** Setting the subtype of an SQL function
-    sqlite3_result_subtype,
 
     -- ** Serialize a database
     sqlite3_serialize,
@@ -358,9 +348,6 @@ module Sqlite.Bindings
     -- ** Extract metadata about a column of a table
     sqlite3_table_column_metadata,
 
-    -- ** Testing interface
-    sqlite3_test_control,
-
     -- ** Test to see if the library is threadsafe
     sqlite3_threadsafe,
 
@@ -406,10 +393,12 @@ module Sqlite.Bindings
     sqlite3_value_type,
 
     -- ** Virtual file systems,
-    sqlite3_vfs_find,
     sqlite3_vfs_register,
     sqlite3_vfs_unregister,
+    sqlite3_vfs_find,
     sqlite3_database_file_object,
+    sqlite3_create_filename,
+    sqlite3_free_filename,
 
     -- ** Virtual tables
     sqlite3_vtab_collation,
@@ -427,10 +416,6 @@ module Sqlite.Bindings
     sqlite3_wal_checkpoint_v2,
     sqlite3_wal_autocheckpoint,
     sqlite3_wal_hook,
-
-    -- ** Callback makers
-    createCallback0,
-    createCallback1,
 
     -- * Constants
     _SQLITE_ABORT,

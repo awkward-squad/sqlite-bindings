@@ -15,6 +15,9 @@ data {-# CTYPE "sqlite3.h" "sqlite3_context" #-} Sqlite3_context
 -- | https://www.sqlite.org/c3ref/mutex.html
 data {-# CTYPE "sqlite3.h" "sqlite3_mutex" #-} Sqlite3_mutex
 
+-- | https://www.sqlite.org/c3ref/snapshot.html
+data {-# CTYPE "sqlite3.h" "sqlite3_snapshot" #-} Sqlite3_snapshot
+
 -- | https://www.sqlite.org/c3ref/stmt.html
 data {-# CTYPE "sqlite3.h" "sqlite3_stmt" #-} Sqlite3_stmt
 

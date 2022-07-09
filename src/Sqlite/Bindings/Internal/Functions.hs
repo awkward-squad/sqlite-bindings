@@ -6,6 +6,8 @@ import Foreign.C.Types (CChar (..), CDouble (..), CInt (..), CUChar (..), CUInt 
 import Foreign.Ptr (FunPtr, Ptr)
 import Sqlite.Bindings.Internal.Objects
 
+-- TODO look over all FunPtr and decide which functions need safe variants
+
 -- | [__Obtain aggregate function context__](https://www.sqlite.org/c3ref/aggregate_context.html)
 foreign import capi unsafe "sqlite3.h sqlite3_aggregate_context"
   sqlite3_aggregate_context ::
@@ -212,7 +214,7 @@ foreign import capi unsafe "sqlite3.h sqlite3_bind_text64"
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/bind_blob.html
-foreign import capi unsafe "sqlite3 sqlite3_bind_value"
+foreign import capi unsafe "sqlite3.h sqlite3_bind_value"
   sqlite3_bind_value ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
@@ -796,11 +798,15 @@ foreign import capi unsafe "sqlite3.h sqlite3_finalize"
     Ptr Sqlite3_stmt ->
     IO CInt
 
-sqlite3_free = undefined
+-- | https://www.sqlite.org/c3ref/free.html
+foreign import capi unsafe "sqlite3.h sqlite3_free"
+  sqlite3_free :: Ptr a -> IO ()
 
-sqlite3_free_filename = undefined
-
-sqlite3_free_table = undefined
+-- | https://www.sqlite.org/c3ref/create_filename.html
+--
+-- Release memory acquired by 'sqlite3_create_filename'.
+foreign import capi unsafe "sqlite3.h sqlite3_free_filename"
+  sqlite3_free_filename :: CString -> IO ()
 
 -- | [__Test for auto-commit mode__](https://www.sqlite.org/c3ref/get_autocommit.html)
 foreign import capi unsafe "sqlite3.h sqlite3_get_autocommit"
@@ -809,7 +815,10 @@ foreign import capi unsafe "sqlite3.h sqlite3_get_autocommit"
     Ptr Sqlite3 ->
     IO CInt
 
-sqlite3_get_auxdata = undefined
+-- | https://www.sqlite.org/c3ref/get_auxdata.html
+foreign import capi unsafe "sqlite3.h sqlite3_get_auxdata"
+  sqlite3_get_auxdata ::
+    Ptr Sqlite3_context -> CInt -> IO (Ptr a)
 
 sqlite3_hard_heap_limit64 = undefined
 
@@ -882,11 +891,9 @@ foreign import capi unsafe "sqlite3.h sqlite3_open_v2"
     CString ->
     IO CInt
 
-sqlite3_os_end = undefined
-
-sqlite3_os_init = undefined
-
-sqlite3_overload_function = undefined
+-- | https://www.sqlite.org/c3ref/overload_function.html
+foreign import capi unsafe "sqlite3.h sqlite3_overload_function"
+  sqlite3_overload_function :: Ptr Sqlite3 -> CString -> CInt -> IO CInt
 
 -- | https://www.sqlite.org/c3ref/prepare.html
 foreign import capi unsafe "sqlite3.h sqlite3_prepare_v2"
@@ -903,27 +910,73 @@ foreign import capi unsafe "sqlite3.h sqlite3_prepare_v2"
     Ptr (Ptr CChar) ->
     IO CInt
 
-sqlite3_preupdate_blobwrite = undefined
+-- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
+foreign import capi unsafe "sqlite3.h sqlite3_preupdate_blobwrite"
+  sqlite3_preupdate_blobwrite :: Ptr Sqlite3 -> IO CInt
 
-sqlite3_preupdate_count = undefined
+-- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
+foreign import capi unsafe "sqlite3.h sqlite3_preupdate_count"
+  sqlite3_preupdate_count :: Ptr Sqlite3 -> IO CInt
 
-sqlite3_preupdate_depth = undefined
+-- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
+foreign import capi unsafe "sqlite3.h sqlite3_preupdate_depth"
+  sqlite3_preupdate_depth :: Ptr Sqlite3 -> IO CInt
 
-sqlite3_preupdate_hook = undefined
+-- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
+foreign import capi unsafe "sqlite3.h sqlite3_preupdate_hook"
+  sqlite3_preupdate_hook ::
+    Ptr Sqlite3 ->
+    FunPtr (Ptr a -> Ptr Sqlite3 -> CInt -> CString -> CString -> Int64 -> Int64 -> IO ()) ->
+    Ptr a ->
+    IO (Ptr b)
 
-sqlite3_preupdate_new = undefined
+-- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
+foreign import capi unsafe "sqlite3.h sqlite3_preupdate_new"
+  sqlite3_preupdate_new ::
+    Ptr Sqlite3 ->
+    CInt ->
+    Ptr (Ptr Sqlite3_value) ->
+    IO CInt
 
-sqlite3_preupdate_old = undefined
+-- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
+foreign import capi unsafe "sqlite3.h sqlite3_preupdate_old"
+  sqlite3_preupdate_old ::
+    Ptr Sqlite3 ->
+    CInt ->
+    Ptr (Ptr Sqlite3_value) ->
+    IO CInt
 
-sqlite3_progress_handler = undefined
+-- | https://www.sqlite.org/c3ref/progress_handler.html
+foreign import capi unsafe "sqlite3.h sqlite3_progress_handler"
+  sqlite3_progress_handler ::
+    Ptr Sqlite3 ->
+    CInt ->
+    FunPtr (Ptr a -> IO CInt) ->
+    Ptr a ->
+    IO ()
 
-sqlite3_randomness = undefined
+-- | https://www.sqlite.org/c3ref/randomness.html
+foreign import capi unsafe "sqlite3.h sqlite3_randomness"
+  sqlite3_randomness :: CInt -> Ptr a -> IO ()
 
-sqlite3_realloc = undefined
+-- | https://www.sqlite.org/c3ref/free.html
+foreign import capi unsafe "sqlite3.h sqlite3_realloc"
+  sqlite3_realloc :: Ptr a -> CInt -> IO (Ptr a)
 
-sqlite3_realloc64 = undefined
+-- | https://www.sqlite.org/c3ref/free.html
+foreign import capi unsafe "sqlite3.h sqlite3_realloc64"
+  sqlite3_realloc64 :: Ptr a -> Int64 -> IO (Ptr a)
 
-sqlite3_release_memory = undefined
+-- | https://www.sqlite.org/c3ref/release_memory.html
+--
+-- Attempt to release memory by deallocating non-essential allocations, such as cache database pages used to improve
+-- performance.
+foreign import capi unsafe "sqlite3.h sqlite3_release_memory"
+  sqlite3_release_memory ::
+    -- | Number of bytes to free.
+    CInt ->
+    -- | Number of bytes actually freed (may be more or less than the requested amount).
+    IO CInt
 
 -- | https://www.sqlite.org/c3ref/reset.html
 foreign import capi unsafe "sqlite3.h sqlite3_reset"
@@ -935,47 +988,133 @@ foreign import capi unsafe "sqlite3.h sqlite3_reset"
 -- | [__Reset automatic extension loading__](https://www.sqlite.org/c3ref/reset_auto_extension.html)
 sqlite3_reset_auto_extension = undefined
 
-sqlite3_result_blob = undefined
+-- | https://www.sqlite.org/c3ref/result_blob.html
+foreign import capi unsafe "sqlite3.h sqlite3_result_blob"
+  sqlite3_result_blob ::
+    Ptr Sqlite3_context ->
+    Ptr a ->
+    CInt ->
+    FunPtr (Ptr a -> IO ()) ->
+    IO ()
 
-sqlite3_result_blob64 = undefined
+-- | https://www.sqlite.org/c3ref/result_blob.html
+foreign import capi unsafe "sqlite3.h sqlite3_result_blob64"
+  sqlite3_result_blob64 ::
+    Ptr Sqlite3_context ->
+    Ptr a ->
+    Int64 ->
+    FunPtr (Ptr a -> IO ()) ->
+    IO ()
 
-sqlite3_result_double = undefined
+-- | https://www.sqlite.org/c3ref/result_blob.html
+foreign import capi unsafe "sqlite3.h sqlite3_result_double"
+  sqlite3_result_double ::
+    Ptr Sqlite3_context ->
+    CDouble ->
+    IO ()
 
-sqlite3_result_error = undefined
+-- | https://www.sqlite.org/c3ref/result_blob.html
+foreign import capi unsafe "sqlite3.h sqlite3_result_error"
+  sqlite3_result_error ::
+    Ptr Sqlite3_context ->
+    CString ->
+    CInt ->
+    IO ()
 
-sqlite3_result_error16 = undefined
+-- | https://www.sqlite.org/c3ref/result_blob.html
+foreign import capi unsafe "sqlite3.h sqlite3_result_error_code"
+  sqlite3_result_error_code ::
+    Ptr Sqlite3_context ->
+    CInt ->
+    IO ()
 
-sqlite3_result_error_code = undefined
+-- | https://www.sqlite.org/c3ref/result_blob.html
+foreign import capi unsafe "sqlite3.h sqlite3_result_error_nomem"
+  sqlite3_result_error_nomem ::
+    Ptr Sqlite3_context ->
+    IO ()
 
-sqlite3_result_error_nomem = undefined
+-- | https://www.sqlite.org/c3ref/result_blob.html
+foreign import capi unsafe "sqlite3.h sqlite3_result_error_toobig"
+  sqlite3_result_error_toobig ::
+    Ptr Sqlite3_context ->
+    IO ()
 
-sqlite3_result_error_toobig = undefined
+-- | https://www.sqlite.org/c3ref/result_blob.html
+foreign import capi unsafe "sqlite3.h sqlite3_result_int"
+  sqlite3_result_int ::
+    Ptr Sqlite3_context ->
+    CInt ->
+    IO ()
 
-sqlite3_result_int = undefined
+-- | https://www.sqlite.org/c3ref/result_blob.html
+foreign import capi unsafe "sqlite3.h sqlite3_result_int64"
+  sqlite3_result_int64 ::
+    Ptr Sqlite3_context ->
+    Int64 ->
+    IO ()
 
-sqlite3_result_int64 = undefined
+-- | https://www.sqlite.org/c3ref/result_blob.html
+foreign import capi unsafe "sqlite3.h sqlite3_result_null"
+  sqlite3_result_null ::
+    Ptr Sqlite3_context ->
+    IO ()
 
-sqlite3_result_null = undefined
+-- | https://www.sqlite.org/c3ref/result_blob.html
+foreign import capi unsafe "sqlite3.h sqlite3_result_pointer"
+  sqlite3_result_pointer ::
+    Ptr Sqlite3_context ->
+    Ptr a ->
+    CString ->
+    FunPtr (Ptr a -> IO ()) ->
+    IO ()
 
-sqlite3_result_pointer = undefined
+-- | https://www.sqlite.org/c3ref/result_subtype.html
+foreign import capi unsafe "sqlite3.h sqlite3_result_subtype"
+  sqlite3_result_subtype ::
+    Ptr Sqlite3_context ->
+    CUInt ->
+    IO ()
 
-sqlite3_result_subtype = undefined
+-- | https://www.sqlite.org/c3ref/result_blob.html
+foreign import capi unsafe "sqlite3.h sqlite3_result_text"
+  sqlite3_result_text ::
+    Ptr Sqlite3_context ->
+    Ptr CChar ->
+    CInt ->
+    FunPtr (Ptr a -> IO ()) ->
+    IO ()
 
-sqlite3_result_text = undefined
+-- | https://www.sqlite.org/c3ref/result_blob.html
+foreign import capi unsafe "sqlite3.h sqlite3_result_text64"
+  sqlite3_result_text64 ::
+    Ptr Sqlite3_context ->
+    Ptr CChar ->
+    Int64 ->
+    FunPtr (Ptr a -> IO ()) ->
+    CUChar ->
+    IO ()
 
-sqlite3_result_text16 = undefined
+-- | https://www.sqlite.org/c3ref/result_blob.html
+foreign import capi unsafe "sqlite3.h sqlite3_result_value"
+  sqlite3_result_value ::
+    Ptr Sqlite3_context ->
+    Ptr Sqlite3_value ->
+    IO ()
 
-sqlite3_result_text16be = undefined
+-- | https://www.sqlite.org/c3ref/result_blob.html
+foreign import capi unsafe "sqlite3.h sqlite3_result_zeroblob"
+  sqlite3_result_zeroblob ::
+    Ptr Sqlite3_context ->
+    CInt ->
+    IO ()
 
-sqlite3_result_text16le = undefined
-
-sqlite3_result_text64 = undefined
-
-sqlite3_result_value = undefined
-
-sqlite3_result_zeroblob = undefined
-
-sqlite3_result_zeroblob64 = undefined
+-- | https://www.sqlite.org/c3ref/result_blob.html
+foreign import capi unsafe "sqlite3.h sqlite3_result_zeroblob64"
+  sqlite3_result_zeroblob64 ::
+    Ptr Sqlite3_context ->
+    Int64 ->
+    IO CInt
 
 -- | https://www.sqlite.org/c3ref/commit_hook.html
 foreign import capi unsafe "sqlite3.h sqlite3_rollback_hook"
@@ -987,39 +1126,104 @@ foreign import capi unsafe "sqlite3.h sqlite3_rollback_hook"
     Ptr a ->
     IO (Ptr b)
 
-sqlite3_serialize = undefined
+-- | https://www.sqlite.org/c3ref/serialize.html
+foreign import capi unsafe "sqlite3.h sqlite3_serialize"
+  sqlite3_serialize ::
+    Ptr Sqlite3 ->
+    CString ->
+    Ptr Int64 ->
+    CUInt ->
+    IO (Ptr CUChar)
 
-sqlite3_set_authorizer = undefined
+-- | https://www.sqlite.org/c3ref/set_authorizer.html
+foreign import capi unsafe "sqlite3.h sqlite3_set_authorizer"
+  sqlite3_set_authorizer ::
+    Ptr Sqlite3 ->
+    FunPtr (Ptr a -> CInt -> CString -> CString -> CString -> CString -> IO CInt) ->
+    Ptr a ->
+    IO CInt
 
-sqlite3_set_auxdata = undefined
+-- | https://www.sqlite.org/c3ref/get_auxdata.html
+foreign import capi unsafe "sqlite3.h sqlite3_set_auxdata"
+  sqlite3_set_auxdata :: Ptr Sqlite3_context -> CInt -> Ptr a -> FunPtr (Ptr a -> IO ()) -> IO ()
 
-sqlite3_set_last_insert_rowid = undefined
+-- | https://www.sqlite.org/c3ref/set_last_insert_rowid.html
+foreign import capi unsafe "sqlite3.h sqlite3_set_last_insert_rowid"
+  sqlite3_set_last_insert_rowid :: Ptr Sqlite3 -> Int64 -> IO ()
 
-sqlite3_shutdown = undefined
+-- | https://www.sqlite.org/c3ref/initialize.html
+foreign import capi unsafe "sqlite3.h sqlite3_shutdown"
+  sqlite3_shutdown :: IO CInt
 
-sqlite3_sleep = undefined
+-- | https://www.sqlite.org/c3ref/sleep.html
+foreign import capi safe "sqlite3.h sqlite3_sleep"
+  sqlite3_sleep :: CInt -> IO CInt
 
-sqlite3_snapshot_cmp = undefined
+-- | https://www.sqlite.org/c3ref/snapshot_cmp.html
+foreign import capi unsafe "sqlite3.h sqlite3_snapshot_cmp"
+  sqlite3_snapshot_cmp ::
+    Ptr Sqlite3_snapshot ->
+    Ptr Sqlite3_snapshot ->
+    IO CInt
 
-sqlite3_snapshot_free = undefined
+-- | https://www.sqlite.org/c3ref/snapshot_free.html
+foreign import capi unsafe "sqlite3.h sqlite3_snapshot_free"
+  sqlite3_snapshot_free :: Ptr Sqlite3_snapshot -> IO ()
 
-sqlite3_snapshot_get = undefined
+-- | https://www.sqlite.org/c3ref/snapshot_get.html
+foreign import capi unsafe "sqlite3.h sqlite3_snapshot_get"
+  sqlite3_snapshot_get ::
+    Ptr Sqlite3 ->
+    CString ->
+    Ptr (Ptr Sqlite3_snapshot) ->
+    IO CInt
 
-sqlite3_snapshot_open = undefined
+-- | https://www.sqlite.org/c3ref/snapshot_open.html
+foreign import capi unsafe "sqlite3.h sqlite3_snapshot_open"
+  sqlite3_snapshot_open ::
+    Ptr Sqlite3 ->
+    CString ->
+    Ptr Sqlite3_snapshot ->
+    IO CInt
 
-sqlite3_snapshot_recover = undefined
+-- | https://www.sqlite.org/c3ref/snapshot_recover.html
+foreign import capi unsafe "sqlite3.h sqlite3_snapshot_recover"
+  sqlite3_snapshot_recover ::
+    Ptr Sqlite3 ->
+    CString ->
+    IO CInt
 
 sqlite3_snprintf = undefined
 
-sqlite3_soft_heap_limit64 = undefined
+-- | https://www.sqlite.org/c3ref/hard_heap_limit64.html
+foreign import capi unsafe "sqlite3.h sqlite3_soft_heap_limit64"
+  sqlite3_soft_heap_limit64 :: Int64 -> IO Int64
 
-sqlite3_sourceid = undefined
+-- | https://www.sqlite.org/c3ref/libversion.html
+foreign import capi unsafe "sqlite3.h sqlite3_sourceid"
+  sqlite3_sourceid :: CString
 
-sqlite3_sql = undefined
+-- | https://www.sqlite.org/c3ref/expanded_sql.html
+foreign import capi unsafe "sqlite3.h sqlite3_sql"
+  sqlite3_sql :: Ptr Sqlite3_stmt -> IO CString
 
-sqlite3_status = undefined
+-- | https://www.sqlite.org/c3ref/status.html
+foreign import capi unsafe "sqlite3.h sqlite3_status"
+  sqlite3_status ::
+    CInt ->
+    Ptr CInt ->
+    Ptr CInt ->
+    CInt ->
+    IO CInt
 
-sqlite3_status64 = undefined
+-- | https://www.sqlite.org/c3ref/status.html
+foreign import capi unsafe "sqlite3.h sqlite3_status64"
+  sqlite3_status64 ::
+    CInt ->
+    Ptr Int64 ->
+    Ptr Int64 ->
+    CInt ->
+    IO CInt
 
 -- | https://www.sqlite.org/c3ref/step.html
 foreign import capi safe "sqlite3.h sqlite3_step"
@@ -1035,17 +1239,46 @@ foreign import capi unsafe "sqlite3.h sqlite3_step"
     Ptr Sqlite3_stmt ->
     IO CInt
 
-sqlite3_stmt_busy = undefined
+-- | https://www.sqlite.org/c3ref/stmt_busy.html
+foreign import capi unsafe "sqlite3.h sqlite3_stmt_busy"
+  sqlite3_stmt_busy ::
+    Ptr Sqlite3_stmt ->
+    IO CInt
 
-sqlite3_stmt_isexplain = undefined
+-- | https://www.sqlite.org/c3ref/stmt_isexplain.html
+foreign import capi unsafe "sqlite3.h sqlite3_stmt_isexplain"
+  sqlite3_stmt_isexplain ::
+    Ptr Sqlite3_stmt ->
+    IO CInt
 
-sqlite3_stmt_readonly = undefined
+-- | https://www.sqlite.org/c3ref/stmt_readonly.html
+foreign import capi unsafe "sqlite3.h sqlite3_stmt_readonly"
+  sqlite3_stmt_readonly ::
+    Ptr Sqlite3_stmt ->
+    IO CInt
 
-sqlite3_stmt_scanstatus = undefined
+-- | https://www.sqlite.org/c3ref/stmt_scanstatus.html
+foreign import capi unsafe "sqlite3.h sqlite3_stmt_scanstatus"
+  sqlite3_stmt_scanstatus ::
+    Ptr Sqlite3_stmt ->
+    CInt ->
+    CInt ->
+    Ptr a ->
+    IO CInt
 
-sqlite3_stmt_scanstatus_reset = undefined
+-- | https://www.sqlite.org/c3ref/stmt_scanstatus_reset.html
+foreign import capi unsafe "sqlite3.h sqlite3_stmt_scanstatus_reset"
+  sqlite3_stmt_scanstatus_reset ::
+    Ptr Sqlite3_stmt ->
+    IO ()
 
-sqlite3_stmt_status = undefined
+-- | https://www.sqlite.org/c3ref/stmt_status.html
+foreign import capi unsafe "sqlite3.h sqlite3_stmt_status"
+  sqlite3_stmt_status ::
+    Ptr Sqlite3_stmt ->
+    CInt ->
+    CInt ->
+    IO CInt
 
 sqlite3_str_append = undefined
 
@@ -1077,25 +1310,67 @@ sqlite3_strlike = undefined
 
 sqlite3_strnicmp = undefined
 
-sqlite3_system_errno = undefined
+-- | https://www.sqlite.org/c3ref/system_errno.html
+foreign import capi unsafe "sqlite3.h sqlite3_system_errno"
+  sqlite3_system_errno :: Ptr Sqlite3 -> IO CInt
 
-sqlite3_table_column_metadata = undefined
+-- | https://www.sqlite.org/c3ref/table_column_metadata.html
+foreign import capi unsafe "sqlite3.h sqlite3_table_column_metadata"
+  sqlite3_table_column_metadata ::
+    Ptr Sqlite3 ->
+    CString ->
+    CString ->
+    CString ->
+    Ptr CString ->
+    Ptr CString ->
+    Ptr CInt ->
+    Ptr CInt ->
+    Ptr CInt ->
+    IO CInt
 
-sqlite3_test_control = undefined
+-- | https://www.sqlite.org/c3ref/threadsafe.html
+foreign import capi unsafe "sqlite3.h sqlite3_threadsafe"
+  sqlite3_threadsafe :: CInt
 
-sqlite3_threadsafe = undefined
+-- | https://www.sqlite.org/c3ref/total_changes.html
+foreign import capi unsafe "sqlite3.h sqlite3_total_changes"
+  sqlite3_total_changes :: Ptr Sqlite3 -> IO CInt
 
-sqlite3_total_changes = undefined
+-- | https://www.sqlite.org/c3ref/total_changes.html
+foreign import capi unsafe "sqlite3.h sqlite3_total_changes64"
+  sqlite3_total_changes64 :: Ptr Sqlite3 -> IO Int64
 
-sqlite3_total_changes64 = undefined
+-- | https://www.sqlite.org/c3ref/trace_v2.html
+foreign import capi unsafe "sqlite3.h sqlite3_trace_v2"
+  sqlite3_trace_v2 ::
+    Ptr Sqlite3 ->
+    CUInt ->
+    FunPtr (CUInt -> Ptr a -> Ptr b -> Ptr c -> IO CInt) ->
+    Ptr a ->
+    IO CInt
 
-sqlite3_trace_v2 = undefined
+-- | https://www.sqlite.org/c3ref/txn_state.html
+foreign import capi unsafe "sqlite3.h sqlite3_txn_state"
+  sqlite3_txn_state ::
+    Ptr Sqlite3 ->
+    CString ->
+    IO CInt
 
-sqlite3_txn_state = undefined
+-- | https://www.sqlite.org/c3ref/unlock_notify.html
+foreign import capi unsafe "sqlite3.h sqlite3_unlock_notify"
+  sqlite3_unlock_notify ::
+    Ptr Sqlite3 ->
+    FunPtr (Ptr (Ptr a) -> CInt -> IO ()) ->
+    Ptr a ->
+    IO CInt
 
-sqlite3_unlock_notify = undefined
-
-sqlite3_update_hook = undefined
+-- | https://www.sqlite.org/c3ref/update_hook.html
+foreign import capi unsafe "sqlite3.h sqlite3_update_hook"
+  sqlite3_update_hook ::
+    Ptr Sqlite3 ->
+    FunPtr (Ptr a -> CInt -> CString -> CString -> Int64 -> IO ()) ->
+    Ptr a ->
+    IO (Ptr b)
 
 sqlite3_uri_boolean = undefined
 
@@ -1105,45 +1380,88 @@ sqlite3_uri_key = undefined
 
 sqlite3_uri_parameter = undefined
 
-sqlite3_user_data = undefined
+-- | https://www.sqlite.org/c3ref/user_data.html
+foreign import capi unsafe "sqlite3.h sqlite3_user_data"
+  sqlite3_user_data ::
+    Ptr Sqlite3_context ->
+    IO (Ptr a)
 
-sqlite3_value_blob = undefined
+-- | https://www.sqlite.org/c3ref/value_blob.html
+foreign import capi unsafe "sqlite3.h sqlite3_value_blob"
+  sqlite3_value_blob ::
+    Ptr Sqlite3_value ->
+    IO (Ptr a)
 
-sqlite3_value_bytes = undefined
+-- | https://www.sqlite.org/c3ref/value_blob.html
+foreign import capi unsafe "sqlite3.h sqlite3_value_bytes"
+  sqlite3_value_bytes ::
+    Ptr Sqlite3_value ->
+    IO CInt
 
-sqlite3_value_bytes16 = undefined
-
-sqlite3_value_double = undefined
+-- | https://www.sqlite.org/c3ref/value_blob.html
+foreign import capi unsafe "sqlite3.h sqlite3_value_double"
+  sqlite3_value_double ::
+    Ptr Sqlite3_value ->
+    IO CDouble
 
 sqlite3_value_dup = undefined
 
 sqlite3_value_free = undefined
 
-sqlite3_value_frombind = undefined
+-- | https://www.sqlite.org/c3ref/value_blob.html
+foreign import capi unsafe "sqlite3.h sqlite3_value_frombind"
+  sqlite3_value_frombind ::
+    Ptr Sqlite3_value ->
+    IO CInt
 
-sqlite3_value_int = undefined
+-- | https://www.sqlite.org/c3ref/value_blob.html
+foreign import capi unsafe "sqlite3.h sqlite3_value_int"
+  sqlite3_value_int ::
+    Ptr Sqlite3_value ->
+    IO CInt
 
-sqlite3_value_int64 = undefined
+-- | https://www.sqlite.org/c3ref/value_blob.html
+foreign import capi unsafe "sqlite3.h sqlite3_value_int64"
+  sqlite3_value_int64 ::
+    Ptr Sqlite3_value ->
+    IO Int64
 
-sqlite3_value_nochange = undefined
+-- | https://www.sqlite.org/c3ref/value_blob.html
+foreign import capi unsafe "sqlite3.h sqlite3_value_nochange"
+  sqlite3_value_nochange ::
+    Ptr Sqlite3_value ->
+    IO CInt
 
-sqlite3_value_numeric_type = undefined
+-- | https://www.sqlite.org/c3ref/value_blob.html
+foreign import capi unsafe "sqlite3.h sqlite3_value_numeric_type"
+  sqlite3_value_numeric_type ::
+    Ptr Sqlite3_value ->
+    IO CInt
 
-sqlite3_value_pointer = undefined
+-- | https://www.sqlite.org/c3ref/value_blob.html
+foreign import capi unsafe "sqlite3.h sqlite3_value_pointer"
+  sqlite3_value_pointer ::
+    Ptr Sqlite3_value ->
+    CString ->
+    IO (Ptr a)
 
 sqlite3_value_subtype = undefined
 
-sqlite3_value_text = undefined
+-- | https://www.sqlite.org/c3ref/value_blob.html
+foreign import capi unsafe "sqlite3.h sqlite3_value_text"
+  sqlite3_value_text ::
+    Ptr Sqlite3_value ->
+    IO (Ptr CUChar)
 
-sqlite3_value_text16 = undefined
+-- | https://www.sqlite.org/c3ref/value_blob.html
+foreign import capi unsafe "sqlite3.h sqlite3_value_type"
+  sqlite3_value_type ::
+    Ptr Sqlite3_value ->
+    IO CInt
 
-sqlite3_value_text16be = undefined
-
-sqlite3_value_text16le = undefined
-
-sqlite3_value_type = undefined
-
-sqlite3_version = undefined
+-- | https://www.sqlite.org/c3ref/libversion.html
+foreign import capi unsafe "sqlite3.h sqlite3_version"
+  sqlite3_version :: CString
 
 sqlite3_vfs_find = undefined
 
@@ -1173,23 +1491,34 @@ sqlite3_vtab_on_conflict = undefined
 
 sqlite3_vtab_rhs_value = undefined
 
-sqlite3_wal_autocheckpoint = undefined
+-- | https://www.sqlite.org/c3ref/wal_autocheckpoint.html
+foreign import capi unsafe "sqlite3.h sqlite3_wal_autocheckpoint"
+  sqlite3_wal_autocheckpoint ::
+    Ptr Sqlite3 ->
+    CInt ->
+    IO CInt
 
-sqlite3_wal_checkpoint = undefined
+-- | https://www.sqlite.org/c3ref/wal_checkpoint.html
+foreign import capi unsafe "sqlite3.h sqlite3_wal_checkpoint"
+  sqlite3_wal_checkpoint ::
+    Ptr Sqlite3 ->
+    CString ->
+    IO CInt
 
-sqlite3_wal_checkpoint_v2 = undefined
+-- | https://www.sqlite.org/c3ref/wal_checkpoint_v2.html
+foreign import capi unsafe "sqlite3.h sqlite3_wal_checkpoint_v2"
+  sqlite3_wal_checkpoint_v2 ::
+    Ptr Sqlite3 ->
+    CString ->
+    CInt ->
+    Ptr CInt ->
+    Ptr CInt ->
+    IO CInt
 
-sqlite3_wal_hook = undefined
-
-------------------------------------------------------------------------------------------------------------------------
-
--- TODO sort/rename these?
-
-foreign import ccall "wrapper"
-  createCallback0 :: (Ptr a -> CInt -> IO CInt) -> IO (FunPtr (Ptr a -> CInt -> IO CInt))
-
-foreign import ccall "wrapper"
-  createCallback1 :: (Ptr a -> IO CInt) -> IO (FunPtr (Ptr a -> IO CInt))
-
-foreign import ccall "wrapper"
-  createCallback2 :: (Ptr a -> IO ()) -> IO (FunPtr (Ptr a -> IO ()))
+-- | https://www.sqlite.org/c3ref/wal_hook.html
+foreign import capi unsafe "sqlite3.h sqlite3_wal_hook"
+  sqlite3_wal_hook ::
+    Ptr Sqlite3 ->
+    FunPtr (Ptr a -> Ptr Sqlite3 -> CString -> CInt -> IO CInt) ->
+    Ptr a ->
+    IO (Ptr b)
