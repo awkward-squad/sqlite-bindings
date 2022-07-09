@@ -17,7 +17,6 @@ module Sqlite.Bindings
     sqlite3_config__11,
     sqlite3_config__12,
     sqlite3_config__13,
-    sqlite3_enable_shared_cache,
 
     -- ** Connections
     sqlite3_open,

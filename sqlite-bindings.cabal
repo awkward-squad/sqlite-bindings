@@ -12,14 +12,17 @@ flag enable-preupdate-hook
   manual: True
   default: False
 
+common component
+  default-language: Haskell2010
+  ghc-options: -Wall
+
 library
+  import: component
   build-depends: base
   c-sources: cbits/sqlite3.c
   default-extensions:
     CApiFFI
-  default-language: Haskell2010
   exposed-modules: Sqlite.Bindings
-  ghc-options: -Wall
   hs-source-dirs: src
   include-dirs: cbits
   includes: sqlite3.h
@@ -30,3 +33,16 @@ library
   if flag(enable-preupdate-hook)
     cc-options: -DSQLITE_ENABLE_PREUPDATE_HOOK
     other-modules: Sqlite.Bindings.Internal.PreupdateHook
+
+test-suite tests
+  import: component
+  build-depends:
+    base,
+    bytestring,
+    sqlite-bindings,
+    tasty,
+    tasty-hunit,
+    text ^>= 2.0,
+  hs-source-dirs: test
+  main-is: Main.hs
+  type: exitcode-stdio-1.0

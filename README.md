@@ -4,6 +4,7 @@
 | --- | --- |
 | `sqlite3_aggregate_count` | Deprecated |
 | `sqlite3_enable_load_extension` | Insecure |
+| `sqlite3_enable_shared_cache` | Deprecated |
 | `sqlite3_exec` | Convenience wrapper |
 | `sqlite3_expired` | Deprecated |
 | `sqlite3_free_table` | Deprecated |

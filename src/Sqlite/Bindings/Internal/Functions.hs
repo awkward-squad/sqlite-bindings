@@ -698,7 +698,11 @@ foreign import ccall unsafe "sqlite3_db_handle"
 --
 -- Get the mutex of a connection.
 foreign import ccall unsafe "sqlite3_db_mutex"
-  sqlite3_db_mutex :: Ptr Sqlite3 -> IO (Ptr Sqlite3_mutex)
+  sqlite3_db_mutex ::
+    -- | Connection.
+    Ptr Sqlite3 ->
+    -- | Mutex.
+    IO (Ptr Sqlite3_mutex)
 
 -- | https://www.sqlite.org/c3ref/db_name.html
 --
@@ -723,9 +727,15 @@ foreign import ccall unsafe "sqlite3_db_readonly"
     CString ->
     IO CInt
 
--- | [__Free memory used by a database connection__](https://www.sqlite.org/c3ref/db_release_memory.html)
+-- | https://www.sqlite.org/c3ref/db_release_memory.html
+--
+-- Free as much memory as possible from a connection.
 foreign import ccall unsafe "sqlite3_db_release_memory"
-  sqlite3_db_release_memory :: Ptr Sqlite3 -> IO CInt
+  sqlite3_db_release_memory ::
+    -- | Connection.
+    Ptr Sqlite3 ->
+    -- | Result code.
+    IO CInt
 
 -- | https://www.sqlite.org/c3ref/db_status.html
 --
@@ -807,17 +817,6 @@ foreign import ccall unsafe "sqlite3_drop_modules"
     Ptr CString ->
     IO CInt
 
--- | https://www.sqlite.org/c3ref/enable_shared_cache.html
---
--- Enable or disable the sharing of the database cache and schema data structures between connections to the same
--- database.
-foreign import ccall unsafe "sqlite3_enable_shared_cache"
-  sqlite3_enable_shared_cache ::
-    -- | 0 or 1.
-    CInt ->
-    -- | Result code.
-    IO CInt
-
 -- | https://www.sqlite.org/c3ref/extended_result_codes.html
 foreign import ccall unsafe "sqlite3_extended_result_codes"
   sqlite3_extended_result_codes ::
@@ -894,7 +893,11 @@ foreign import ccall unsafe "sqlite3_free_filename"
 --
 -- Get whether a connection is in autocommit mode.
 foreign import ccall unsafe "sqlite3_get_autocommit"
-  sqlite3_get_autocommit :: Ptr Sqlite3 -> IO CInt
+  sqlite3_get_autocommit ::
+    -- | Connection.
+    Ptr Sqlite3 ->
+    -- | 0 or 1.
+    IO CInt
 
 -- | https://www.sqlite.org/c3ref/get_auxdata.html
 foreign import ccall unsafe "sqlite3_get_auxdata"
@@ -960,10 +963,7 @@ sqlite3_normalized_sql = undefined
 -- Open a new database connection.
 foreign import ccall unsafe "sqlite3_open"
   sqlite3_open ::
-    -- |
-    -- * Database file (UTF-8).
-    -- * @":memory:"@: temporary in-memory database.
-    -- * @""@: temporary on-disk database.
+    -- | Database file (UTF-8).
     CString ->
     -- | /Out/: connection.
     Ptr (Ptr Sqlite3) ->
@@ -975,18 +975,13 @@ foreign import ccall unsafe "sqlite3_open"
 -- Open a new database connection.
 foreign import ccall unsafe "sqlite3_open_v2"
   sqlite3_open_v2 ::
-    -- |
-    -- * Database file (UTF-8).
-    -- * @":memory:"@: temporary in-memory database.
-    -- * @""@: temporary on-disk database.
+    -- | Database file (UTF-8).
     CString ->
     -- | /Out/: connection.
     Ptr (Ptr Sqlite3) ->
     -- | Flags.
     CInt ->
-    -- |
-    -- * Name of VFS to use.
-    -- * /null/: use the default VFS.
+    -- | Name of VFS to use.
     CString ->
     -- | Result code.
     IO CInt
