@@ -13,6 +13,7 @@
 | `sqlite3_memory_alarm` | Deprecated |
 | `sqlite3_os_end` | Shouldn't be called by application |
 | `sqlite3_os_init` | Shouldn't be called by application |
+| `sqlite3_prepare` | Deprecated |
 | `sqlite3_profile` | Deprecated |
 | `sqlite3_soft_heap_limit` | Deprecated |
 | `sqlite3_test_control` | Shouldn't be called by application |
@@ -22,4 +23,3 @@
 | `SQLITE_CONFIG_GETPCACHE` | Unused |
 | `SQLITE_CONFIG_PCACHE` | Unused |
 | `SQLITE_CONFIG_SCRATCH` | Unused |
-

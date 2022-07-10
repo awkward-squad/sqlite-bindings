@@ -39,8 +39,13 @@ module Sqlite.Bindings
 
     -- ** Statements
     sqlite3_prepare_v2,
+    sqlite3_prepare_v3,
+    sqlite3_step,
+    sqlite3_reset,
+    sqlite3_clear_bindings,
     sqlite3_finalize,
     sqlite3_db_handle,
+    sqlite3_bind_parameter_count,
 
     -- ** Binding values to statements
     sqlite3_bind_blob,
@@ -57,7 +62,6 @@ module Sqlite.Bindings
     sqlite3_bind_zeroblob64,
     sqlite3_bind_parameter_index,
     sqlite3_bind_parameter_name,
-    sqlite3_bind_parameter_count,
 
     -- ** Query result columns
     sqlite3_column_count,
@@ -141,9 +145,6 @@ module Sqlite.Bindings
     -- ** Count the number of rows modified
     sqlite3_changes,
     sqlite3_changes64,
-
-    -- ** Reset all bindings on a prepared statement
-    sqlite3_clear_bindings,
 
     -- ** Source of data in a query result
     sqlite3_column_database_name,
@@ -283,9 +284,6 @@ module Sqlite.Bindings
     -- ** Attempt to free heap memory
     sqlite3_release_memory,
 
-    -- ** Reset a prepared statement object
-    sqlite3_reset,
-
     -- ** Serialize a database
     sqlite3_serialize,
 
@@ -314,10 +312,6 @@ module Sqlite.Bindings
     -- ** SQLite runtime status
     sqlite3_status,
     sqlite3_status64,
-
-    -- ** Evaluate an SQL statement
-    sqlite3_step__safe,
-    sqlite3_step__unsafe,
 
     -- ** Determine if a prepared statement has been reset
     sqlite3_stmt_busy,

@@ -7,6 +7,8 @@ import Foreign.Ptr (FunPtr, Ptr)
 import Sqlite.Bindings.Internal.Objects
 
 -- TODO look over all FunPtr and decide which functions need safe variants
+--
+-- TODO call out all "optional" params (whether caller can provide null)
 
 -- | https://www.sqlite.org/c3ref/aggregate_context.html
 foreign import ccall unsafe
@@ -74,6 +76,8 @@ foreign import ccall safe
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/bind_blob.html
+--
+-- Bind a BLOB to a parameter.
 foreign import ccall unsafe
   sqlite3_bind_blob ::
     -- | Statement.
@@ -84,10 +88,14 @@ foreign import ccall unsafe
     Ptr a ->
     -- | Length of blob in bytes.
     CInt ->
+    -- | Optional destructor, @SQLITE_STATIC@, or @SQLITE_TRANSIENT@.
     FunPtr (Ptr a -> IO ()) ->
+    -- | Result code.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/bind_blob.html
+--
+-- Bind a BLOB to a parameter.
 foreign import ccall unsafe
   sqlite3_bind_blob64 ::
     -- | Statement.
@@ -98,10 +106,14 @@ foreign import ccall unsafe
     Ptr a ->
     -- | Length of blob in bytes.
     Int64 ->
+    -- | Optional destructor, @SQLITE_STATIC@, or @SQLITE_TRANSIENT@.
     FunPtr (Ptr a -> IO ()) ->
+    -- | Result code.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/bind_blob.html
+--
+-- Bind a double to a parameter.
 foreign import ccall unsafe
   sqlite3_bind_double ::
     -- | Statement.
@@ -110,9 +122,12 @@ foreign import ccall unsafe
     CInt ->
     -- | Double.
     CDouble ->
+    -- | Result code.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/bind_blob.html
+--
+-- Bind an integer to a parameter.
 foreign import ccall unsafe
   sqlite3_bind_int ::
     -- | Statement.
@@ -121,9 +136,12 @@ foreign import ccall unsafe
     CInt ->
     -- | Integer.
     CInt ->
+    -- | Result code.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/bind_blob.html
+--
+-- Bind an integer to a parameter.
 foreign import ccall unsafe
   sqlite3_bind_int64 ::
     -- | Statement.
@@ -132,22 +150,47 @@ foreign import ccall unsafe
     CInt ->
     -- | Integer.
     Int64 ->
+    -- | Result code.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/bind_blob.html
+--
+-- Bind null to a parameter.
 foreign import ccall unsafe
   sqlite3_bind_null ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
     -- | Parameter index (1-based).
     CInt ->
+    -- | Result code.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/bind_parameter_count.html
+--
+-- Get the index of the largest parameter in a statement.
+--
+-- This is normally the number of unique parameters in a statement. For example, the following statement has two
+-- parameters, and @sqlite3_bind_parameter_count@ would return 2:
+--
+-- @
+-- select "foo"
+-- from "bar"
+-- where "baz" = ? and "qux" = ?
+-- @
+--
+-- However, a statement may include manually-numbered parameters. For example, on this statement,
+-- @sqlite3_bind_parameter_count@ would return 6:
+--
+-- @
+-- select "foo"
+-- from "bar"
+-- where "baz" = ?2 and "qux" = ?6
+-- @
 foreign import ccall unsafe
   sqlite3_bind_parameter_count ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
+    -- | Parameter index (1-based; 0 means no parameters).
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/bind_parameter_index.html
@@ -181,9 +224,12 @@ foreign import ccall unsafe
     CString ->
     -- | Optional destructor.
     FunPtr (Ptr a -> IO ()) ->
+    -- | Result code.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/bind_blob.html
+--
+-- Bind a string to a parameter.
 foreign import ccall unsafe
   sqlite3_bind_text ::
     -- | Statement.
@@ -194,10 +240,14 @@ foreign import ccall unsafe
     Ptr CChar ->
     -- | Length of string in bytes.
     CInt ->
+    -- | Optional destructor, @SQLITE_STATIC@, or @SQLITE_TRANSIENT@.
     FunPtr (Ptr a -> IO ()) ->
+    -- | Result code.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/bind_blob.html
+--
+-- Bind a string to a parameter.
 foreign import ccall unsafe
   sqlite3_bind_text64 ::
     -- | Statement.
@@ -208,12 +258,16 @@ foreign import ccall unsafe
     Ptr CChar ->
     -- | Length of string in bytes.
     Int64 ->
+    -- | Optional destructor, @SQLITE_STATIC@, or @SQLITE_TRANSIENT@.
     FunPtr (Ptr a -> IO ()) ->
     -- | Encoding.
     CUChar ->
+    -- | Result code.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/bind_blob.html
+--
+-- Bind a value to a parameter.
 foreign import ccall unsafe
   sqlite3_bind_value ::
     -- | Statement.
@@ -222,9 +276,12 @@ foreign import ccall unsafe
     CInt ->
     -- | Value.
     Ptr Sqlite3_value ->
+    -- | Result code.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/bind_blob.html
+--
+-- Bind a BLOB of zeroes to a parameter.
 foreign import ccall unsafe
   sqlite3_bind_zeroblob ::
     -- | Statement.
@@ -233,9 +290,12 @@ foreign import ccall unsafe
     CInt ->
     -- | Length of blob in bytes.
     CInt ->
+    -- | Result code.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/bind_blob.html
+--
+-- Bind a BLOB of zeroes to a parameter.
 foreign import ccall unsafe
   sqlite3_bind_zeroblob64 ::
     -- | Statement.
@@ -244,6 +304,7 @@ foreign import ccall unsafe
     CInt ->
     -- | Length of blob in bytes.
     Int64 ->
+    -- | Result code.
     IO CInt
 
 -- | [__Return the size of an open BLOB__](https://www.sqlite.org/c3ref/blob_bytes.html)
@@ -692,6 +753,7 @@ foreign import ccall unsafe
   sqlite3_db_handle ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
+    -- | Connection.
     Ptr Sqlite3
 
 -- | https://www.sqlite.org/c3ref/db_mutex.html
@@ -739,7 +801,7 @@ foreign import ccall unsafe
 
 -- | https://www.sqlite.org/c3ref/db_status.html
 --
--- Get a statistic of a connection.
+-- Get a status of a connection.
 --
 -- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
 -- | Status option                          | Meaning                                                                                                                              |
@@ -786,6 +848,7 @@ foreign import ccall unsafe
     Ptr CInt ->
     -- | Reset the highest value to the current value?
     CInt ->
+    -- | Result code.
     IO CInt
 
 sqlite3_declare_vtab = undefined
@@ -873,10 +936,13 @@ sqlite3_filename_journal = undefined
 sqlite3_filename_wal = undefined
 
 -- | https://www.sqlite.org/c3ref/finalize.html
+--
+-- Finalize a statement.
 foreign import ccall unsafe
   sqlite3_finalize ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
+    -- | Result code.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/free.html
@@ -1003,6 +1069,25 @@ foreign import ccall unsafe
     Ptr (Ptr Sqlite3_stmt) ->
     -- | /Out/: unused SQL.
     Ptr (Ptr CChar) ->
+    -- | Result code.
+    IO CInt
+
+-- | https://www.sqlite.org/c3ref/prepare.html
+foreign import ccall unsafe
+  sqlite3_prepare_v3 ::
+    -- | Connection.
+    Ptr Sqlite3 ->
+    -- | SQL (UTF-8).
+    Ptr CChar ->
+    -- | Length of SQL in bytes.
+    CInt ->
+    -- | Flags.
+    CUInt ->
+    -- | /Out/: statement.
+    Ptr (Ptr Sqlite3_stmt) ->
+    -- | /Out/: unused SQL.
+    Ptr (Ptr CChar) ->
+    -- | Result code.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/progress_handler.html
@@ -1038,10 +1123,13 @@ foreign import ccall unsafe
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/reset.html
+--
+-- Reset a statement to its initial state. Does not clear parameter bindings.
 foreign import ccall unsafe
   sqlite3_reset ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
+    -- | Result code.
     IO CInt
 
 -- | [__Reset automatic extension loading__](https://www.sqlite.org/c3ref/reset_auto_extension.html)
@@ -1285,15 +1373,8 @@ foreign import ccall unsafe
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/step.html
-foreign import ccall safe "sqlite3_step"
-  sqlite3_step__safe ::
-    -- | Statement.
-    Ptr Sqlite3_stmt ->
-    IO CInt
-
--- | https://www.sqlite.org/c3ref/step.html
-foreign import ccall unsafe "sqlite3_step"
-  sqlite3_step__unsafe ::
+foreign import ccall safe
+  sqlite3_step ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
     IO CInt
