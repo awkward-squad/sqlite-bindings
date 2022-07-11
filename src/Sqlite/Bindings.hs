@@ -2,6 +2,7 @@
 
 module Sqlite.Bindings
   ( -- ** SQLite
+
     -- *** Configuration
     -- $sqlite-configuration
     sqlite3_config__1,
@@ -26,6 +27,7 @@ module Sqlite.Bindings
     sqlite3_get_autocommit,
     sqlite3_db_mutex,
     sqlite3_db_status,
+    -- *** Configuration
     -- $connections-configuration
     sqlite3_db_config__1,
     sqlite3_db_config__2,
@@ -40,55 +42,57 @@ module Sqlite.Bindings
     -- ** Statements
     sqlite3_prepare_v2,
     sqlite3_prepare_v3,
+    sqlite3_finalize,
     sqlite3_step,
     sqlite3_reset,
     sqlite3_clear_bindings,
-    sqlite3_finalize,
     sqlite3_db_handle,
     sqlite3_bind_parameter_count,
 
-    -- ** Binding values to statements
-    sqlite3_bind_blob,
-    sqlite3_bind_blob64,
-    sqlite3_bind_double,
-    sqlite3_bind_int,
-    sqlite3_bind_int64,
-    sqlite3_bind_null,
-    sqlite3_bind_pointer,
-    sqlite3_bind_text,
-    sqlite3_bind_text64,
-    sqlite3_bind_value,
-    sqlite3_bind_zeroblob,
-    sqlite3_bind_zeroblob64,
+    -- *** Parameters
     sqlite3_bind_parameter_index,
     sqlite3_bind_parameter_name,
 
-    -- ** Query result columns
+    -- **** Binding
+    sqlite3_bind_int,
+    sqlite3_bind_int64,
+    sqlite3_bind_double,
+    sqlite3_bind_text,
+    sqlite3_bind_text64,
+    sqlite3_bind_blob,
+    sqlite3_bind_blob64,
+    sqlite3_bind_zeroblob,
+    sqlite3_bind_zeroblob64,
+    sqlite3_bind_null,
+    sqlite3_bind_pointer,
+    sqlite3_bind_value,
+
+    -- *** Results
     sqlite3_column_count,
     sqlite3_data_count,
+    sqlite3_column_decltype,
     sqlite3_column_type,
-    sqlite3_column_blob,
-    sqlite3_column_bytes,
-    sqlite3_column_double,
     sqlite3_column_int,
     sqlite3_column_int64,
+    sqlite3_column_double,
+    sqlite3_column_blob,
     sqlite3_column_text,
     sqlite3_column_value,
+    sqlite3_column_bytes,
 
     -- * Functions
     sqlite3_aggregate_context,
     sqlite3_autovacuum_pages,
-    sqlite3_column_decltype,
 
-    -- ** BLOBs
-    sqlite3_blob_bytes,
-    sqlite3_blob_close,
+    -- ** Blobs
     sqlite3_blob_open,
+    sqlite3_blob_close,
+    sqlite3_blob_bytes,
     sqlite3_blob_read,
-    sqlite3_blob_reopen,
     sqlite3_blob_write,
+    sqlite3_blob_reopen,
 
-    -- ** Collations
+    -- ** Collating sequences
     sqlite3_create_collation,
     sqlite3_create_collation_v2,
     sqlite3_collation_needed,
@@ -261,9 +265,8 @@ module Sqlite.Bindings
     -- ** Overload a function for a virtual table
     sqlite3_overload_function,
 
-    -- ** The pre-update hook
-
 #ifdef SQLITE_ENABLE_PREUPDATE_HOOK
+    -- ** The pre-update hook
     sqlite3_preupdate_blobwrite,
     sqlite3_preupdate_count,
     sqlite3_preupdate_depth,
@@ -910,105 +913,9 @@ import Sqlite.Bindings.Internal.Objects
 -- https://www.sqlite.org/c3ref/config.html
 --
 -- Configure SQLite.
---
--- +-----------------------------------------+----------------------------------------------------------------------------------------------------------------------------+
--- | Configuration option                    | Meaning                                                                                                                    |
--- +=========================================+============================================================================================================================+
--- | @SQLITE_CONFIG_COVERING_INDEX_SCAN@     | Disable the use of covering indices for full table scans (/default/: enabled, or @-DSQLITE_ALLOW_COVERING_INDEX_SCAN@).    |
--- +-----------------------------------------+----------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_CONFIG_GETMALLOC@               | Get memory allocation routines.                                                                                            |
--- +-----------------------------------------+----------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_CONFIG_GETMUTEX@                | Get mutex routines.                                                                                                        |
--- +-----------------------------------------+----------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_CONFIG_GETPCACHE2@              | Get page cache implementation.                                                                                             |
--- +-----------------------------------------+----------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_CONFIG_HEAP@                    | Set a memory pool memory allocations.                                                                                      |
--- +-----------------------------------------+----------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_CONFIG_LOG@                     | Set error logger.                                                                                                          |
--- +-----------------------------------------+----------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_CONFIG_LOOKASIDE@               | Set default lookaside memory size.                                                                                         |
--- +-----------------------------------------+----------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_CONFIG_MALLOC@                  | Set memory allocation routines.                                                                                            |
--- +-----------------------------------------+----------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_CONFIG_MEMDB_MAXSIZE@           | Set maximum size for a database created using 'sqlite3_deserialize' (/default/: 1GB, or @-DSQLITE_MEMDB_DEFAULT_MAXSIZE@). |
--- +-----------------------------------------+----------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_CONFIG_MEMSTATUS@               | Disable the collection of memory allocation statistics (/default/: enabled, or @-DSQLITE_DEFAULT_MEMSTATUS@).              |
--- +-----------------------------------------+----------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_CONFIG_MMAP_SIZE@               | Set default and maximum mmap size limit.                                                                                   |
--- +-----------------------------------------+----------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_CONFIG_MULTITHREAD@             | Set threading mode to multi.                                                                                               |
--- +-----------------------------------------+----------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_CONFIG_MUTEX@                   | Set mutex routines.                                                                                                        |
--- +-----------------------------------------+----------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_CONFIG_PAGECACHE@               | Set a memory pool for the page cache.                                                                                      |
--- +-----------------------------------------+----------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_CONFIG_PCACHE2@                 | Set page cache implementation.                                                                                             |
--- +-----------------------------------------+----------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_CONFIG_PCACHE_HDRSZ@            | Get number of extra bytes per page in the page cache.                                                                      |
--- +-----------------------------------------+----------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_CONFIG_PMASZ@                   | Set minimum PMA size (/default/: @-DSQLITE_SORTER_PMASZ@.                                                                  |
--- +-----------------------------------------+----------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_CONFIG_SERIALIZED@              | Set threading mode to serialized.                                                                                          |
--- +-----------------------------------------+----------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_CONFIG_SINGLETHREAD@            | Set threading mode to single.                                                                                              |
--- +-----------------------------------------+----------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_CONFIG_SMALL_MALLOC@            | Avoid large memory allocations, if possible.                                                                               |
--- +-----------------------------------------+----------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_CONFIG_SORTERREF_SIZE@          | Set sorter-reference size threshold.                                                                                       |
--- +-----------------------------------------+----------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_CONFIG_SQLLOG@                  | Set logger.                                                                                                                |
--- +-----------------------------------------+----------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_CONFIG_STMTJRNL_SPILL@          | Set statement journal spill-to-disk threshold (/default/: @-DSQLITE_STMTJRNL_SPILL@).                                      |
--- +-----------------------------------------+----------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_CONFIG_URI@                     | Enable URI handling (/default/: disabled, or @-DSQLITE_USE_URI@).                                                          |
--- +-----------------------------------------+----------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_CONFIG_WIN32_HEAPSIZE@          | Windows: set mamximum heap size.                                                                                           |
--- +-----------------------------------------+----------------------------------------------------------------------------------------------------------------------------+
 
 -- $connections-configuration
---
--- ==== Configuration
 --
 -- https://www.sqlite.org/c3ref/db_config.html
 --
 -- Configure a connection.
---
--- +-----------------------------------------+--------------------------------------------------------------------------------+
--- | Configuration option                    | Meaning                                                                        |
--- +=========================================+================================================================================+
--- | @SQLITE_DBCONFIG_DEFENSIVE@             | Disallow SQL that can corrupt the database (/default/: allowed).               |
--- +-----------------------------------------+--------------------------------------------------------------------------------+
--- | @SQLITE_DBCONFIG_DQS_DDL@               | Disallow double-quoted strings in DDL (/default/: allowed, or @-DSQLITE_DQS@). |
--- +-----------------------------------------+--------------------------------------------------------------------------------+
--- | @SQLITE_DBCONFIG_DQS_DML@               | Disallow double-quoted strings in DML (/default/: allowed, or @-DSQLITE_DQS@). |
--- +-----------------------------------------+--------------------------------------------------------------------------------+
--- | @SQLITE_DBCONFIG_ENABLE_FKEY@           | Enable foreign-key constraints (/default/: disabled).                          |
--- +-----------------------------------------+--------------------------------------------------------------------------------+
--- | @SQLITE_DBCONFIG_ENABLE_FTS3_TOKENIZER@ | Allow passing string literals @fts3_tokenizer()@ (/default/: disallowed).      |
--- +-----------------------------------------+--------------------------------------------------------------------------------+
--- | @SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION@ | TODO                                                                           |
--- +-----------------------------------------+--------------------------------------------------------------------------------+
--- | @SQLITE_DBCONFIG_ENABLE_QPSG@           | TODO                                                                           |
--- +-----------------------------------------+--------------------------------------------------------------------------------+
--- | @SQLITE_DBCONFIG_ENABLE_TRIGGER@        | TODO                                                                           |
--- +-----------------------------------------+--------------------------------------------------------------------------------+
--- | @SQLITE_DBCONFIG_ENABLE_VIEW@           | TODO                                                                           |
--- +-----------------------------------------+--------------------------------------------------------------------------------+
--- | @SQLITE_DBCONFIG_LEGACY_ALTER_TABLE@    | TODO                                                                           |
--- +-----------------------------------------+--------------------------------------------------------------------------------+
--- | @SQLITE_DBCONFIG_LEGACY_FILE_FORMAT@    | TODO                                                                           |
--- +-----------------------------------------+--------------------------------------------------------------------------------+
--- | @SQLITE_DBCONFIG_LOOKASIDE@             | TODO                                                                           |
--- +-----------------------------------------+--------------------------------------------------------------------------------+
--- | @SQLITE_DBCONFIG_MAINDBNAME@            | TODO                                                                           |
--- +-----------------------------------------+--------------------------------------------------------------------------------+
--- | @SQLITE_DBCONFIG_NO_CKPT_ON_CLOSE@      | TODO                                                                           |
--- +-----------------------------------------+--------------------------------------------------------------------------------+
--- | @SQLITE_DBCONFIG_RESET_DATABASE@        | TODO                                                                           |
--- +-----------------------------------------+--------------------------------------------------------------------------------+
--- | @SQLITE_DBCONFIG_TRIGGER_EQP@           | TODO                                                                           |
--- +-----------------------------------------+--------------------------------------------------------------------------------+
--- | @SQLITE_DBCONFIG_TRUSTED_SCHEMA@        | TODO                                                                           |
--- +-----------------------------------------+--------------------------------------------------------------------------------+
--- | @SQLITE_DBCONFIG_WRITABLE_SCHEMA@       | TODO                                                                           |
--- +-----------------------------------------+--------------------------------------------------------------------------------+

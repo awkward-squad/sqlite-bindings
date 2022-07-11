@@ -20,16 +20,24 @@ foreign import ccall unsafe
     IO (Ptr a)
 
 -- | https://www.sqlite.org/c3ref/auto_extension.html
+--
+-- Register an extension that is automatically loaded by every new connection.
 sqlite3_auto_extension = undefined
 
 -- | https://www.sqlite.org/c3ref/autovacuum_pages.html
+--
+-- Register a callback that is invoked prior to each autovacuum.
 foreign import ccall unsafe
   sqlite3_autovacuum_pages ::
     -- | Connection.
     Ptr Sqlite3 ->
+    -- | Callback.
     FunPtr (Ptr a -> CString -> CUInt -> CUInt -> CUInt -> IO CUInt) ->
+    -- | Generic data.
     Ptr a ->
+    -- | Optional generic data destructor.
     FunPtr (Ptr a -> IO ()) ->
+    -- | Result code.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/backup_finish.html
@@ -77,7 +85,7 @@ foreign import ccall safe
 
 -- | https://www.sqlite.org/c3ref/bind_blob.html
 --
--- Bind a BLOB to a parameter.
+-- Bind a blob to a parameter.
 foreign import ccall unsafe
   sqlite3_bind_blob ::
     -- | Statement.
@@ -86,7 +94,7 @@ foreign import ccall unsafe
     CInt ->
     -- | Blob.
     Ptr a ->
-    -- | Length of blob in bytes.
+    -- | Size of blob, in bytes.
     CInt ->
     -- | Optional destructor, @SQLITE_STATIC@, or @SQLITE_TRANSIENT@.
     FunPtr (Ptr a -> IO ()) ->
@@ -95,7 +103,7 @@ foreign import ccall unsafe
 
 -- | https://www.sqlite.org/c3ref/bind_blob.html
 --
--- Bind a BLOB to a parameter.
+-- Bind a blob to a parameter.
 foreign import ccall unsafe
   sqlite3_bind_blob64 ::
     -- | Statement.
@@ -104,7 +112,7 @@ foreign import ccall unsafe
     CInt ->
     -- | Blob.
     Ptr a ->
-    -- | Length of blob in bytes.
+    -- | Size of blob, in bytes.
     Int64 ->
     -- | Optional destructor, @SQLITE_STATIC@, or @SQLITE_TRANSIENT@.
     FunPtr (Ptr a -> IO ()) ->
@@ -167,51 +175,41 @@ foreign import ccall unsafe
 
 -- | https://www.sqlite.org/c3ref/bind_parameter_count.html
 --
--- Get the index of the largest parameter in a statement.
---
--- This is normally the number of unique parameters in a statement. For example, the following statement has two
--- parameters, and @sqlite3_bind_parameter_count@ would return 2:
---
--- @
--- select "foo"
--- from "bar"
--- where "baz" = ? and "qux" = ?
--- @
---
--- However, a statement may include manually-numbered parameters. For example, on this statement,
--- @sqlite3_bind_parameter_count@ would return 6:
---
--- @
--- select "foo"
--- from "bar"
--- where "baz" = ?2 and "qux" = ?6
--- @
+-- Get the index of the largest parameter.
 foreign import ccall unsafe
   sqlite3_bind_parameter_count ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
-    -- | Parameter index (1-based; 0 means no parameters).
+    -- | Parameter index (1-based), or 0 (no parameters).
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/bind_parameter_index.html
+--
+-- Get the index of a named parameter.
 foreign import ccall unsafe
   sqlite3_bind_parameter_index ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
-    -- | Parameter name.
+    -- | Parameter name (UTF-8).
     CString ->
+    -- | Parameter index (1-based), or 0 (not found).
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/bind_parameter_name.html
+--
+-- Get the name of a named parameter.
 foreign import ccall unsafe
   sqlite3_bind_parameter_name ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
     -- | Parameter index (1-based).
     CInt ->
+    -- | Parameter name (UTF-8), or null (index out of range, or parameter is nameless).
     IO CString
 
 -- | https://www.sqlite.org/c3ref/bind_blob.html
+--
+-- Bind null to a parameter, and associate it with a pointer.
 foreign import ccall unsafe
   sqlite3_bind_pointer ::
     -- | Statement.
@@ -238,7 +236,7 @@ foreign import ccall unsafe
     CInt ->
     -- | String (UTF-8).
     Ptr CChar ->
-    -- | Length of string in bytes.
+    -- | Size of string, in bytes.
     CInt ->
     -- | Optional destructor, @SQLITE_STATIC@, or @SQLITE_TRANSIENT@.
     FunPtr (Ptr a -> IO ()) ->
@@ -256,7 +254,7 @@ foreign import ccall unsafe
     CInt ->
     -- | String (UTF-8).
     Ptr CChar ->
-    -- | Length of string in bytes.
+    -- | Size of string, in bytes.
     Int64 ->
     -- | Optional destructor, @SQLITE_STATIC@, or @SQLITE_TRANSIENT@.
     FunPtr (Ptr a -> IO ()) ->
@@ -281,47 +279,55 @@ foreign import ccall unsafe
 
 -- | https://www.sqlite.org/c3ref/bind_blob.html
 --
--- Bind a BLOB of zeroes to a parameter.
+-- Bind a blob of zeroes to a parameter.
 foreign import ccall unsafe
   sqlite3_bind_zeroblob ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
     -- | Parameter index (1-based).
     CInt ->
-    -- | Length of blob in bytes.
+    -- | Size of blob, in bytes.
     CInt ->
     -- | Result code.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/bind_blob.html
 --
--- Bind a BLOB of zeroes to a parameter.
+-- Bind a blob of zeroes to a parameter.
 foreign import ccall unsafe
   sqlite3_bind_zeroblob64 ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
     -- | Parameter index (1-based).
     CInt ->
-    -- | Length of blob in bytes.
+    -- | Size of blob, in bytes.
     Int64 ->
     -- | Result code.
     IO CInt
 
--- | [__Return the size of an open BLOB__](https://www.sqlite.org/c3ref/blob_bytes.html)
+-- | https://www.sqlite.org/c3ref/blob_bytes.html
+--
+-- Get the size of a blob, in bytes.
 foreign import ccall unsafe
   sqlite3_blob_bytes ::
     -- | Blob.
     Ptr Sqlite3_blob ->
+    -- | Size of blob, in bytes.
     IO CInt
 
--- | [__Close a BLOB handle__](https://www.sqlite.org/c3ref/blob_close.html)
+-- | https://www.sqlite.org/c3ref/blob_close.html
+--
+-- Close a blob.
 foreign import ccall unsafe
   sqlite3_blob_close ::
     -- | Blob.
     Ptr Sqlite3_blob ->
+    -- | Result code.
     IO CInt
 
--- | [__Open a BLOB for incremental I/O__](https://www.sqlite.org/c3ref/blob_open.html)
+-- | https://www.sqlite.org/c3ref/blob_open.html
+--
+-- Open a blob.
 foreign import ccall unsafe
   sqlite3_blob_open ::
     -- | Connection.
@@ -332,47 +338,57 @@ foreign import ccall unsafe
     CString ->
     -- | Column name
     CString ->
-    -- | Row id.
+    -- | Rowid.
     Int64 ->
-    -- | Flags.
+    -- | Read-only if 0, else read-write.
     CInt ->
     -- | /Out/: blob.
     Ptr (Ptr Sqlite3_blob) ->
+    -- | Result code.
     IO CInt
 
--- | [__Read data from a BLOB incrementally__](https://www.sqlite.org/c3ref/blob_read.html)
+-- | https://www.sqlite.org/c3ref/blob_read.html
+--
+-- Read data from a blob.
 foreign import ccall unsafe
   sqlite3_blob_read ::
     -- | Blob.
     Ptr Sqlite3_blob ->
     -- | Buffer to read into.
     Ptr a ->
-    -- | Length of buffer to read into.
+    -- | Size of buffer to read into.
     CInt ->
     -- | Byte offset into blob to read from.
     CInt ->
+    -- | Result code.
     IO CInt
 
--- | [__Move a BLOB handle to a new row__](https://www.sqlite.org/c3ref/blob_reopen.html)
+-- | https://www.sqlite.org/c3ref/blob_reopen.html
+--
+-- Point an open blob at a different row in the same table.
 foreign import ccall unsafe
   sqlite3_blob_reopen ::
     -- | Blob.
     Ptr Sqlite3_blob ->
     -- | Rowid.
     Int64 ->
+    -- | Result code.
     IO CInt
 
--- | [__Write data into a BLOB incrementally__](https://www.sqlite.org/c3ref/blob_write.html)
+-- | https://www.sqlite.org/c3ref/blob_write.html
+--
+-- Write data to a blob.
 foreign import ccall unsafe
   sqlite3_blob_write ::
     -- | Blob.
     Ptr Sqlite3_blob ->
     -- | Buffer of data to write.
     Ptr a ->
-    -- | Length of buffer to write.
+    -- | Size of buffer to write.
     CInt ->
     -- | Byte offset into blob to write to.
     CInt ->
+    -- | Result code.
     IO CInt
 
 -- | [__Register a callback to handle `SQLITE_BUSY` errors__](https://www.sqlite.org/c3ref/busy_handler.html)
@@ -411,10 +427,13 @@ foreign import ccall unsafe
     IO Int64
 
 -- | https://www.sqlite.org/c3ref/clear_bindings.html
+--
+-- Clear parameter bindings.
 foreign import ccall unsafe
   sqlite3_clear_bindings ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
+    -- | Result code.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/close.html
@@ -429,8 +448,8 @@ foreign import ccall unsafe
 
 -- | https://www.sqlite.org/c3ref/close.html
 --
--- Close a database connection. If it has any unfinalized statements, open BLOB handlers, or unfinished backups, mark
--- the connection as unusable and make arrangements to deallocate it after all statements are finalized, BLOB handlers
+-- Close a database connection. If it has any unfinalized statements, open blob handlers, or unfinished backups, mark
+-- the connection as unusable and make arrangements to deallocate it after all statements are finalized, blob handlers
 -- are closed, and backups are finished.
 foreign import ccall unsafe
   sqlite3_close_v2 ::
@@ -439,37 +458,53 @@ foreign import ccall unsafe
     -- | Result code.
     IO CInt
 
--- | [__Collation needed callbacks__](https://www.sqlite.org/c3ref/collation_needed.html)
+-- | https://www.sqlite.org/c3ref/collation_needed.html
+--
+-- Register a callback that is invoked when a collating sequence is needed.
 foreign import ccall unsafe
   sqlite3_collation_needed ::
+    -- | Connection.
     Ptr Sqlite3 ->
+    -- | Generic data.
     Ptr a ->
+    -- |
+    -- /Arguments/: generic data, connection, encoding, collating sequence name.
     FunPtr (Ptr a -> Ptr Sqlite3 -> CInt -> CString -> IO ()) ->
+    -- | Result code.
     IO CInt
 
--- | [__Result values from a query__](https://www.sqlite.org/c3ref/column_blob.html)
+-- | https://www.sqlite.org/c3ref/column_blob.html
+--
+-- Get the blob of a result column.
 foreign import ccall unsafe
   sqlite3_column_blob ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
     -- | Column index (0-based).
     CInt ->
+    -- | Blob.
     IO (Ptr a)
 
--- | [__Result values from a query__](https://www.sqlite.org/c3ref/column_blob.html)
+-- | https://www.sqlite.org/c3ref/column_blob.html
+--
+-- Get the size of a blob or string result column, in bytes.
 foreign import ccall unsafe
   sqlite3_column_bytes ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
     -- | Column index (0-based).
     CInt ->
+    -- | Number of bytes.
     IO CInt
 
--- | [__Number of columns in a result set__](https://www.sqlite.org/c3ref/column_count.html)
+-- | https://www.sqlite.org/c3ref/column_count.html
+--
+-- Get the number of columns in a result set.
 foreign import ccall unsafe
   sqlite3_column_count ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
+    -- | Number of columns.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/column_database_name.html
@@ -481,40 +516,52 @@ foreign import ccall unsafe
     CInt ->
     IO CString
 
--- | [__Declared datatype of a query result__](https://www.sqlite.org/c3ref/column_decltype.html)
+-- | https://www.sqlite.org/c3ref/column_decltype.html
+--
+-- Get the declared datatype of a result column.
 foreign import ccall unsafe
   sqlite3_column_decltype ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
     -- | Column index (0-based).
     CInt ->
+    -- | Datatype (UTF-8), or null if not applicable.
     IO CString
 
--- | [__Result values from a query__](https://www.sqlite.org/c3ref/column_blob.html)
+-- | https://www.sqlite.org/c3ref/column_blob.html
+--
+-- Get the double of a result column.
 foreign import ccall unsafe
   sqlite3_column_double ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
     -- | Column index (0-based).
     CInt ->
+    -- | Double.
     IO CDouble
 
--- | [__Result values from a query__](https://www.sqlite.org/c3ref/column_blob.html)
+-- | https://www.sqlite.org/c3ref/column_blob.html
+--
+-- Get the integer of a result column.
 foreign import ccall unsafe
   sqlite3_column_int ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
     -- | Column index (0-based).
     CInt ->
+    -- | Integer.
     IO CInt
 
--- | [__Result values from a query__](https://www.sqlite.org/c3ref/column_blob.html)
+-- | https://www.sqlite.org/c3ref/column_blob.html
+--
+-- Get the integer of a result column.
 foreign import ccall unsafe
   sqlite3_column_int64 ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
     -- | Column index (0-based).
     CInt ->
+    -- | Integer.
     IO Int64
 
 -- | https://www.sqlite.org/c3ref/column_name.html
@@ -544,31 +591,40 @@ foreign import ccall unsafe
     CInt ->
     IO CString
 
--- | [__Result values from a query__](https://www.sqlite.org/c3ref/column_blob.html)
+-- | https://www.sqlite.org/c3ref/column_blob.html
+--
+-- Get the string of a result column.
 foreign import ccall unsafe
   sqlite3_column_text ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
     -- | Column index (0-based).
     CInt ->
+    -- | String (UTF-8).
     IO (Ptr CUChar)
 
--- | [__Result values from a query__](https://www.sqlite.org/c3ref/column_blob.html)
+-- | https://www.sqlite.org/c3ref/column_blob.html
+--
+-- Get the datatype of a result column.
 foreign import ccall unsafe
   sqlite3_column_type ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
     -- | Column index (0-based).
     CInt ->
+    -- | Datatype.
     IO CInt
 
--- | [__Result values from a query__](https://www.sqlite.org/c3ref/column_blob.html)
+-- | https://www.sqlite.org/c3ref/column_blob.html
+--
+-- Get the value of a result column.
 foreign import ccall unsafe
   sqlite3_column_value ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
     -- | Column index (0-based).
     CInt ->
+    -- | Value.
     IO (Ptr Sqlite3_value)
 
 -- | https://www.sqlite.org/c3ref/commit_hook.html
@@ -634,33 +690,87 @@ foreign import ccall unsafe
     Ptr Sqlite3_context ->
     IO (Ptr Sqlite3)
 
-sqlite3_create_collation = undefined
+-- | https://www.sqlite.org/c3ref/create_collation.html
+--
+-- Create a collating sequence.
+foreign import ccall unsafe
+  sqlite3_create_collation ::
+    -- | Connection.
+    Ptr Sqlite3 ->
+    -- | Collating sequence name (UTF-8).
+    CString ->
+    -- | Encoding.
+    CInt ->
+    -- | Generic data.
+    Ptr a ->
+    -- | Comparison function.
+    --
+    -- /Arguments/: generic data, first string length (in bytes), first string, second string length (in bytes), second string.
+    --
+    -- /Returns/: whether the first string is less than (< 0), equal to (0), or greater than (> 0) the second string.
+    FunPtr (Ptr a -> CInt -> Ptr b -> CInt -> Ptr b -> IO CInt) ->
+    -- | Result code.
+    IO CInt
 
-sqlite3_create_collation16 = undefined
-
-sqlite3_create_collation_v2 = undefined
+-- | https://www.sqlite.org/c3ref/create_collation.html
+--
+-- Create a collating sequence.
+foreign import ccall unsafe
+  sqlite3_create_collation_v2 ::
+    -- | Connection.
+    Ptr Sqlite3 ->
+    -- | Collating sequence name (UTF-8).
+    CString ->
+    -- | Encoding.
+    CInt ->
+    -- | Generic data.
+    Ptr a ->
+    -- | Comparison function.
+    --
+    -- /Arguments/: generic data, first string length (in bytes), first string, second string length (in bytes), second string.
+    --
+    -- /Returns/: whether the first string is less than (< 0), equal to (0), or greater than (> 0) the second string.
+    FunPtr (Ptr a -> CInt -> Ptr b -> CInt -> Ptr b -> IO CInt) ->
+    -- | Optional generic data destructor.
+    FunPtr (Ptr a -> IO ()) ->
+    -- | Result code.
+    IO CInt
 
 sqlite3_create_filename = undefined
 
--- | [__Create or redefine SQL functions__](https://www.sqlite.org/c3ref/create_function.html)
+-- | https://www.sqlite.org/c3ref/create_function.html
+--
+-- Create a function or aggregate function.
 foreign import ccall unsafe
   sqlite3_create_function ::
     -- | Connection.
     Ptr Sqlite3 ->
-    -- | Function name.
+    -- | Function name (UTF-8).
     CString ->
     -- | Number of function arguments.
     CInt ->
-    -- | Flags.
+    -- | Encoding and flags.
     CInt ->
-    -- | User data.
+    -- | Generic data.
     Ptr a ->
+    -- | Function implementation.
+    --
+    -- /Arguments/: context, number of arguments, arguments.
     FunPtr (Ptr Sqlite3_context -> CInt -> Ptr (Ptr Sqlite3_value) -> IO ()) ->
+    -- | Aggregate function step implementation.
+    --
+    -- /Arguments/: context, number of arguments, arguments.
     FunPtr (Ptr Sqlite3_context -> CInt -> Ptr (Ptr Sqlite3_value) -> IO ()) ->
+    -- | Aggregate function finalize implementation.
+    --
+    -- /Arguments/: context.
     FunPtr (Ptr Sqlite3_context -> IO ()) ->
+    -- | Result code.
     IO CInt
 
--- | [__Create or redefine SQL functions__](https://www.sqlite.org/c3ref/create_function.html)
+-- | https://www.sqlite.org/c3ref/create_function.html
+--
+-- Create a function or aggregate function.
 foreign import ccall unsafe
   sqlite3_create_function_v2 ::
     -- | Connection.
@@ -669,14 +779,23 @@ foreign import ccall unsafe
     CString ->
     -- | Number of function arguments.
     CInt ->
-    -- | Flags.
+    -- | Encoding and flags.
     CInt ->
-    -- | User data.
+    -- | Generic data.
     Ptr a ->
+    -- | Function implementation.
+    --
+    -- /Arguments/: context, number of arguments, arguments.
     FunPtr (Ptr Sqlite3_context -> CInt -> Ptr (Ptr Sqlite3_value) -> IO ()) ->
+    -- | Aggregate function step implementation.
+    --
+    -- /Arguments/: context, number of arguments, arguments.
     FunPtr (Ptr Sqlite3_context -> CInt -> Ptr (Ptr Sqlite3_value) -> IO ()) ->
+    -- | Aggregate function finalize implementation.
+    --
+    -- /Arguments/: context.
     FunPtr (Ptr Sqlite3_context -> IO ()) ->
-    -- | User data destructor.
+    -- | Generic data destructor.
     FunPtr (Ptr a -> IO ()) ->
     IO CInt
 
@@ -684,7 +803,9 @@ sqlite3_create_module = undefined
 
 sqlite3_create_module_v2 = undefined
 
--- | [__Create or redefine SQL functions__](https://www.sqlite.org/c3ref/create_function.html)
+-- | https://www.sqlite.org/c3ref/create_function.html
+--
+-- Create an aggregate function or an aggregate window function.
 foreign import ccall unsafe
   sqlite3_create_window_function ::
     -- | Connection.
@@ -695,21 +816,34 @@ foreign import ccall unsafe
     CInt ->
     -- | Flags.
     CInt ->
-    -- | User data.
+    -- | Generic data.
     Ptr a ->
+    -- | Aggregate function step implementation.
+    --
+    -- /Arguments/: context, number of arguments, arguments.
     FunPtr (Ptr Sqlite3_context -> CInt -> Ptr (Ptr Sqlite3_value) -> IO ()) ->
+    -- | Aggregate function finalize implementation.
+    --
+    -- /Arguments/: context.
     FunPtr (Ptr Sqlite3_context -> IO ()) ->
+    -- | Aggregate window function get current value implementation.
+    --
+    -- /Arguments/: context.
     FunPtr (Ptr Sqlite3_context -> IO ()) ->
+    -- | Aggregate window function remove value from aggregate implementation.
     FunPtr (Ptr Sqlite3_context -> CInt -> Ptr (Ptr Sqlite3_value) -> IO ()) ->
-    -- | User data destructor.
+    -- | Generic data destructor.
     FunPtr (Ptr a -> IO ()) ->
     IO CInt
 
--- | [__Number of columns in a result set__](https://www.sqlite.org/c3ref/data_count.html)
+-- | https://www.sqlite.org/c3ref/data_count.html
+--
+-- Get the number of columns in the next row of a result set.
 foreign import ccall unsafe
   sqlite3_data_count ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
+    -- | Number of columns.
     IO CInt
 
 sqlite3_database_file_object = undefined
@@ -787,6 +921,7 @@ foreign import ccall unsafe
     Ptr Sqlite3 ->
     -- | Database name.
     CString ->
+    -- | 0 or 1, or -1 if the database is not attached.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/db_release_memory.html
@@ -802,40 +937,6 @@ foreign import ccall unsafe
 -- | https://www.sqlite.org/c3ref/db_status.html
 --
 -- Get a status of a connection.
---
--- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
--- | Status option                          | Meaning                                                                                                                              |
--- +========================================+======================================================================================================================================+
--- | @SQLITE_DBSTATUS_CACHE_HIT@₁           | Pager cache hits.                                                                                                                    |
--- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_DBSTATUS_CACHE_MISS@₁          | Pager cache misses.                                                                                                                  |
--- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_DBSTATUS_CACHE_SPILL@          | Dirty cache entries written to disk in the middle of a transaction due to the page cache overflowing.                                |
--- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_DBSTATUS_CACHE_USED@₁          | Approximate bytes of heap memory used by all pager caches.                                                                           |
--- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_DBSTATUS_CACHE_USED_SHARED@₁   | @DBSTATUS_CACHE_USED@, but evenly divide bytes of shared pager caches among all associated connections.                              |
--- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_DBSTATUS_CACHE_WRITE@₁         | Dirty cache entries written to disk.                                                                                                 |
--- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_DBSTATUS_DEFERRED_FKS@₁        | Zero if and only if all foreign key constraints (deferred or immediate) have been resolved.                                          |
--- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_DBSTATUS_LOOKASIDE_HIT@₂       | Malloc attempts satisfied using lookaside memory.                                                                                    |
--- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_DBSTATUS_LOOKASIDE_MISS_FULL@₂ | Malloc attempts not satisfied using lookaside memory because all lookaside memory was in use.                                        |
--- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_DBSTATUS_LOOKASIDE_MISS_SIZE@₂ | Malloc attempts not satisfied using lookaside memory because the amount of memory requested was larger than the lookaside slot size. |
--- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_DBSTATUS_LOOKASIDE_USED@       | Lookaside memory slots currently checked out.                                                                                        |
--- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_DBSTATUS_SCHEMA_USED@₁         | Approximate bytes of heap memory used to store the schema for all attached databases.                                                |
--- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
--- | @SQLITE_DBSTATUS_STMT_USED@₁           | Approximate bytes of heap and lookaside memory used by all statements                                                                |
--- +----------------------------------------+--------------------------------------------------------------------------------------------------------------------------------------+
---
--- /₁ only has current value/
---
--- /₂ only has highest value/
 foreign import ccall unsafe
   sqlite3_db_status ::
     -- | Connection.
@@ -1027,7 +1128,8 @@ sqlite3_normalized_sql = undefined
 -- | https://www.sqlite.org/c3ref/open.html
 --
 -- Open a new database connection.
-foreign import ccall unsafe
+foreign import ccall safe
+  -- safe because: sqlite3_auto_extension
   sqlite3_open ::
     -- | Database file (UTF-8).
     CString ->
@@ -1039,7 +1141,8 @@ foreign import ccall unsafe
 -- | https://www.sqlite.org/c3ref/open.html
 --
 -- Open a new database connection.
-foreign import ccall unsafe
+foreign import ccall safe
+  -- safe because: sqlite3_auto_extension
   sqlite3_open_v2 ::
     -- | Database file (UTF-8).
     CString ->
@@ -1047,7 +1150,7 @@ foreign import ccall unsafe
     Ptr (Ptr Sqlite3) ->
     -- | Flags.
     CInt ->
-    -- | Name of VFS to use.
+    -- | Optional name of VFS to use.
     CString ->
     -- | Result code.
     IO CInt
@@ -1057,13 +1160,14 @@ foreign import ccall unsafe
   sqlite3_overload_function :: Ptr Sqlite3 -> CString -> CInt -> IO CInt
 
 -- | https://www.sqlite.org/c3ref/prepare.html
-foreign import ccall unsafe
+foreign import ccall safe
+  -- safe because: sqlite3_collation_needed
   sqlite3_prepare_v2 ::
     -- | Connection.
     Ptr Sqlite3 ->
     -- | SQL (UTF-8).
     Ptr CChar ->
-    -- | Length of SQL in bytes.
+    -- | Size of SQL, in bytes.
     CInt ->
     -- | /Out/: statement.
     Ptr (Ptr Sqlite3_stmt) ->
@@ -1079,7 +1183,7 @@ foreign import ccall unsafe
     Ptr Sqlite3 ->
     -- | SQL (UTF-8).
     Ptr CChar ->
-    -- | Length of SQL in bytes.
+    -- | Size of SQL, in bytes.
     CInt ->
     -- | Flags.
     CUInt ->
@@ -1132,7 +1236,7 @@ foreign import ccall unsafe
     -- | Result code.
     IO CInt
 
--- | [__Reset automatic extension loading__](https://www.sqlite.org/c3ref/reset_auto_extension.html)
+-- | https://www.sqlite.org/c3ref/reset_auto_extension.html
 sqlite3_reset_auto_extension = undefined
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
@@ -1373,10 +1477,14 @@ foreign import ccall unsafe
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/step.html
+--
+-- Produce the next row of a statement.
 foreign import ccall safe
+  -- safe because: sqlite3_create_function
   sqlite3_step ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
+    -- | Result code.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/stmt_busy.html
