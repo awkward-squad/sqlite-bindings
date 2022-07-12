@@ -3,8 +3,7 @@
 
 module Sqlite.Bindings.Internal.Constants where
 
-import Foreign.C.String (CString)
-import Foreign.C.Types (CInt (..))
+import Foreign.C (CInt (..), CString)
 import Foreign.Ptr (FunPtr, Ptr)
 
 foreign import capi "sqlite3.h value SQLITE_ABORT" _SQLITE_ABORT :: CInt

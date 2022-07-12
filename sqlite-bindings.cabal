@@ -20,6 +20,7 @@ library
     -DSQLITE_ENABLE_PREUPDATE_HOOK
   default-extensions:
     CApiFFI
+    RankNTypes
   exposed-modules: Sqlite.Bindings
   hs-source-dirs: src
   include-dirs: cbits
