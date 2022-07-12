@@ -1,11 +1,69 @@
 {-# LANGUAGE CPP #-}
 
 module Sqlite.Bindings
-  ( -- ** SQLite
-
-    -- *** Configuration
+  ( -- * Functions
+    sqlite3_aggregate_context,
+    sqlite3_auto_extension,
+    sqlite3_autovacuum_pages,
+    sqlite3_backup_finish,
+    sqlite3_backup_init,
+    sqlite3_backup_pagecount,
+    sqlite3_backup_remaining,
+    sqlite3_backup_step,
+    sqlite3_bind_blob,
+    sqlite3_bind_blob64,
+    sqlite3_bind_double,
+    sqlite3_bind_int,
+    sqlite3_bind_int64,
+    sqlite3_bind_null,
+    sqlite3_bind_parameter_count,
+    sqlite3_bind_parameter_index,
+    sqlite3_bind_parameter_name,
+    sqlite3_bind_pointer,
+    sqlite3_bind_text,
+    sqlite3_bind_text64,
+    sqlite3_bind_value,
+    sqlite3_bind_zeroblob,
+    sqlite3_bind_zeroblob64,
+    sqlite3_blob_bytes,
+    sqlite3_blob_close,
+    sqlite3_blob_open,
+    sqlite3_blob_read,
+    sqlite3_blob_reopen,
+    sqlite3_blob_write,
+    sqlite3_busy_handler,
+    sqlite3_busy_timeout,
+    sqlite3_cancel_auto_extension,
+    sqlite3_changes,
+    sqlite3_changes64,
+    sqlite3_clear_bindings,
+    sqlite3_close,
+    sqlite3_close_v2,
+    sqlite3_collation_needed,
+    sqlite3_column_blob,
+    sqlite3_column_bytes,
+    sqlite3_column_count,
+    sqlite3_column_database_name,
+    sqlite3_column_decltype,
+    sqlite3_column_double,
+    sqlite3_column_int,
+    sqlite3_column_int64,
+    sqlite3_column_name,
+    sqlite3_column_origin_name,
+    sqlite3_column_table_name,
+    sqlite3_column_text,
+    sqlite3_column_type,
+    sqlite3_column_value,
+    sqlite3_commit_hook,
+    sqlite3_compileoption_get,
+    sqlite3_compileoption_used,
+    sqlite3_complete,
     -- $sqlite-configuration
     sqlite3_config__1,
+    sqlite3_config__10,
+    sqlite3_config__11,
+    sqlite3_config__12,
+    sqlite3_config__13,
     sqlite3_config__2,
     sqlite3_config__3,
     sqlite3_config__4,
@@ -14,105 +72,94 @@ module Sqlite.Bindings
     sqlite3_config__7,
     sqlite3_config__8,
     sqlite3_config__9,
-    sqlite3_config__10,
-    sqlite3_config__11,
-    sqlite3_config__12,
-    sqlite3_config__13,
-
-    -- ** Connections
-    sqlite3_open,
-    sqlite3_open_v2,
-    sqlite3_close,
-    sqlite3_close_v2,
-    sqlite3_get_autocommit,
-    sqlite3_db_mutex,
-    sqlite3_db_status,
-    -- *** Configuration
+    sqlite3_context_db_handle,
+    sqlite3_create_collation,
+    sqlite3_create_collation_v2,
+    sqlite3_create_filename,
+    sqlite3_create_function,
+    sqlite3_create_function_v2,
+    sqlite3_create_module,
+    sqlite3_create_module_v2,
+    sqlite3_create_window_function,
+    sqlite3_data_count,
+    sqlite3_database_file_object,
+    sqlite3_db_cacheflush__safe,
+    sqlite3_db_cacheflush__unsafe,
     -- $connections-configuration
     sqlite3_db_config__1,
     sqlite3_db_config__2,
     sqlite3_db_config__3,
-    sqlite3_db_release_memory,
-
-    -- ** Attached databases
     sqlite3_db_filename,
+    sqlite3_db_handle,
+    sqlite3_db_mutex,
     sqlite3_db_name,
     sqlite3_db_readonly,
-
-    -- ** Statements
+    sqlite3_db_release_memory,
+    sqlite3_db_status,
+    sqlite3_declare_vtab,
+    sqlite3_deserialize,
+    sqlite3_drop_modules,
+    sqlite3_errcode,
+    sqlite3_errmsg,
+    sqlite3_error_offset,
+    sqlite3_errstr,
+    sqlite3_expanded_sql,
+    sqlite3_extended_errcode,
+    sqlite3_extended_result_codes,
+    sqlite3_file_control,
+    sqlite3_filename_database,
+    sqlite3_filename_journal,
+    sqlite3_filename_wal,
+    sqlite3_finalize,
+    sqlite3_free,
+    sqlite3_free_filename,
+    sqlite3_get_autocommit,
+    sqlite3_get_auxdata,
+    sqlite3_hard_heap_limit64,
+    sqlite3_initialize,
+    sqlite3_interrupt,
+    sqlite3_keyword_check,
+    sqlite3_keyword_count,
+    sqlite3_keyword_name,
+    sqlite3_last_insert_rowid,
+    sqlite3_libversion,
+    sqlite3_libversion_number,
+    sqlite3_limit,
+    sqlite3_load_extension,
+    sqlite3_log,
+    sqlite3_malloc,
+    sqlite3_malloc64,
+    sqlite3_memory_highwater,
+    sqlite3_memory_used,
+    sqlite3_mprintf,
+    sqlite3_msize,
+    sqlite3_mutex_alloc,
+    sqlite3_mutex_enter,
+    sqlite3_mutex_free,
+    sqlite3_mutex_held,
+    sqlite3_mutex_leave,
+    sqlite3_mutex_notheld,
+    sqlite3_mutex_try,
+    sqlite3_next_stmt,
+    sqlite3_normalized_sql,
+    sqlite3_open,
+    sqlite3_open_v2,
+    sqlite3_overload_function,
     sqlite3_prepare_v2,
     sqlite3_prepare_v3,
-    sqlite3_finalize,
-    sqlite3_step,
+    sqlite3_preupdate_blobwrite,
+    sqlite3_preupdate_count,
+    sqlite3_preupdate_depth,
+    sqlite3_preupdate_hook,
+    sqlite3_preupdate_new,
+    sqlite3_preupdate_old,
+    sqlite3_progress_handler,
+    sqlite3_randomness,
+    sqlite3_realloc,
+    sqlite3_realloc64,
+    sqlite3_release_memory,
     sqlite3_reset,
-    sqlite3_clear_bindings,
-    sqlite3_db_handle,
-    sqlite3_bind_parameter_count,
-
-    -- *** Parameters
-    sqlite3_bind_parameter_index,
-    sqlite3_bind_parameter_name,
-
-    -- **** Binding
-    sqlite3_bind_int,
-    sqlite3_bind_int64,
-    sqlite3_bind_double,
-    sqlite3_bind_text,
-    sqlite3_bind_text64,
-    sqlite3_bind_blob,
-    sqlite3_bind_blob64,
-    sqlite3_bind_zeroblob,
-    sqlite3_bind_zeroblob64,
-    sqlite3_bind_null,
-    sqlite3_bind_pointer,
-    sqlite3_bind_value,
-
-    -- *** Results
-    sqlite3_column_count,
-    sqlite3_data_count,
-    sqlite3_column_decltype,
-    sqlite3_column_type,
-    sqlite3_column_int,
-    sqlite3_column_int64,
-    sqlite3_column_double,
-    sqlite3_column_blob,
-    sqlite3_column_text,
-    sqlite3_column_value,
-    sqlite3_column_bytes,
-
-    -- * Functions
-    sqlite3_aggregate_context,
-    sqlite3_autovacuum_pages,
-
-    -- ** Blobs
-    sqlite3_blob_open,
-    sqlite3_blob_close,
-    sqlite3_blob_bytes,
-    sqlite3_blob_read,
-    sqlite3_blob_write,
-    sqlite3_blob_reopen,
-
-    -- ** Collating sequences
-    sqlite3_create_collation,
-    sqlite3_create_collation_v2,
-    sqlite3_collation_needed,
-
-    -- ** Compile-time options
-    sqlite3_compileoption_get,
-    sqlite3_compileoption_used,
-
-    -- ** Extensions
-    sqlite3_auto_extension,
-    sqlite3_cancel_auto_extension,
     sqlite3_reset_auto_extension,
-
-    -- ** Functions
-    sqlite3_create_function,
-    sqlite3_create_function_v2,
-    sqlite3_create_window_function,
-    sqlite3_context_db_handle,
-    sqlite3_user_data,
-    sqlite3_result_subtype,
     sqlite3_result_blob,
     sqlite3_result_blob64,
     sqlite3_result_double,
@@ -124,298 +171,86 @@ module Sqlite.Bindings
     sqlite3_result_int64,
     sqlite3_result_null,
     sqlite3_result_pointer,
+    sqlite3_result_subtype,
     sqlite3_result_text,
     sqlite3_result_text64,
     sqlite3_result_value,
     sqlite3_result_zeroblob,
     sqlite3_result_zeroblob64,
-
-    -- ** Virtual tables
-    sqlite3_create_module,
-    sqlite3_create_module_v2,
-    sqlite3_drop_modules,
-
-    -- ** Online backup API
-    sqlite3_backup_finish,
-    sqlite3_backup_init,
-    sqlite3_backup_pagecount,
-    sqlite3_backup_remaining,
-    sqlite3_backup_step,
-
-    -- ** `SQLITE_BUSY` handlers
-    sqlite3_busy_handler,
-    sqlite3_busy_timeout,
-
-    -- ** Count the number of rows modified
-    sqlite3_changes,
-    sqlite3_changes64,
-
-    -- ** Source of data in a query result
-    sqlite3_column_database_name,
-    sqlite3_column_origin_name,
-    sqlite3_column_table_name,
-
-    -- ** Column names in a result set
-    sqlite3_column_name,
-
-    -- ** Commit and rollback notification callbacks
-    sqlite3_commit_hook,
     sqlite3_rollback_hook,
-
-    -- ** Determine if an SQL statement is complete
-    sqlite3_complete,
-
-    -- ** Flush caches to disk mid-transaction
-    sqlite3_db_cacheflush__safe,
-    sqlite3_db_cacheflush__unsafe,
-
-    -- ** Declare the schema of a virtual table
-    sqlite3_declare_vtab,
-
-    -- ** Deserialize a database
-    sqlite3_deserialize,
-
-    -- ** Error codes and messages
-    sqlite3_errcode,
-    sqlite3_errmsg,
-    sqlite3_error_offset,
-    sqlite3_errstr,
-    sqlite3_extended_errcode,
-
-    -- ** Retrieving statement SQL
-    sqlite3_expanded_sql,
-    sqlite3_normalized_sql,
-    sqlite3_sql,
-
-    -- ** Enable or disable extended result codes
-    sqlite3_extended_result_codes,
-
-    -- ** Low-level control of database files
-    sqlite3_file_control,
-
-    -- ** Translate filenames
-    sqlite3_filename_database,
-    sqlite3_filename_journal,
-    sqlite3_filename_wal,
-
-    -- ** Memory allocation subsystem
-    sqlite3_free,
-    sqlite3_malloc,
-    sqlite3_malloc64,
-    sqlite3_msize,
-    sqlite3_realloc,
-    sqlite3_realloc64,
-
-    -- ** Function auxiliary data
-    sqlite3_get_auxdata,
-    sqlite3_set_auxdata,
-
-    -- ** Impose a limit on heap size
-    sqlite3_hard_heap_limit64,
-    sqlite3_soft_heap_limit64,
-
-    -- ** Initialize the SQLite library
-    sqlite3_initialize,
-    sqlite3_shutdown,
-
-    -- ** Interrupt a long-running query
-    sqlite3_interrupt,
-
-    -- ** SQL keyword checking
-    sqlite3_keyword_check,
-    sqlite3_keyword_count,
-    sqlite3_keyword_name,
-
-    -- ** Last insert rowid
-    sqlite3_last_insert_rowid,
-
-    -- ** Runtime library version numbers
-    sqlite3_libversion,
-    sqlite3_libversion_number,
-    sqlite3_sourceid,
-    sqlite3_version,
-
-    -- ** Runtime limits
-    sqlite3_limit,
-
-    -- ** Load an extension
-    sqlite3_load_extension,
-
-    -- ** Error logging interface
-    sqlite3_log,
-
-    -- ** Memory allocator statistics
-    sqlite3_memory_highwater,
-    sqlite3_memory_used,
-
-    -- ** Mutexes
-    sqlite3_mutex_alloc,
-    sqlite3_mutex_enter,
-    sqlite3_mutex_free,
-    sqlite3_mutex_leave,
-    sqlite3_mutex_try,
-
-    -- ** Mutex verification routines
-    sqlite3_mutex_held,
-    sqlite3_mutex_notheld,
-
-    -- ** Find the next prepared statement
-    sqlite3_next_stmt,
-
-    -- ** Overload a function for a virtual table
-    sqlite3_overload_function,
-
-#ifdef SQLITE_ENABLE_PREUPDATE_HOOK
-    -- ** The pre-update hook
-    sqlite3_preupdate_blobwrite,
-    sqlite3_preupdate_count,
-    sqlite3_preupdate_depth,
-    sqlite3_preupdate_hook,
-    sqlite3_preupdate_new,
-    sqlite3_preupdate_old,
-#endif
-
-    -- ** SQL trace hook
-    sqlite3_trace_v2,
-
-    -- ** Query progress callbacks
-    sqlite3_progress_handler,
-
-    -- ** Pseudo-random number generator
-    sqlite3_randomness,
-
-    -- ** Attempt to free heap memory
-    sqlite3_release_memory,
-
-    -- ** Serialize a database
     sqlite3_serialize,
-
-    -- ** Compile-time authorization callbacks
     sqlite3_set_authorizer,
-
-    -- ** Set the last insert rowid value
+    sqlite3_set_auxdata,
     sqlite3_set_last_insert_rowid,
-
-    -- ** Suspend execution for a short time
+    sqlite3_shutdown,
     sqlite3_sleep,
-
-    -- ** Snapshots
     sqlite3_snapshot_cmp,
     sqlite3_snapshot_free,
     sqlite3_snapshot_get,
     sqlite3_snapshot_open,
     sqlite3_snapshot_recover,
-
-    -- ** Formatted string printing functions
-    sqlite3_mprintf,
     sqlite3_snprintf,
-    sqlite3_vmprintf,
-    sqlite3_vsnprintf,
-
-    -- ** SQLite runtime status
+    sqlite3_soft_heap_limit64,
+    sqlite3_sourceid,
+    sqlite3_sql,
     sqlite3_status,
     sqlite3_status64,
-
-    -- ** Determine if a prepared statement has been reset
+    sqlite3_step,
     sqlite3_stmt_busy,
-
-    -- ** Query the `EXPLAIN` setting for a prepared statement
     sqlite3_stmt_isexplain,
-
-    -- ** Determine if an SQL statement writes the database
     sqlite3_stmt_readonly,
-
-    -- ** Prepared statement scan status
     sqlite3_stmt_scanstatus,
-
-    -- ** Zero scan-status counters
     sqlite3_stmt_scanstatus_reset,
-
-    -- ** Prepared statement status
     sqlite3_stmt_status,
-
-    -- ** Dynamic strings
-    sqlite3_str_new,
-    sqlite3_str_finish,
     sqlite3_str_append,
     sqlite3_str_appendall,
     sqlite3_str_appendchar,
     sqlite3_str_appendf,
-    sqlite3_str_reset,
-    sqlite3_str_vappendf,
     sqlite3_str_errcode,
+    sqlite3_str_finish,
     sqlite3_str_length,
+    sqlite3_str_new,
+    sqlite3_str_reset,
     sqlite3_str_value,
-
-    -- ** String globbing
+    sqlite3_str_vappendf,
     sqlite3_strglob,
-
-    -- ** String comparison
     sqlite3_stricmp,
-    sqlite3_strnicmp,
-
-    -- ** String `LIKE` matching
     sqlite3_strlike,
-
-    -- ** Low-level system error code
+    sqlite3_strnicmp,
     sqlite3_system_errno,
-
-    -- ** Extract metadata about a column of a table
     sqlite3_table_column_metadata,
-
-    -- ** Test to see if the library is threadsafe
     sqlite3_threadsafe,
-
-    -- ** Total number of rows modified
     sqlite3_total_changes,
     sqlite3_total_changes64,
-
-    -- ** Determine the transaction state of a database
+    sqlite3_trace_v2,
     sqlite3_txn_state,
-
-    -- ** Unlock notification
     sqlite3_unlock_notify,
-
-    -- ** Data change notification callbacks
     sqlite3_update_hook,
-
-    -- ** Obtain values for URI parameters
     sqlite3_uri_boolean,
     sqlite3_uri_int64,
     sqlite3_uri_key,
     sqlite3_uri_parameter,
-
-    -- ** SQL values
-
-    -- *** Copy and free SQL values
-    sqlite3_value_dup,
-    sqlite3_value_free,
-
-    -- *** Finding the subtype of SQL values
-    sqlite3_value_subtype,
-
-    -- *** Obtaining SQL values
+    sqlite3_user_data,
     sqlite3_value_blob,
     sqlite3_value_bytes,
     sqlite3_value_double,
+    sqlite3_value_dup,
+    sqlite3_value_free,
     sqlite3_value_frombind,
     sqlite3_value_int,
     sqlite3_value_int64,
     sqlite3_value_nochange,
     sqlite3_value_numeric_type,
     sqlite3_value_pointer,
+    sqlite3_value_subtype,
     sqlite3_value_text,
     sqlite3_value_type,
-
-    -- ** Virtual file systems,
+    sqlite3_version,
+    sqlite3_vfs_find,
     sqlite3_vfs_register,
     sqlite3_vfs_unregister,
-    sqlite3_vfs_find,
-    sqlite3_database_file_object,
-    sqlite3_create_filename,
-    sqlite3_free_filename,
-
-    -- ** Virtual tables
+    sqlite3_vmprintf,
+    sqlite3_vsnprintf,
     sqlite3_vtab_collation,
     sqlite3_vtab_config,
     sqlite3_vtab_distinct,
@@ -425,11 +260,9 @@ module Sqlite.Bindings
     sqlite3_vtab_nochange,
     sqlite3_vtab_on_conflict,
     sqlite3_vtab_rhs_value,
-
-    -- ** Write-ahead log
+    sqlite3_wal_autocheckpoint,
     sqlite3_wal_checkpoint,
     sqlite3_wal_checkpoint_v2,
-    sqlite3_wal_autocheckpoint,
     sqlite3_wal_hook,
 
     -- * Constants

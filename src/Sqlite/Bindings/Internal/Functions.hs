@@ -7,8 +7,6 @@ import Foreign.Ptr (FunPtr, Ptr)
 import Sqlite.Bindings.Internal.Objects
 
 -- TODO look over all FunPtr and decide which functions need safe variants
---
--- TODO call out all "optional" params (whether caller can provide null)
 
 -- | https://www.sqlite.org/c3ref/aggregate_context.html
 foreign import ccall unsafe
@@ -33,9 +31,9 @@ foreign import ccall unsafe
     Ptr Sqlite3 ->
     -- | Callback.
     FunPtr (Ptr a -> CString -> CUInt -> CUInt -> CUInt -> IO CUInt) ->
-    -- | Generic data.
+    -- | Application data.
     Ptr a ->
-    -- | Optional generic data destructor.
+    -- | Application data destructor.
     FunPtr (Ptr a -> IO ()) ->
     -- | Result code.
     IO CInt
@@ -96,7 +94,7 @@ foreign import ccall unsafe
     Ptr a ->
     -- | Size of blob, in bytes.
     CInt ->
-    -- | Optional destructor, @SQLITE_STATIC@, or @SQLITE_TRANSIENT@.
+    -- | Destructor, @SQLITE_STATIC@, or @SQLITE_TRANSIENT@.
     FunPtr (Ptr a -> IO ()) ->
     -- | Result code.
     IO CInt
@@ -114,7 +112,7 @@ foreign import ccall unsafe
     Ptr a ->
     -- | Size of blob, in bytes.
     Int64 ->
-    -- | Optional destructor, @SQLITE_STATIC@, or @SQLITE_TRANSIENT@.
+    -- | Destructor, @SQLITE_STATIC@, or @SQLITE_TRANSIENT@.
     FunPtr (Ptr a -> IO ()) ->
     -- | Result code.
     IO CInt
@@ -220,7 +218,7 @@ foreign import ccall unsafe
     Ptr a ->
     -- | Pointer type.
     CString ->
-    -- | Optional destructor.
+    -- | Pointer destructor.
     FunPtr (Ptr a -> IO ()) ->
     -- | Result code.
     IO CInt
@@ -238,7 +236,7 @@ foreign import ccall unsafe
     Ptr CChar ->
     -- | Size of string, in bytes.
     CInt ->
-    -- | Optional destructor, @SQLITE_STATIC@, or @SQLITE_TRANSIENT@.
+    -- | Destructor, @SQLITE_STATIC@, or @SQLITE_TRANSIENT@.
     FunPtr (Ptr a -> IO ()) ->
     -- | Result code.
     IO CInt
@@ -256,7 +254,7 @@ foreign import ccall unsafe
     Ptr CChar ->
     -- | Size of string, in bytes.
     Int64 ->
-    -- | Optional destructor, @SQLITE_STATIC@, or @SQLITE_TRANSIENT@.
+    -- | Destructor, @SQLITE_STATIC@, or @SQLITE_TRANSIENT@.
     FunPtr (Ptr a -> IO ()) ->
     -- | Encoding.
     CUChar ->
@@ -465,10 +463,9 @@ foreign import ccall unsafe
   sqlite3_collation_needed ::
     -- | Connection.
     Ptr Sqlite3 ->
-    -- | Generic data.
+    -- | Application data.
     Ptr a ->
-    -- |
-    -- /Arguments/: generic data, connection, encoding, collating sequence name.
+    -- | Callback.
     FunPtr (Ptr a -> Ptr Sqlite3 -> CInt -> CString -> IO ()) ->
     -- | Result code.
     IO CInt
@@ -487,7 +484,7 @@ foreign import ccall unsafe
 
 -- | https://www.sqlite.org/c3ref/column_blob.html
 --
--- Get the size of a blob or string result column, in bytes.
+-- Get the size of a blob or string result column.
 foreign import ccall unsafe
   sqlite3_column_bytes ::
     -- | Statement.
@@ -637,18 +634,24 @@ foreign import ccall unsafe
     Ptr a ->
     IO (Ptr b)
 
--- | [__Runtime library compilation options diagnostics__](https://www.sqlite.org/c3ref/compileoption_get.html)
+-- | https://www.sqlite.org/c3ref/compileoption_get.html
+--
+-- Get a compile-time option name.
 foreign import ccall unsafe
   sqlite3_compileoption_get ::
     -- | Option index.
     CInt ->
+    -- | Option name.
     CString
 
--- | [__Runtime library compilation options diagnostics__](https://www.sqlite.org/c3ref/compileoption_get.html)
+-- | https://www.sqlite.org/c3ref/compileoption_get.html
+--
+-- Get whether an option was specified at compile-time.
 foreign import ccall unsafe
   sqlite3_compileoption_used ::
     -- | Option name.
     CString ->
+    -- | 0 or 1.
     CInt
 
 -- | https://www.sqlite.org/c3ref/complete.html
@@ -701,13 +704,9 @@ foreign import ccall unsafe
     CString ->
     -- | Encoding.
     CInt ->
-    -- | Generic data.
+    -- | Application data.
     Ptr a ->
-    -- | Comparison function.
-    --
-    -- /Arguments/: generic data, first string length (in bytes), first string, second string length (in bytes), second string.
-    --
-    -- /Returns/: whether the first string is less than (< 0), equal to (0), or greater than (> 0) the second string.
+    -- | Collating sequence.
     FunPtr (Ptr a -> CInt -> Ptr b -> CInt -> Ptr b -> IO CInt) ->
     -- | Result code.
     IO CInt
@@ -723,15 +722,11 @@ foreign import ccall unsafe
     CString ->
     -- | Encoding.
     CInt ->
-    -- | Generic data.
+    -- | Application data.
     Ptr a ->
-    -- | Comparison function.
-    --
-    -- /Arguments/: generic data, first string length (in bytes), first string, second string length (in bytes), second string.
-    --
-    -- /Returns/: whether the first string is less than (< 0), equal to (0), or greater than (> 0) the second string.
+    -- | Collating sequence.
     FunPtr (Ptr a -> CInt -> Ptr b -> CInt -> Ptr b -> IO CInt) ->
-    -- | Optional generic data destructor.
+    -- | Application data destructor.
     FunPtr (Ptr a -> IO ()) ->
     -- | Result code.
     IO CInt
@@ -751,19 +746,13 @@ foreign import ccall unsafe
     CInt ->
     -- | Encoding and flags.
     CInt ->
-    -- | Generic data.
+    -- | Application data.
     Ptr a ->
-    -- | Function implementation.
-    --
-    -- /Arguments/: context, number of arguments, arguments.
+    -- | Function.
     FunPtr (Ptr Sqlite3_context -> CInt -> Ptr (Ptr Sqlite3_value) -> IO ()) ->
-    -- | Aggregate function step implementation.
-    --
-    -- /Arguments/: context, number of arguments, arguments.
+    -- | Aggregate function step.
     FunPtr (Ptr Sqlite3_context -> CInt -> Ptr (Ptr Sqlite3_value) -> IO ()) ->
-    -- | Aggregate function finalize implementation.
-    --
-    -- /Arguments/: context.
+    -- | Aggregate function finalize.
     FunPtr (Ptr Sqlite3_context -> IO ()) ->
     -- | Result code.
     IO CInt
@@ -781,21 +770,15 @@ foreign import ccall unsafe
     CInt ->
     -- | Encoding and flags.
     CInt ->
-    -- | Generic data.
+    -- | Application data.
     Ptr a ->
-    -- | Function implementation.
-    --
-    -- /Arguments/: context, number of arguments, arguments.
+    -- | Function.
     FunPtr (Ptr Sqlite3_context -> CInt -> Ptr (Ptr Sqlite3_value) -> IO ()) ->
-    -- | Aggregate function step implementation.
-    --
-    -- /Arguments/: context, number of arguments, arguments.
+    -- | Aggregate function step.
     FunPtr (Ptr Sqlite3_context -> CInt -> Ptr (Ptr Sqlite3_value) -> IO ()) ->
-    -- | Aggregate function finalize implementation.
-    --
-    -- /Arguments/: context.
+    -- | Aggregate function finalize.
     FunPtr (Ptr Sqlite3_context -> IO ()) ->
-    -- | Generic data destructor.
+    -- | Application data destructor.
     FunPtr (Ptr a -> IO ()) ->
     IO CInt
 
@@ -816,23 +799,17 @@ foreign import ccall unsafe
     CInt ->
     -- | Flags.
     CInt ->
-    -- | Generic data.
+    -- | Application data.
     Ptr a ->
-    -- | Aggregate function step implementation.
-    --
-    -- /Arguments/: context, number of arguments, arguments.
+    -- | Aggregate function step.
     FunPtr (Ptr Sqlite3_context -> CInt -> Ptr (Ptr Sqlite3_value) -> IO ()) ->
-    -- | Aggregate function finalize implementation.
-    --
-    -- /Arguments/: context.
+    -- | Aggregate function finalize.
     FunPtr (Ptr Sqlite3_context -> IO ()) ->
-    -- | Aggregate window function get current value implementation.
-    --
-    -- /Arguments/: context.
+    -- | Aggregate window function get current value.
     FunPtr (Ptr Sqlite3_context -> IO ()) ->
-    -- | Aggregate window function remove value from aggregate implementation.
+    -- | Aggregate window function remove value.
     FunPtr (Ptr Sqlite3_context -> CInt -> Ptr (Ptr Sqlite3_value) -> IO ()) ->
-    -- | Generic data destructor.
+    -- | Application data destructor.
     FunPtr (Ptr a -> IO ()) ->
     IO CInt
 
@@ -1150,7 +1127,7 @@ foreign import ccall safe
     Ptr (Ptr Sqlite3) ->
     -- | Flags.
     CInt ->
-    -- | Optional name of VFS to use.
+    -- | Name of VFS to use.
     CString ->
     -- | Result code.
     IO CInt
@@ -1192,6 +1169,42 @@ foreign import ccall unsafe
     -- | /Out/: unused SQL.
     Ptr (Ptr CChar) ->
     -- | Result code.
+    IO CInt
+
+-- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
+foreign import ccall unsafe
+  sqlite3_preupdate_blobwrite :: Ptr Sqlite3 -> IO CInt
+
+-- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
+foreign import ccall unsafe
+  sqlite3_preupdate_count :: Ptr Sqlite3 -> IO CInt
+
+-- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
+foreign import ccall unsafe
+  sqlite3_preupdate_depth :: Ptr Sqlite3 -> IO CInt
+
+-- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
+foreign import ccall unsafe
+  sqlite3_preupdate_hook ::
+    Ptr Sqlite3 ->
+    FunPtr (Ptr a -> Ptr Sqlite3 -> CInt -> CString -> CString -> Int64 -> Int64 -> IO ()) ->
+    Ptr a ->
+    IO (Ptr b)
+
+-- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
+foreign import ccall unsafe
+  sqlite3_preupdate_new ::
+    Ptr Sqlite3 ->
+    CInt ->
+    Ptr (Ptr Sqlite3_value) ->
+    IO CInt
+
+-- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
+foreign import ccall unsafe
+  sqlite3_preupdate_old ::
+    Ptr Sqlite3 ->
+    CInt ->
+    Ptr (Ptr Sqlite3_value) ->
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/progress_handler.html
