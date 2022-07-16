@@ -17,6 +17,10 @@ library
   build-depends: base
   c-sources: cbits/sqlite3.c
   cc-options:
+    -- sqlite3_column_database_name()
+    -- sqlite3_column_origin_name()
+    -- sqlite3_column_table_name()
+    -DSQLITE_ENABLE_COLUMN_METADATA
     -- sqlite3_normalized_sql()
     -DSQLITE_ENABLE_NORMALIZE
     -- sqlite3_preupdate_blobwrite()
