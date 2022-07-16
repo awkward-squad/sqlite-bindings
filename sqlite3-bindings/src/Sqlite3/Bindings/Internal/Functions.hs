@@ -13,7 +13,7 @@ import Foreign.Storable (Storable (peek))
 import qualified Sqlite.Bindings
 import Sqlite3.Bindings.Internal.Constants
 import Sqlite3.Bindings.Internal.Objects
-import Sqlite3.Bindings.Internal.Utils (cstringLenToText, textToCString, textToCStringLen)
+import Sqlite3.Bindings.Internal.Utils (cintToInt, cstringLenToText, cstringToText, doubleToCDouble, intToCInt, textToCString, textToCStringLen)
 
 sqlite3_aggregate_context = undefined
 
@@ -127,95 +127,99 @@ sqlite3_bind_blob64 =
 -- Bind a double to a parameter.
 sqlite3_bind_double ::
   -- | Statement.
-  Ptr Sqlite.Bindings.Sqlite3_stmt ->
+  Sqlite3_stmt ->
   -- | Parameter index (1-based).
-  CInt ->
+  Int ->
   -- | Double.
-  CDouble ->
+  Double ->
   -- | Result code.
   IO CInt
-sqlite3_bind_double =
-  Sqlite.Bindings.sqlite3_bind_double
+sqlite3_bind_double (Sqlite3_stmt statement) index n =
+  Sqlite.Bindings.sqlite3_bind_double statement (intToCInt index) (doubleToCDouble n)
 
 -- | https://www.sqlite.org/c3ref/bind_blob.html
 --
 -- Bind an integer to a parameter.
 sqlite3_bind_int ::
   -- | Statement.
-  Ptr Sqlite.Bindings.Sqlite3_stmt ->
+  Sqlite3_stmt ->
   -- | Parameter index (1-based).
-  CInt ->
+  Int ->
   -- | Integer.
-  CInt ->
+  Int ->
   -- | Result code.
   IO CInt
-sqlite3_bind_int =
-  Sqlite.Bindings.sqlite3_bind_int
+sqlite3_bind_int (Sqlite3_stmt statement) index n =
+  Sqlite.Bindings.sqlite3_bind_int statement (intToCInt index) (intToCInt n)
 
 -- | https://www.sqlite.org/c3ref/bind_blob.html
 --
 -- Bind an integer to a parameter.
 sqlite3_bind_int64 ::
   -- | Statement.
-  Ptr Sqlite.Bindings.Sqlite3_stmt ->
+  Sqlite3_stmt ->
   -- | Parameter index (1-based).
-  CInt ->
+  Int ->
   -- | Integer.
   Int64 ->
   -- | Result code.
   IO CInt
-sqlite3_bind_int64 =
-  Sqlite.Bindings.sqlite3_bind_int64
+sqlite3_bind_int64 (Sqlite3_stmt statement) index n =
+  Sqlite.Bindings.sqlite3_bind_int64 statement (intToCInt index) n
 
 -- | https://www.sqlite.org/c3ref/bind_blob.html
 --
 -- Bind null to a parameter.
 sqlite3_bind_null ::
   -- | Statement.
-  Ptr Sqlite.Bindings.Sqlite3_stmt ->
+  Sqlite3_stmt ->
   -- | Parameter index (1-based).
-  CInt ->
+  Int ->
   -- | Result code.
   IO CInt
-sqlite3_bind_null =
-  Sqlite.Bindings.sqlite3_bind_null
+sqlite3_bind_null (Sqlite3_stmt statement) index =
+  Sqlite.Bindings.sqlite3_bind_null statement (intToCInt index)
 
 -- | https://www.sqlite.org/c3ref/bind_parameter_count.html
 --
 -- Get the index of the largest parameter.
 sqlite3_bind_parameter_count ::
   -- | Statement.
-  Ptr Sqlite.Bindings.Sqlite3_stmt ->
+  Sqlite3_stmt ->
   -- | Parameter index (1-based), or 0 (no parameters).
-  IO CInt
-sqlite3_bind_parameter_count =
-  Sqlite.Bindings.sqlite3_bind_parameter_count
+  IO Int
+sqlite3_bind_parameter_count (Sqlite3_stmt statement) =
+  cintToInt <$> Sqlite.Bindings.sqlite3_bind_parameter_count statement
 
 -- | https://www.sqlite.org/c3ref/bind_parameter_index.html
 --
 -- Get the index of a named parameter.
 sqlite3_bind_parameter_index ::
   -- | Statement.
-  Ptr Sqlite.Bindings.Sqlite3_stmt ->
-  -- | Parameter name (UTF-8).
-  CString ->
-  -- | Parameter index (1-based), or 0 (not found).
-  IO CInt
-sqlite3_bind_parameter_index =
-  Sqlite.Bindings.sqlite3_bind_parameter_index
+  Sqlite3_stmt ->
+  -- | Parameter name.
+  Text ->
+  -- | Parameter index (1-based).
+  IO (Maybe Int)
+sqlite3_bind_parameter_index (Sqlite3_stmt statement) name = do
+  index <-
+    textToCString name \c_name -> do
+      Sqlite.Bindings.sqlite3_bind_parameter_index statement c_name
+  pure if index == 0 then Nothing else Just (cintToInt index)
 
 -- | https://www.sqlite.org/c3ref/bind_parameter_name.html
 --
 -- Get the name of a named parameter.
 sqlite3_bind_parameter_name ::
   -- | Statement.
-  Ptr Sqlite.Bindings.Sqlite3_stmt ->
+  Sqlite3_stmt ->
   -- | Parameter index (1-based).
-  CInt ->
-  -- | Parameter name (UTF-8).
-  IO CString
-sqlite3_bind_parameter_name =
-  Sqlite.Bindings.sqlite3_bind_parameter_name
+  Int ->
+  -- | Parameter name.
+  IO (Maybe Text)
+sqlite3_bind_parameter_name (Sqlite3_stmt statement) index = do
+  c_name <- Sqlite.Bindings.sqlite3_bind_parameter_name statement (intToCInt index)
+  if c_name == nullPtr then pure Nothing else Just <$> cstringToText c_name
 
 -- | https://www.sqlite.org/c3ref/bind_blob.html
 --
@@ -281,45 +285,45 @@ sqlite3_bind_text64 =
 -- Bind a value to a parameter.
 sqlite3_bind_value ::
   -- | Statement.
-  Ptr Sqlite.Bindings.Sqlite3_stmt ->
+  Sqlite3_stmt ->
   -- | Parameter index (1-based).
-  CInt ->
+  Int ->
   -- | Value.
   Ptr Sqlite.Bindings.Sqlite3_value ->
   -- | Result code.
   IO CInt
-sqlite3_bind_value =
-  Sqlite.Bindings.sqlite3_bind_value
+sqlite3_bind_value (Sqlite3_stmt statement) index value =
+  Sqlite.Bindings.sqlite3_bind_value statement (intToCInt index) value
 
 -- | https://www.sqlite.org/c3ref/bind_blob.html
 --
 -- Bind a blob of zeroes to a parameter.
 sqlite3_bind_zeroblob ::
   -- | Statement.
-  Ptr Sqlite.Bindings.Sqlite3_stmt ->
+  Sqlite3_stmt ->
   -- | Parameter index (1-based).
-  CInt ->
+  Int ->
   -- | Size of blob, in bytes.
-  CInt ->
+  Int ->
   -- | Result code.
   IO CInt
-sqlite3_bind_zeroblob =
-  Sqlite.Bindings.sqlite3_bind_zeroblob
+sqlite3_bind_zeroblob (Sqlite3_stmt statement) index n =
+  Sqlite.Bindings.sqlite3_bind_zeroblob statement (intToCInt index) (intToCInt n)
 
 -- | https://www.sqlite.org/c3ref/bind_blob.html
 --
 -- Bind a blob of zeroes to a parameter.
 sqlite3_bind_zeroblob64 ::
   -- | Statement.
-  Ptr Sqlite.Bindings.Sqlite3_stmt ->
+  Sqlite3_stmt ->
   -- | Parameter index (1-based).
-  CInt ->
+  Int ->
   -- | Size of blob, in bytes.
   Word64 ->
   -- | Result code.
   IO CInt
-sqlite3_bind_zeroblob64 =
-  Sqlite.Bindings.sqlite3_bind_zeroblob64
+sqlite3_bind_zeroblob64 (Sqlite3_stmt statement) index n =
+  Sqlite.Bindings.sqlite3_bind_zeroblob64 statement (intToCInt index) n
 
 -- | https://www.sqlite.org/c3ref/blob_bytes.html
 --
@@ -457,11 +461,11 @@ sqlite3_changes64 =
 -- Clear parameter bindings.
 sqlite3_clear_bindings ::
   -- | Statement.
-  Ptr Sqlite.Bindings.Sqlite3_stmt ->
+  Sqlite3_stmt ->
   -- | Result code.
   IO CInt
-sqlite3_clear_bindings =
-  Sqlite.Bindings.sqlite3_clear_bindings
+sqlite3_clear_bindings (Sqlite3_stmt statement) =
+  Sqlite.Bindings.sqlite3_clear_bindings statement
 
 -- | https://www.sqlite.org/c3ref/close.html
 --
@@ -1604,13 +1608,7 @@ sqlite3_prepare_v2 (Sqlite3 connection) sql =
   textToCStringLen sql \c_sql c_sql_len ->
     alloca \statementPtr ->
       alloca \unusedSqlPtr -> do
-        code <-
-          Sqlite.Bindings.sqlite3_prepare_v2
-            connection
-            c_sql
-            (fromIntegral @Int @CInt c_sql_len)
-            statementPtr
-            unusedSqlPtr
+        code <- Sqlite.Bindings.sqlite3_prepare_v2 connection c_sql (intToCInt c_sql_len) statementPtr unusedSqlPtr
         statement <- peek statementPtr
         c_unused_sql <- peek unusedSqlPtr
         let unusedSqlLen = (c_sql `plusPtr` c_sql_len) `minusPtr` c_unused_sql
@@ -1738,11 +1736,11 @@ sqlite3_release_memory =
 -- Reset a statement to its initial state. Does not clear parameter bindings.
 sqlite3_reset ::
   -- | Statement.
-  Ptr Sqlite.Bindings.Sqlite3_stmt ->
+  Sqlite3_stmt ->
   -- | Result code.
   IO CInt
-sqlite3_reset =
-  Sqlite.Bindings.sqlite3_reset
+sqlite3_reset (Sqlite3_stmt statement) =
+  Sqlite.Bindings.sqlite3_reset statement
 
 -- | https://www.sqlite.org/c3ref/reset_auto_extension.html
 sqlite3_reset_auto_extension = undefined

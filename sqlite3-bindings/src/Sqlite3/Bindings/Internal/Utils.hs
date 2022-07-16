@@ -1,5 +1,8 @@
 module Sqlite3.Bindings.Internal.Utils
-  ( cstringToText,
+  ( cintToInt,
+    intToCInt,
+    doubleToCDouble,
+    cstringToText,
     cstringLenToText,
     textToCString,
     textToCStringLen,
@@ -10,8 +13,20 @@ import qualified Data.ByteString as ByteString
 import qualified Data.ByteString.Unsafe as ByteString
 import Data.Text (Text)
 import qualified Data.Text.Encoding as Text
-import Foreign.C (CChar, CString)
+import Foreign.C (CChar, CDouble, CInt, CString)
 import Foreign.Ptr (Ptr)
+
+cintToInt :: CInt -> Int
+cintToInt =
+  fromIntegral
+
+intToCInt :: Int -> CInt
+intToCInt =
+  fromIntegral
+
+doubleToCDouble :: Double -> CDouble
+doubleToCDouble =
+  realToFrac
 
 cstringToText :: CString -> IO Text
 cstringToText string =
