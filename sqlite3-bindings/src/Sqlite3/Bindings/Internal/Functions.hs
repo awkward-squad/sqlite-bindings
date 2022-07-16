@@ -2066,11 +2066,11 @@ sqlite3_status64 =
 -- Produce the next row of a statement.
 sqlite3_step ::
   -- | Statement.
-  Ptr Sqlite.Bindings.Sqlite3_stmt ->
+  Sqlite3_stmt ->
   -- | Result code.
   IO CInt
-sqlite3_step =
-  Sqlite.Bindings.sqlite3_step
+sqlite3_step (Sqlite3_stmt statement) =
+  Sqlite.Bindings.sqlite3_step statement
 
 -- | https://www.sqlite.org/c3ref/stmt_busy.html
 sqlite3_stmt_busy ::
