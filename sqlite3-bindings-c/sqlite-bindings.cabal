@@ -21,6 +21,7 @@ library
     -DSQLITE_ENABLE_NORMALIZE
     -DSQLITE_ENABLE_PREUPDATE_HOOK
     -DSQLITE_ENABLE_SNAPSHOT
+    -DSQLITE_ENABLE_UNLOCK_NOTIFY
   default-extensions:
     CApiFFI
     DuplicateRecordFields
