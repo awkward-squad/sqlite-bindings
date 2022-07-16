@@ -704,7 +704,7 @@ module Sqlite.Bindings
     Sqlite3_context,
     Sqlite3_data_directory,
     Sqlite3_file,
-    Sqlite3_index_info,
+    Sqlite3_index_info (..),
     Sqlite3_io_methods,
     Sqlite3_mem_methods,
     Sqlite3_module (..),
@@ -717,7 +717,7 @@ module Sqlite.Bindings
     Sqlite3_stmt,
     Sqlite3_temp_directory,
     Sqlite3_value,
-    Sqlite3_vfs,
+    Sqlite3_vfs (..),
     Sqlite3_vtab,
     Sqlite3_vtab_cursor,
   )

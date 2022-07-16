@@ -1,0 +1,23 @@
+cabal-version: 2.2
+
+name: sqlite3-bindings
+version: 0
+
+extra-source-files:
+  README.md
+
+common component
+  default-language: Haskell2010
+  ghc-options: -Wall
+
+library
+  import: component
+  build-depends:
+    base,
+    sqlite-bindings,
+  exposed-modules: Sqlite3.Bindings
+  hs-source-dirs: src
+  other-modules:
+    Sqlite3.Bindings.Internal.Constants
+    Sqlite3.Bindings.Internal.Functions
+    Sqlite3.Bindings.Internal.Objects
