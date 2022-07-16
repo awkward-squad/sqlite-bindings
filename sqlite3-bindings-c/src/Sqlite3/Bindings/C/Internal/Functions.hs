@@ -1034,6 +1034,8 @@ foreign import ccall unsafe
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/errcode.html
+--
+-- Get the error message of the most recent failure on a connection.
 foreign import ccall unsafe
   sqlite3_errmsg ::
     -- | Connection.
@@ -1049,9 +1051,13 @@ foreign import ccall unsafe
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/errcode.html
+--
+-- Get the error message of a result code.
 foreign import ccall unsafe
   sqlite3_errstr ::
+    -- | Result code.
     CInt ->
+    -- | Error message (UTF-8).
     CString
 
 -- | https://www.sqlite.org/c3ref/expanded_sql.html

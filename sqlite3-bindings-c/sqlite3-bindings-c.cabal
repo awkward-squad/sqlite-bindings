@@ -34,16 +34,3 @@ library
     Sqlite3.Bindings.C.Internal.Constants
     Sqlite3.Bindings.C.Internal.Functions
     Sqlite3.Bindings.C.Internal.Objects
-
-test-suite tests
-  import: component
-  build-depends:
-    base,
-    bytestring,
-    sqlite3-bindings-c,
-    tasty,
-    tasty-hunit,
-    text ^>= 2.0,
-  hs-source-dirs: test
-  main-is: Main.hs
-  type: exitcode-stdio-1.0

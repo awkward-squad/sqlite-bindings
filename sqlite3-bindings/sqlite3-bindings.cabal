@@ -7,6 +7,14 @@ extra-source-files:
   README.md
 
 common component
+  default-extensions:
+    BlockArguments
+    DerivingStrategies
+    LambdaCase
+    OverloadedStrings
+    PatternSynonyms
+    TypeApplications
+    ViewPatterns
   default-language: Haskell2010
   ghc-options: -Wall
 
@@ -18,16 +26,21 @@ library
     sqlite3-bindings-c,
     text ^>= 2.0,
   exposed-modules: Sqlite3.Bindings
-  default-extensions:
-    BlockArguments
-    DerivingStrategies
-    LambdaCase
-    PatternSynonyms
-    TypeApplications
-    ViewPatterns
   hs-source-dirs: src
   other-modules:
     Sqlite3.Bindings.Internal.Constants
     Sqlite3.Bindings.Internal.Functions
     Sqlite3.Bindings.Internal.Objects
     Sqlite3.Bindings.Internal.Utils
+
+test-suite tests
+  import: component
+  build-depends:
+    base,
+    sqlite3-bindings,
+    tasty,
+    tasty-hunit,
+    text,
+  hs-source-dirs: test
+  main-is: Main.hs
+  type: exitcode-stdio-1.0

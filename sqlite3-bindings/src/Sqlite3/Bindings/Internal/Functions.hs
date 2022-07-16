@@ -14,6 +14,7 @@ import qualified Sqlite3.Bindings.C as C
 import Sqlite3.Bindings.Internal.Constants
 import Sqlite3.Bindings.Internal.Objects
 import Sqlite3.Bindings.Internal.Utils (cintToInt, cstringLenToText, cstringToText, doubleToCDouble, intToCInt, textToCString, textToCStringLen)
+import System.IO.Unsafe (unsafeDupablePerformIO)
 
 sqlite3_aggregate_context = undefined
 
@@ -1143,13 +1144,16 @@ sqlite3_errcode =
   C.sqlite3_errcode
 
 -- | https://www.sqlite.org/c3ref/errcode.html
+--
+-- Get the error message of the most recent failure on a connection.
 sqlite3_errmsg ::
   -- | Connection.
-  Ptr C.Sqlite3 ->
-  -- | Error message (UTF-8).
-  IO CString
-sqlite3_errmsg =
-  C.sqlite3_errmsg
+  Sqlite3 ->
+  -- | Error message.
+  IO Text
+sqlite3_errmsg (Sqlite3 connection) = do
+  c_string <- C.sqlite3_errmsg connection
+  cstringToText c_string
 
 -- | https://www.sqlite.org/c3ref/errcode.html
 sqlite3_error_offset ::
@@ -1160,11 +1164,15 @@ sqlite3_error_offset =
   C.sqlite3_error_offset
 
 -- | https://www.sqlite.org/c3ref/errcode.html
+--
+-- Get the error message of a result code.
 sqlite3_errstr ::
+  -- | Result code.
   CInt ->
-  CString
-sqlite3_errstr =
-  C.sqlite3_errstr
+  -- | Error message.
+  Text
+sqlite3_errstr code =
+  unsafeDupablePerformIO (cstringToText (C.sqlite3_errstr code))
 
 -- | https://www.sqlite.org/c3ref/expanded_sql.html
 --
