@@ -39,13 +39,18 @@ foreign import ccall unsafe
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/backup_finish.html
+--
+-- Release a backup.
 foreign import ccall unsafe
   sqlite3_backup_finish ::
     -- | Backup.
     Ptr Sqlite3_backup ->
+    -- | Result code.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/backup_finish.html
+--
+-- Initialize a backup.
 foreign import ccall unsafe
   sqlite3_backup_init ::
     -- | Destination connection.
@@ -56,29 +61,40 @@ foreign import ccall unsafe
     Ptr Sqlite3 ->
     -- | Source database name (UTF-8).
     CString ->
+    -- | Backup.
     IO (Ptr Sqlite3_backup)
 
 -- | https://www.sqlite.org/c3ref/backup_finish.html
+--
+-- Get the number of pages in the source database of a backup.
 foreign import ccall unsafe
   sqlite3_backup_pagecount ::
     -- | Backup.
     Ptr Sqlite3_backup ->
+    -- | Number of pages.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/backup_finish.html
+--
+-- Get the number of pages yet to be copied from the source database to the destination database of a backup.
 foreign import ccall unsafe
   sqlite3_backup_remaining ::
     -- | Backup.
     Ptr Sqlite3_backup ->
+    -- | Number of pages.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/backup_finish.html
+--
+-- Copy pages from the source database to the destination database of a backup.
 foreign import ccall safe
+  -- safe because: sqlite3_busy_handler
   sqlite3_backup_step ::
     -- | Backup.
     Ptr Sqlite3_backup ->
     -- | Number of pages to copy.
     CInt ->
+    -- | Result code.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/bind_blob.html
@@ -1027,10 +1043,13 @@ foreign import ccall unsafe
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/errcode.html
+--
+-- Get the error code of the most recent failure on a connection.
 foreign import ccall unsafe
   sqlite3_errcode ::
     -- | Connection.
     Ptr Sqlite3 ->
+    -- | Error code.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/errcode.html

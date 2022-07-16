@@ -1,7 +1,7 @@
 module Sqlite3.Bindings.Internal.Objects
   ( Sqlite3 (..),
     C.Sqlite3_api_routines,
-    C.Sqlite3_backup,
+    Sqlite3_backup (..),
     C.Sqlite3_blob,
     C.Sqlite3_context,
     C.Sqlite3_data_directory,
@@ -31,6 +31,10 @@ import qualified Sqlite3.Bindings.C as C
 -- | https://www.sqlite.org/c3ref/sqlite3.html
 newtype Sqlite3
   = Sqlite3 (Ptr C.Sqlite3)
+
+-- | https://www.sqlite.org/c3ref/backup.html
+newtype Sqlite3_backup
+  = Sqlite3_backup (Ptr C.Sqlite3_backup)
 
 -- | https://www.sqlite.org/c3ref/stmt.html
 newtype Sqlite3_stmt

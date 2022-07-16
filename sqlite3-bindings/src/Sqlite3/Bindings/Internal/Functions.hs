@@ -38,52 +38,71 @@ sqlite3_autovacuum_pages =
   C.sqlite3_autovacuum_pages
 
 -- | https://www.sqlite.org/c3ref/backup_finish.html
+--
+-- Release a backup.
 sqlite3_backup_finish ::
   -- | Backup.
-  Ptr C.Sqlite3_backup ->
+  Sqlite3_backup ->
+  -- | Result code.
   IO CInt
-sqlite3_backup_finish =
-  C.sqlite3_backup_finish
+sqlite3_backup_finish (Sqlite3_backup backup) =
+  C.sqlite3_backup_finish backup
 
 -- | https://www.sqlite.org/c3ref/backup_finish.html
+--
+-- Initialize a backup.
 sqlite3_backup_init ::
   -- | Destination connection.
-  Ptr C.Sqlite3 ->
-  -- | Destination database name (UTF-8).
-  CString ->
+  Sqlite3 ->
+  -- | Destination database name.
+  Text ->
   -- | Source connection.
-  Ptr C.Sqlite3 ->
-  -- | Source database name (UTF-8).
-  CString ->
-  IO (Ptr C.Sqlite3_backup)
-sqlite3_backup_init =
-  C.sqlite3_backup_init
+  Sqlite3 ->
+  -- | Source database name.
+  Text ->
+  -- | Backup.
+  IO (Maybe Sqlite3_backup)
+sqlite3_backup_init (Sqlite3 dstConnection) dstName (Sqlite3 srcConnection) srcName = do
+  c_backup <-
+    textToCString dstName \c_dstName ->
+      textToCString srcName \c_srcName ->
+        C.sqlite3_backup_init dstConnection c_dstName srcConnection c_srcName
+  pure if c_backup == nullPtr then Nothing else Just (Sqlite3_backup c_backup)
 
 -- | https://www.sqlite.org/c3ref/backup_finish.html
+--
+-- Get the number of pages in the source database of a backup.
 sqlite3_backup_pagecount ::
   -- | Backup.
-  Ptr C.Sqlite3_backup ->
-  IO CInt
-sqlite3_backup_pagecount =
-  C.sqlite3_backup_pagecount
+  Sqlite3_backup ->
+  -- | Number of pages.
+  IO Int
+sqlite3_backup_pagecount (Sqlite3_backup backup) =
+  cintToInt <$> C.sqlite3_backup_pagecount backup
 
 -- | https://www.sqlite.org/c3ref/backup_finish.html
+--
+-- Get the number of pages yet to be copied from the source database to the destination database of a backup.
 sqlite3_backup_remaining ::
   -- | Backup.
-  Ptr C.Sqlite3_backup ->
-  IO CInt
-sqlite3_backup_remaining =
-  C.sqlite3_backup_remaining
+  Sqlite3_backup ->
+  -- | Number of pages.
+  IO Int
+sqlite3_backup_remaining (Sqlite3_backup backup) =
+  cintToInt <$> C.sqlite3_backup_remaining backup
 
 -- | https://www.sqlite.org/c3ref/backup_finish.html
+--
+-- Copy pages from the source database to the destination database of a backup.
 sqlite3_backup_step ::
   -- | Backup.
-  Ptr C.Sqlite3_backup ->
+  Sqlite3_backup ->
   -- | Number of pages to copy.
-  CInt ->
+  Int ->
+  -- | Result code.
   IO CInt
-sqlite3_backup_step =
-  C.sqlite3_backup_step
+sqlite3_backup_step (Sqlite3_backup backup) n =
+  C.sqlite3_backup_step backup (intToCInt n)
 
 -- | https://www.sqlite.org/c3ref/bind_blob.html
 --
@@ -1136,12 +1155,15 @@ sqlite3_extended_result_codes =
   C.sqlite3_extended_result_codes
 
 -- | https://www.sqlite.org/c3ref/errcode.html
+--
+-- Get the error code of the most recent failure on a connection.
 sqlite3_errcode ::
   -- | Connection.
-  Ptr C.Sqlite3 ->
+  Sqlite3 ->
+  -- | Error code.
   IO CInt
-sqlite3_errcode =
-  C.sqlite3_errcode
+sqlite3_errcode (Sqlite3 connection) =
+  C.sqlite3_errcode connection
 
 -- | https://www.sqlite.org/c3ref/errcode.html
 --
