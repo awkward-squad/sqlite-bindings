@@ -467,11 +467,11 @@ sqlite3_clear_bindings =
 -- Close a database connection.
 sqlite3_close ::
   -- | Connection.
-  Ptr Sqlite.Bindings.Sqlite3 ->
+  Sqlite3 ->
   -- | Result code.
   IO CInt
-sqlite3_close =
-  Sqlite.Bindings.sqlite3_close
+sqlite3_close (Sqlite3 connection) =
+  Sqlite.Bindings.sqlite3_close connection
 
 -- | https://www.sqlite.org/c3ref/close.html
 --
@@ -480,11 +480,11 @@ sqlite3_close =
 -- are closed, and backups are finished.
 sqlite3_close_v2 ::
   -- | Connection.
-  Ptr Sqlite.Bindings.Sqlite3 ->
+  Sqlite3 ->
   -- | Result code.
   IO CInt
-sqlite3_close_v2 =
-  Sqlite.Bindings.sqlite3_close_v2
+sqlite3_close_v2 (Sqlite3 connection) =
+  Sqlite.Bindings.sqlite3_close_v2 connection
 
 -- | https://www.sqlite.org/c3ref/collation_needed.html
 --
