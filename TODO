@@ -1,0 +1,7 @@
+- Make accurate safe/unsafe bindings
+- Expose compile-time options as flags
+- Figure out versioning scheme
+- Make low-level haskellified wrapper (called `sqlite3`)?
+- auto extension xEntryPoint fiasco
+- make sure all pure funcs don't have IO
+- objects

@@ -21,7 +21,12 @@ data Sqlite3_data_directory
 
 data Sqlite3_file
 
-data Sqlite3_index_info
+-- | https://www.sqlite.org/c3ref/index_info.html
+--
+-- TODO rest of the fields
+data {-# CTYPE "sqlite3.h" "sqlite3_index_info" #-} Sqlite3_index_info = Sqlite3_index_info
+  { nConstraint :: !CInt
+  }
 
 data Sqlite3_io_methods
 
@@ -32,29 +37,31 @@ data {-# CTYPE "sqlite3.h" "sqlite3_mem_methods" #-} Sqlite3_mem_methods
 --
 -- TODO rest of the fields
 data {-# CTYPE "sqlite3.h" "sqlite3_module" #-} Sqlite3_module = Sqlite3_module
-  { iVersion :: CInt,
+  { iVersion :: !CInt,
     xCreate ::
-      forall a.
-      FunPtr
-        ( Ptr Sqlite3 ->
-          Ptr a ->
-          CInt ->
-          Ptr CString ->
-          Ptr (Ptr Sqlite3_vtab) ->
-          Ptr CString ->
-          IO CInt
-        ),
+      !( forall a.
+         FunPtr
+           ( Ptr Sqlite3 ->
+             Ptr a ->
+             CInt ->
+             Ptr CString ->
+             Ptr (Ptr Sqlite3_vtab) ->
+             Ptr CString ->
+             IO CInt
+           )
+       ),
     xConnect ::
-      forall a.
-      FunPtr
-        ( Ptr Sqlite3 ->
-          Ptr a ->
-          CInt ->
-          Ptr CString ->
-          Ptr (Ptr Sqlite3_vtab) ->
-          Ptr CString ->
-          IO CInt
-        )
+      !( forall a.
+         FunPtr
+           ( Ptr Sqlite3 ->
+             Ptr a ->
+             CInt ->
+             Ptr CString ->
+             Ptr (Ptr Sqlite3_vtab) ->
+             Ptr CString ->
+             IO CInt
+           )
+       )
   }
 
 -- | https://www.sqlite.org/c3ref/mutex.html
@@ -81,7 +88,15 @@ data Sqlite3_temp_directory
 -- | https://www.sqlite.org/c3ref/value.html
 data {-# CTYPE "sqlite3.h" "sqlite3_value" #-} Sqlite3_value
 
-data Sqlite3_vfs
+-- | https://www.sqlite.org/c3ref/vfs.html
+--
+-- TODO rest of the fields
+data {-# CTYPE "sqlite3.h" "sqlite3_vfs" #-} Sqlite3_vfs = Sqlite3_vfs
+  { iVersion :: !CInt,
+    szOsFile :: !CInt,
+    mxPathname :: !CInt,
+    pNext :: !(Ptr Sqlite3_vfs)
+  }
 
 data Sqlite3_vtab
 
