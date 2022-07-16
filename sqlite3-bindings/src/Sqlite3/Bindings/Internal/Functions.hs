@@ -5,7 +5,6 @@ import Data.Word (Word64)
 import Foreign (FunPtr, Ptr)
 import Foreign.C (CChar (..), CDouble (..), CInt (..), CString, CUChar (..), CUInt (..))
 import qualified Sqlite.Bindings
-import Sqlite3.Bindings.Internal.Objects
 
 sqlite3_aggregate_context = undefined
 
@@ -16,7 +15,7 @@ sqlite3_auto_extension = undefined
 -- Register a callback that is invoked prior to each autovacuum.
 sqlite3_autovacuum_pages ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | Callback.
   FunPtr (Ptr a -> CString -> CUInt -> CUInt -> CUInt -> IO CUInt) ->
   -- | Application data.
@@ -31,7 +30,7 @@ sqlite3_autovacuum_pages =
 -- | https://www.sqlite.org/c3ref/backup_finish.html
 sqlite3_backup_finish ::
   -- | Backup.
-  Ptr Sqlite3_backup ->
+  Ptr Sqlite.Bindings.Sqlite3_backup ->
   IO CInt
 sqlite3_backup_finish =
   Sqlite.Bindings.sqlite3_backup_finish
@@ -39,21 +38,21 @@ sqlite3_backup_finish =
 -- | https://www.sqlite.org/c3ref/backup_finish.html
 sqlite3_backup_init ::
   -- | Destination connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | Destination database name (UTF-8).
   CString ->
   -- | Source connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | Source database name (UTF-8).
   CString ->
-  IO (Ptr Sqlite3_backup)
+  IO (Ptr Sqlite.Bindings.Sqlite3_backup)
 sqlite3_backup_init =
   Sqlite.Bindings.sqlite3_backup_init
 
 -- | https://www.sqlite.org/c3ref/backup_finish.html
 sqlite3_backup_pagecount ::
   -- | Backup.
-  Ptr Sqlite3_backup ->
+  Ptr Sqlite.Bindings.Sqlite3_backup ->
   IO CInt
 sqlite3_backup_pagecount =
   Sqlite.Bindings.sqlite3_backup_pagecount
@@ -61,7 +60,7 @@ sqlite3_backup_pagecount =
 -- | https://www.sqlite.org/c3ref/backup_finish.html
 sqlite3_backup_remaining ::
   -- | Backup.
-  Ptr Sqlite3_backup ->
+  Ptr Sqlite.Bindings.Sqlite3_backup ->
   IO CInt
 sqlite3_backup_remaining =
   Sqlite.Bindings.sqlite3_backup_remaining
@@ -69,7 +68,7 @@ sqlite3_backup_remaining =
 -- | https://www.sqlite.org/c3ref/backup_finish.html
 sqlite3_backup_step ::
   -- | Backup.
-  Ptr Sqlite3_backup ->
+  Ptr Sqlite.Bindings.Sqlite3_backup ->
   -- | Number of pages to copy.
   CInt ->
   IO CInt
@@ -81,7 +80,7 @@ sqlite3_backup_step =
 -- Bind a blob to a parameter.
 sqlite3_bind_blob ::
   -- | Statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | Parameter index (1-based).
   CInt ->
   -- | Blob.
@@ -100,7 +99,7 @@ sqlite3_bind_blob =
 -- Bind a blob to a parameter.
 sqlite3_bind_blob64 ::
   -- | Statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | Parameter index (1-based).
   CInt ->
   -- | Blob.
@@ -119,7 +118,7 @@ sqlite3_bind_blob64 =
 -- Bind a double to a parameter.
 sqlite3_bind_double ::
   -- | Statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | Parameter index (1-based).
   CInt ->
   -- | Double.
@@ -134,7 +133,7 @@ sqlite3_bind_double =
 -- Bind an integer to a parameter.
 sqlite3_bind_int ::
   -- | Statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | Parameter index (1-based).
   CInt ->
   -- | Integer.
@@ -149,7 +148,7 @@ sqlite3_bind_int =
 -- Bind an integer to a parameter.
 sqlite3_bind_int64 ::
   -- | Statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | Parameter index (1-based).
   CInt ->
   -- | Integer.
@@ -164,7 +163,7 @@ sqlite3_bind_int64 =
 -- Bind null to a parameter.
 sqlite3_bind_null ::
   -- | Statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | Parameter index (1-based).
   CInt ->
   -- | Result code.
@@ -177,7 +176,7 @@ sqlite3_bind_null =
 -- Get the index of the largest parameter.
 sqlite3_bind_parameter_count ::
   -- | Statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | Parameter index (1-based), or 0 (no parameters).
   IO CInt
 sqlite3_bind_parameter_count =
@@ -188,7 +187,7 @@ sqlite3_bind_parameter_count =
 -- Get the index of a named parameter.
 sqlite3_bind_parameter_index ::
   -- | Statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | Parameter name (UTF-8).
   CString ->
   -- | Parameter index (1-based), or 0 (not found).
@@ -201,7 +200,7 @@ sqlite3_bind_parameter_index =
 -- Get the name of a named parameter.
 sqlite3_bind_parameter_name ::
   -- | Statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | Parameter index (1-based).
   CInt ->
   -- | Parameter name (UTF-8).
@@ -214,7 +213,7 @@ sqlite3_bind_parameter_name =
 -- Bind null to a parameter, and associate it with a pointer.
 sqlite3_bind_pointer ::
   -- | Statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | Parameter index (1-based).
   CInt ->
   -- | Pointer.
@@ -233,7 +232,7 @@ sqlite3_bind_pointer =
 -- Bind a string to a parameter.
 sqlite3_bind_text ::
   -- | Statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | Parameter index (1-based).
   CInt ->
   -- | String (UTF-8).
@@ -252,7 +251,7 @@ sqlite3_bind_text =
 -- Bind a string to a parameter.
 sqlite3_bind_text64 ::
   -- | Statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | Parameter index (1-based).
   CInt ->
   -- | String (UTF-8).
@@ -273,11 +272,11 @@ sqlite3_bind_text64 =
 -- Bind a value to a parameter.
 sqlite3_bind_value ::
   -- | Statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | Parameter index (1-based).
   CInt ->
   -- | Value.
-  Ptr Sqlite3_value ->
+  Ptr Sqlite.Bindings.Sqlite3_value ->
   -- | Result code.
   IO CInt
 sqlite3_bind_value =
@@ -288,7 +287,7 @@ sqlite3_bind_value =
 -- Bind a blob of zeroes to a parameter.
 sqlite3_bind_zeroblob ::
   -- | Statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | Parameter index (1-based).
   CInt ->
   -- | Size of blob, in bytes.
@@ -303,7 +302,7 @@ sqlite3_bind_zeroblob =
 -- Bind a blob of zeroes to a parameter.
 sqlite3_bind_zeroblob64 ::
   -- | Statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | Parameter index (1-based).
   CInt ->
   -- | Size of blob, in bytes.
@@ -318,7 +317,7 @@ sqlite3_bind_zeroblob64 =
 -- Get the size of a blob, in bytes.
 sqlite3_blob_bytes ::
   -- | Blob.
-  Ptr Sqlite3_blob ->
+  Ptr Sqlite.Bindings.Sqlite3_blob ->
   -- | Size of blob, in bytes.
   IO CInt
 sqlite3_blob_bytes =
@@ -329,7 +328,7 @@ sqlite3_blob_bytes =
 -- Close a blob.
 sqlite3_blob_close ::
   -- | Blob.
-  Ptr Sqlite3_blob ->
+  Ptr Sqlite.Bindings.Sqlite3_blob ->
   -- | Result code.
   IO CInt
 sqlite3_blob_close =
@@ -340,7 +339,7 @@ sqlite3_blob_close =
 -- Open a blob.
 sqlite3_blob_open ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | Database name (UTF-8).
   CString ->
   -- | Table name (UTF-8).
@@ -352,7 +351,7 @@ sqlite3_blob_open ::
   -- | Read-only if 0, else read-write.
   CInt ->
   -- | /Out/: blob.
-  Ptr (Ptr Sqlite3_blob) ->
+  Ptr (Ptr Sqlite.Bindings.Sqlite3_blob) ->
   -- | Result code.
   IO CInt
 sqlite3_blob_open =
@@ -363,7 +362,7 @@ sqlite3_blob_open =
 -- Read data from a blob.
 sqlite3_blob_read ::
   -- | Blob.
-  Ptr Sqlite3_blob ->
+  Ptr Sqlite.Bindings.Sqlite3_blob ->
   -- | Buffer to read into.
   Ptr a ->
   -- | Size of buffer to read into.
@@ -380,7 +379,7 @@ sqlite3_blob_read =
 -- Point an open blob at a different row in the same table.
 sqlite3_blob_reopen ::
   -- | Blob.
-  Ptr Sqlite3_blob ->
+  Ptr Sqlite.Bindings.Sqlite3_blob ->
   -- | Rowid.
   Int64 ->
   -- | Result code.
@@ -393,7 +392,7 @@ sqlite3_blob_reopen =
 -- Write data to a blob.
 sqlite3_blob_write ::
   -- | Blob.
-  Ptr Sqlite3_blob ->
+  Ptr Sqlite.Bindings.Sqlite3_blob ->
   -- | Buffer of data to write.
   Ptr a ->
   -- | Size of buffer to write.
@@ -408,7 +407,7 @@ sqlite3_blob_write =
 -- | [__Register a callback to handle `SQLITE_BUSY` errors__](https://www.sqlite.org/c3ref/busy_handler.html)
 sqlite3_busy_handler ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   FunPtr (Ptr a -> CInt -> IO CInt) ->
   Ptr a ->
   IO CInt
@@ -418,7 +417,7 @@ sqlite3_busy_handler =
 -- | [__Set a busy timeout__](https://www.sqlite.org/c3ref/busy_timeout.html)
 sqlite3_busy_timeout ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | Number of millseconds.
   CInt ->
   IO CInt
@@ -431,7 +430,7 @@ sqlite3_cancel_auto_extension = undefined
 -- | https://www.sqlite.org/c3ref/changes.html
 sqlite3_changes ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   IO CInt
 sqlite3_changes =
   Sqlite.Bindings.sqlite3_changes
@@ -439,7 +438,7 @@ sqlite3_changes =
 -- | https://www.sqlite.org/c3ref/changes.html
 sqlite3_changes64 ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   IO Int64
 sqlite3_changes64 =
   Sqlite.Bindings.sqlite3_changes64
@@ -449,7 +448,7 @@ sqlite3_changes64 =
 -- Clear parameter bindings.
 sqlite3_clear_bindings ::
   -- | Statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | Result code.
   IO CInt
 sqlite3_clear_bindings =
@@ -460,7 +459,7 @@ sqlite3_clear_bindings =
 -- Close a database connection.
 sqlite3_close ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | Result code.
   IO CInt
 sqlite3_close =
@@ -473,7 +472,7 @@ sqlite3_close =
 -- are closed, and backups are finished.
 sqlite3_close_v2 ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | Result code.
   IO CInt
 sqlite3_close_v2 =
@@ -484,11 +483,11 @@ sqlite3_close_v2 =
 -- Register a callback that is invoked when a collating sequence is needed.
 sqlite3_collation_needed ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | Application data.
   Ptr a ->
   -- | Callback.
-  FunPtr (Ptr a -> Ptr Sqlite3 -> CInt -> CString -> IO ()) ->
+  FunPtr (Ptr a -> Ptr Sqlite.Bindings.Sqlite3 -> CInt -> CString -> IO ()) ->
   -- | Result code.
   IO CInt
 sqlite3_collation_needed =
@@ -499,7 +498,7 @@ sqlite3_collation_needed =
 -- Get the blob of a result column.
 sqlite3_column_blob ::
   -- | Statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | Column index (0-based).
   CInt ->
   -- | Blob.
@@ -512,7 +511,7 @@ sqlite3_column_blob =
 -- Get the size of a blob or string result column, in bytes.
 sqlite3_column_bytes ::
   -- | Statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | Column index (0-based).
   CInt ->
   -- | Size, in bytes.
@@ -525,7 +524,7 @@ sqlite3_column_bytes =
 -- Get the number of columns in a result set.
 sqlite3_column_count ::
   -- | Statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | Number of columns.
   IO CInt
 sqlite3_column_count =
@@ -534,7 +533,7 @@ sqlite3_column_count =
 -- | https://www.sqlite.org/c3ref/column_database_name.html
 sqlite3_column_database_name ::
   -- | Statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | Column index (0-based).
   CInt ->
   IO CString
@@ -546,7 +545,7 @@ sqlite3_column_database_name =
 -- Get the declared type of a result column.
 sqlite3_column_decltype ::
   -- | Statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | Column index (0-based).
   CInt ->
   -- | Type (UTF-8).
@@ -559,7 +558,7 @@ sqlite3_column_decltype =
 -- Get the double of a result column.
 sqlite3_column_double ::
   -- | Statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | Column index (0-based).
   CInt ->
   -- | Double.
@@ -572,7 +571,7 @@ sqlite3_column_double =
 -- Get the integer of a result column.
 sqlite3_column_int ::
   -- | Statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | Column index (0-based).
   CInt ->
   -- | Integer.
@@ -585,7 +584,7 @@ sqlite3_column_int =
 -- Get the integer of a result column.
 sqlite3_column_int64 ::
   -- | Statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | Column index (0-based).
   CInt ->
   -- | Integer.
@@ -596,7 +595,7 @@ sqlite3_column_int64 =
 -- | https://www.sqlite.org/c3ref/column_name.html
 sqlite3_column_name ::
   -- | Statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | Column index (0-based).
   CInt ->
   IO CString
@@ -606,7 +605,7 @@ sqlite3_column_name =
 -- | https://www.sqlite.org/c3ref/column_database_name.html
 sqlite3_column_origin_name ::
   -- | Statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | Column index (0-based).
   CInt ->
   IO CString
@@ -616,7 +615,7 @@ sqlite3_column_origin_name =
 -- | https://www.sqlite.org/c3ref/column_database_name.html
 sqlite3_column_table_name ::
   -- | Statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | Column index (0-based).
   CInt ->
   IO CString
@@ -628,7 +627,7 @@ sqlite3_column_table_name =
 -- Get the string of a result column.
 sqlite3_column_text ::
   -- | Statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | Column index (0-based).
   CInt ->
   -- | String (UTF-8).
@@ -641,7 +640,7 @@ sqlite3_column_text =
 -- Get the type of a result column.
 sqlite3_column_type ::
   -- | Statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | Column index (0-based).
   CInt ->
   -- | Type.
@@ -654,18 +653,18 @@ sqlite3_column_type =
 -- Get the value of a result column.
 sqlite3_column_value ::
   -- | Statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | Column index (0-based).
   CInt ->
   -- | Value.
-  IO (Ptr Sqlite3_value)
+  IO (Ptr Sqlite.Bindings.Sqlite3_value)
 sqlite3_column_value =
   Sqlite.Bindings.sqlite3_column_value
 
 -- | https://www.sqlite.org/c3ref/commit_hook.html
 sqlite3_commit_hook ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | Commit hook.
   FunPtr (Ptr a -> IO CInt) ->
   Ptr a ->
@@ -707,7 +706,7 @@ sqlite3_config__1 :: CInt -> IO CInt
 sqlite3_config__1 =
   Sqlite.Bindings.sqlite3_config__1
 
-sqlite3_config__2 :: CInt -> Ptr Sqlite3_mem_methods -> IO CInt
+sqlite3_config__2 :: CInt -> Ptr Sqlite.Bindings.Sqlite3_mem_methods -> IO CInt
 sqlite3_config__2 =
   Sqlite.Bindings.sqlite3_config__2
 
@@ -719,7 +718,7 @@ sqlite3_config__4 :: CInt -> CInt -> IO CInt
 sqlite3_config__4 =
   Sqlite.Bindings.sqlite3_config__4
 
-sqlite3_config__5 :: CInt -> Ptr Sqlite3_mutex_methods -> IO CInt
+sqlite3_config__5 :: CInt -> Ptr Sqlite.Bindings.Sqlite3_mutex_methods -> IO CInt
 sqlite3_config__5 =
   Sqlite.Bindings.sqlite3_config__5
 
@@ -731,11 +730,11 @@ sqlite3_config__7 :: CInt -> FunPtr (Ptr a -> CInt -> CString -> IO ()) -> Ptr a
 sqlite3_config__7 =
   Sqlite.Bindings.sqlite3_config__7
 
-sqlite3_config__8 :: CInt -> Ptr Sqlite3_pcache_methods2 -> IO CInt
+sqlite3_config__8 :: CInt -> Ptr Sqlite.Bindings.Sqlite3_pcache_methods2 -> IO CInt
 sqlite3_config__8 =
   Sqlite.Bindings.sqlite3_config__8
 
-sqlite3_config__9 :: CInt -> FunPtr (Ptr a -> Ptr Sqlite3 -> CString -> CInt -> IO ()) -> Ptr a -> IO CInt
+sqlite3_config__9 :: CInt -> FunPtr (Ptr a -> Ptr Sqlite.Bindings.Sqlite3 -> CString -> CInt -> IO ()) -> Ptr a -> IO CInt
 sqlite3_config__9 =
   Sqlite.Bindings.sqlite3_config__9
 
@@ -758,9 +757,9 @@ sqlite3_config__13 =
 -- | https://www.sqlite.org/c3ref/context_db_handle.html
 sqlite3_context_db_handle ::
   -- | Function context.
-  Ptr Sqlite3_context ->
+  Ptr Sqlite.Bindings.Sqlite3_context ->
   -- | Connection.
-  IO (Ptr Sqlite3)
+  IO (Ptr Sqlite.Bindings.Sqlite3)
 sqlite3_context_db_handle =
   Sqlite.Bindings.sqlite3_context_db_handle
 
@@ -769,7 +768,7 @@ sqlite3_context_db_handle =
 -- Create a collating sequence.
 sqlite3_create_collation ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | Collating sequence name (UTF-8).
   CString ->
   -- | Encoding.
@@ -788,7 +787,7 @@ sqlite3_create_collation =
 -- Create a collating sequence.
 sqlite3_create_collation_v2 ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | Collating sequence name (UTF-8).
   CString ->
   -- | Encoding.
@@ -828,7 +827,7 @@ sqlite3_create_filename =
 -- Create a function or aggregate function.
 sqlite3_create_function ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | Function name (UTF-8).
   CString ->
   -- | Number of function arguments.
@@ -838,11 +837,11 @@ sqlite3_create_function ::
   -- | Application data.
   Ptr a ->
   -- | Function.
-  FunPtr (Ptr Sqlite3_context -> CInt -> Ptr (Ptr Sqlite3_value) -> IO ()) ->
+  FunPtr (Ptr Sqlite.Bindings.Sqlite3_context -> CInt -> Ptr (Ptr Sqlite.Bindings.Sqlite3_value) -> IO ()) ->
   -- | Aggregate function step.
-  FunPtr (Ptr Sqlite3_context -> CInt -> Ptr (Ptr Sqlite3_value) -> IO ()) ->
+  FunPtr (Ptr Sqlite.Bindings.Sqlite3_context -> CInt -> Ptr (Ptr Sqlite.Bindings.Sqlite3_value) -> IO ()) ->
   -- | Aggregate function finalize.
-  FunPtr (Ptr Sqlite3_context -> IO ()) ->
+  FunPtr (Ptr Sqlite.Bindings.Sqlite3_context -> IO ()) ->
   -- | Result code.
   IO CInt
 sqlite3_create_function =
@@ -853,7 +852,7 @@ sqlite3_create_function =
 -- Create a function or aggregate function.
 sqlite3_create_function_v2 ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | Function name (UTF-8).
   CString ->
   -- | Number of function arguments.
@@ -863,11 +862,11 @@ sqlite3_create_function_v2 ::
   -- | Application data.
   Ptr a ->
   -- | Function.
-  FunPtr (Ptr Sqlite3_context -> CInt -> Ptr (Ptr Sqlite3_value) -> IO ()) ->
+  FunPtr (Ptr Sqlite.Bindings.Sqlite3_context -> CInt -> Ptr (Ptr Sqlite.Bindings.Sqlite3_value) -> IO ()) ->
   -- | Aggregate function step.
-  FunPtr (Ptr Sqlite3_context -> CInt -> Ptr (Ptr Sqlite3_value) -> IO ()) ->
+  FunPtr (Ptr Sqlite.Bindings.Sqlite3_context -> CInt -> Ptr (Ptr Sqlite.Bindings.Sqlite3_value) -> IO ()) ->
   -- | Aggregate function finalize.
-  FunPtr (Ptr Sqlite3_context -> IO ()) ->
+  FunPtr (Ptr Sqlite.Bindings.Sqlite3_context -> IO ()) ->
   -- | Application data destructor.
   FunPtr (Ptr a -> IO ()) ->
   IO CInt
@@ -879,11 +878,11 @@ sqlite3_create_function_v2 =
 -- Create a virtual table module.
 sqlite3_create_module ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | Module name (UTF-8).
   CString ->
   -- | Module.
-  Ptr Sqlite3_module ->
+  Ptr Sqlite.Bindings.Sqlite3_module ->
   -- | Application data.
   Ptr a ->
   -- | Result code.
@@ -896,11 +895,11 @@ sqlite3_create_module =
 -- Create a virtual table module.
 sqlite3_create_module_v2 ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | Module name (UTF-8).
   CString ->
   -- | Module.
-  Ptr Sqlite3_module ->
+  Ptr Sqlite.Bindings.Sqlite3_module ->
   -- | Application data.
   Ptr a ->
   -- | Application data destructor.
@@ -915,7 +914,7 @@ sqlite3_create_module_v2 =
 -- Create an aggregate function or an aggregate window function.
 sqlite3_create_window_function ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | Function name (UTF-8).
   CString ->
   -- | Number of function arguments.
@@ -925,13 +924,13 @@ sqlite3_create_window_function ::
   -- | Application data.
   Ptr a ->
   -- | Aggregate function step.
-  FunPtr (Ptr Sqlite3_context -> CInt -> Ptr (Ptr Sqlite3_value) -> IO ()) ->
+  FunPtr (Ptr Sqlite.Bindings.Sqlite3_context -> CInt -> Ptr (Ptr Sqlite.Bindings.Sqlite3_value) -> IO ()) ->
   -- | Aggregate function finalize.
-  FunPtr (Ptr Sqlite3_context -> IO ()) ->
+  FunPtr (Ptr Sqlite.Bindings.Sqlite3_context -> IO ()) ->
   -- | Aggregate window function get current value.
-  FunPtr (Ptr Sqlite3_context -> IO ()) ->
+  FunPtr (Ptr Sqlite.Bindings.Sqlite3_context -> IO ()) ->
   -- | Aggregate window function remove value.
-  FunPtr (Ptr Sqlite3_context -> CInt -> Ptr (Ptr Sqlite3_value) -> IO ()) ->
+  FunPtr (Ptr Sqlite.Bindings.Sqlite3_context -> CInt -> Ptr (Ptr Sqlite.Bindings.Sqlite3_value) -> IO ()) ->
   -- | Application data destructor.
   FunPtr (Ptr a -> IO ()) ->
   IO CInt
@@ -943,7 +942,7 @@ sqlite3_create_window_function =
 -- Get the number of columns in the next row of a result set.
 sqlite3_data_count ::
   -- | Statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | Number of columns.
   IO CInt
 sqlite3_data_count =
@@ -954,7 +953,7 @@ sqlite3_data_count =
 -- Get the file object for a journal.
 sqlite3_database_file_object ::
   CString ->
-  IO (Ptr Sqlite3_file)
+  IO (Ptr Sqlite.Bindings.Sqlite3_file)
 sqlite3_database_file_object =
   Sqlite.Bindings.sqlite3_database_file_object
 
@@ -963,20 +962,20 @@ sqlite3_database_file_object =
 -- Flush all dirty pager-cache pages to disk, for all attached databases.
 sqlite3_db_cacheflush ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   IO CInt
 sqlite3_db_cacheflush =
   Sqlite.Bindings.sqlite3_db_cacheflush
 
-sqlite3_db_config__1 :: Ptr Sqlite3 -> CInt -> CString -> IO CInt
+sqlite3_db_config__1 :: Ptr Sqlite.Bindings.Sqlite3 -> CInt -> CString -> IO CInt
 sqlite3_db_config__1 =
   Sqlite.Bindings.sqlite3_db_config__1
 
-sqlite3_db_config__2 :: Ptr Sqlite3 -> CInt -> Ptr a -> CInt -> CInt -> IO CInt
+sqlite3_db_config__2 :: Ptr Sqlite.Bindings.Sqlite3 -> CInt -> Ptr a -> CInt -> CInt -> IO CInt
 sqlite3_db_config__2 =
   Sqlite.Bindings.sqlite3_db_config__2
 
-sqlite3_db_config__3 :: Ptr Sqlite3 -> CInt -> CInt -> Ptr CInt -> IO CInt
+sqlite3_db_config__3 :: Ptr Sqlite.Bindings.Sqlite3 -> CInt -> CInt -> Ptr CInt -> IO CInt
 sqlite3_db_config__3 =
   Sqlite.Bindings.sqlite3_db_config__3
 
@@ -985,7 +984,7 @@ sqlite3_db_config__3 =
 -- Get the filename for an attached database.
 sqlite3_db_filename ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | Database name (UTF-8).
   CString ->
   -- | Filename (UTF-8).
@@ -998,9 +997,9 @@ sqlite3_db_filename =
 -- Get the connection for a statement.
 sqlite3_db_handle ::
   -- | Statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | Connection.
-  Ptr Sqlite3
+  Ptr Sqlite.Bindings.Sqlite3
 sqlite3_db_handle =
   Sqlite.Bindings.sqlite3_db_handle
 
@@ -1009,9 +1008,9 @@ sqlite3_db_handle =
 -- Get the mutex of a connection.
 sqlite3_db_mutex ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | Mutex.
-  IO (Ptr Sqlite3_mutex)
+  IO (Ptr Sqlite.Bindings.Sqlite3_mutex)
 sqlite3_db_mutex =
   Sqlite.Bindings.sqlite3_db_mutex
 
@@ -1020,7 +1019,7 @@ sqlite3_db_mutex =
 -- Get the name of an attached database.
 sqlite3_db_name ::
   -- | Connection
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | Database index (0-based; 0 is the main database file).
   CInt ->
   -- | Database name (UTF-8).
@@ -1033,7 +1032,7 @@ sqlite3_db_name =
 -- Get whether an attached database is read-only.
 sqlite3_db_readonly ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | Database name (UTF-8).
   CString ->
   -- | 0 or 1, or -1 if the database is not attached.
@@ -1046,7 +1045,7 @@ sqlite3_db_readonly =
 -- Release as much memory as possible from a connection.
 sqlite3_db_release_memory ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | Result code.
   IO CInt
 sqlite3_db_release_memory =
@@ -1057,7 +1056,7 @@ sqlite3_db_release_memory =
 -- Get a status of a connection.
 sqlite3_db_status ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | Status option.
   CInt ->
   -- | /Out/: current value.
@@ -1076,7 +1075,7 @@ sqlite3_db_status =
 -- Declare the schema of a virtual table.
 sqlite3_declare_vtab ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | Schema (UTF-8).
   CString ->
   -- | Result code.
@@ -1087,7 +1086,7 @@ sqlite3_declare_vtab =
 -- | [__Deserialize a database__](https://www.sqlite.org/c3ref/deserialize.html)
 sqlite3_deserialize ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | Database name (UTF-8).
   CString ->
   -- | Serialized database.
@@ -1106,7 +1105,7 @@ sqlite3_deserialize =
 -- | [__Remove unnecessary virtual table implementations__](https://www.sqlite.org/c3ref/drop_modules.html)
 sqlite3_drop_modules ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | Names of virtual table modules to keep (UTF-8).
   Ptr CString ->
   IO CInt
@@ -1116,7 +1115,7 @@ sqlite3_drop_modules =
 -- | https://www.sqlite.org/c3ref/extended_result_codes.html
 sqlite3_extended_result_codes ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   CInt ->
   IO CInt
 sqlite3_extended_result_codes =
@@ -1125,7 +1124,7 @@ sqlite3_extended_result_codes =
 -- | https://www.sqlite.org/c3ref/errcode.html
 sqlite3_errcode ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   IO CInt
 sqlite3_errcode =
   Sqlite.Bindings.sqlite3_errcode
@@ -1133,7 +1132,7 @@ sqlite3_errcode =
 -- | https://www.sqlite.org/c3ref/errcode.html
 sqlite3_errmsg ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | Error message (UTF-8).
   IO CString
 sqlite3_errmsg =
@@ -1142,7 +1141,7 @@ sqlite3_errmsg =
 -- | https://www.sqlite.org/c3ref/errcode.html
 sqlite3_error_offset ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   IO CInt
 sqlite3_error_offset =
   Sqlite.Bindings.sqlite3_error_offset
@@ -1159,7 +1158,7 @@ sqlite3_errstr =
 -- Get the expanded SQL of a statement.
 sqlite3_expanded_sql ::
   -- | Statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | SQL (UTF-8).
   IO CString
 sqlite3_expanded_sql =
@@ -1168,14 +1167,14 @@ sqlite3_expanded_sql =
 -- | https://www.sqlite.org/c3ref/errcode.html
 sqlite3_extended_errcode ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   IO CInt
 sqlite3_extended_errcode =
   Sqlite.Bindings.sqlite3_extended_errcode
 
 sqlite3_file_control ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | Database name (UTF-8).
   CString ->
   -- | Opcode.
@@ -1225,7 +1224,7 @@ sqlite3_filename_wal =
 -- Finalize a statement.
 sqlite3_finalize ::
   -- | Statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | Result code.
   IO CInt
 sqlite3_finalize =
@@ -1253,7 +1252,7 @@ sqlite3_free_filename =
 -- Get whether a connection is in autocommit mode.
 sqlite3_get_autocommit ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | 0 or 1.
   IO CInt
 sqlite3_get_autocommit =
@@ -1262,7 +1261,7 @@ sqlite3_get_autocommit =
 -- | https://www.sqlite.org/c3ref/get_auxdata.html
 sqlite3_get_auxdata ::
   -- | Function context.
-  Ptr Sqlite3_context ->
+  Ptr Sqlite.Bindings.Sqlite3_context ->
   CInt ->
   IO (Ptr a)
 sqlite3_get_auxdata =
@@ -1293,7 +1292,7 @@ sqlite3_initialize =
 -- Cause all in-progress operations to abort and return `SQLITE_INTERRUPT` at the earliest opportunity.
 sqlite3_interrupt ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   IO ()
 sqlite3_interrupt =
   Sqlite.Bindings.sqlite3_interrupt
@@ -1338,7 +1337,7 @@ sqlite3_keyword_name =
 -- Get the rowid of the most recent insert into a table with a rowid.
 sqlite3_last_insert_rowid ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | Rowid.
   IO Int64
 sqlite3_last_insert_rowid =
@@ -1363,7 +1362,7 @@ sqlite3_libversion_number =
 -- Get or set a limit on a connection.
 sqlite3_limit ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | Limit category.
   CInt ->
   -- | Limit, or a negative number to get the limit.
@@ -1376,7 +1375,7 @@ sqlite3_limit =
 -- | https://www.sqlite.org/c3ref/load_extension.html
 sqlite3_load_extension ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | Extension shared library name.
   CString ->
   -- | Entry point.
@@ -1459,7 +1458,7 @@ sqlite3_mutex_alloc ::
   -- | Mutex type.
   CInt ->
   -- | Mutex.
-  IO (Ptr Sqlite3_mutex)
+  IO (Ptr Sqlite.Bindings.Sqlite3_mutex)
 sqlite3_mutex_alloc =
   Sqlite.Bindings.sqlite3_mutex_alloc
 
@@ -1468,7 +1467,7 @@ sqlite3_mutex_alloc =
 -- Acquire a mutex (blocking).
 sqlite3_mutex_enter ::
   -- | Mutex.
-  Ptr Sqlite3_mutex ->
+  Ptr Sqlite.Bindings.Sqlite3_mutex ->
   IO ()
 sqlite3_mutex_enter =
   Sqlite.Bindings.sqlite3_mutex_enter
@@ -1478,7 +1477,7 @@ sqlite3_mutex_enter =
 -- Destroy a mutex.
 sqlite3_mutex_free ::
   -- | Mutex.
-  Ptr Sqlite3_mutex ->
+  Ptr Sqlite.Bindings.Sqlite3_mutex ->
   IO ()
 sqlite3_mutex_free =
   Sqlite.Bindings.sqlite3_mutex_free
@@ -1490,7 +1489,7 @@ sqlite3_mutex_held = undefined
 -- Release a mutex. The mutex must have been acquired on the same OS thread.
 sqlite3_mutex_leave ::
   -- | Mutex.
-  Ptr Sqlite3_mutex ->
+  Ptr Sqlite.Bindings.Sqlite3_mutex ->
   IO ()
 sqlite3_mutex_leave =
   Sqlite.Bindings.sqlite3_mutex_leave
@@ -1502,7 +1501,7 @@ sqlite3_mutex_notheld = undefined
 -- Acquire a mutex (non-blocking).
 sqlite3_mutex_try ::
   -- | Mutex.
-  Ptr Sqlite3_mutex ->
+  Ptr Sqlite.Bindings.Sqlite3_mutex ->
   -- | Result code.
   IO CInt
 sqlite3_mutex_try =
@@ -1513,11 +1512,11 @@ sqlite3_mutex_try =
 -- Get the first or next statement of a connection.
 sqlite3_next_stmt ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | Statement, or null to get the first statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | Next statement.
-  IO (Ptr Sqlite3_stmt)
+  IO (Ptr Sqlite.Bindings.Sqlite3_stmt)
 sqlite3_next_stmt =
   Sqlite.Bindings.sqlite3_next_stmt
 
@@ -1526,7 +1525,7 @@ sqlite3_next_stmt =
 -- Get the normalized SQL of a statement.
 sqlite3_normalized_sql ::
   -- | Statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | SQL (UTF-8).
   IO CString
 sqlite3_normalized_sql =
@@ -1539,7 +1538,7 @@ sqlite3_open ::
   -- | Database file (UTF-8).
   CString ->
   -- | /Out/: connection.
-  Ptr (Ptr Sqlite3) ->
+  Ptr (Ptr Sqlite.Bindings.Sqlite3) ->
   -- | Result code.
   IO CInt
 sqlite3_open =
@@ -1552,7 +1551,7 @@ sqlite3_open_v2 ::
   -- | Database file (UTF-8).
   CString ->
   -- | /Out/: connection.
-  Ptr (Ptr Sqlite3) ->
+  Ptr (Ptr Sqlite.Bindings.Sqlite3) ->
   -- | Flags.
   CInt ->
   -- | Name of VFS to use.
@@ -1564,7 +1563,7 @@ sqlite3_open_v2 =
 
 -- | https://www.sqlite.org/c3ref/overload_function.html
 sqlite3_overload_function ::
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   CString ->
   CInt ->
   IO CInt
@@ -1574,13 +1573,13 @@ sqlite3_overload_function =
 -- | https://www.sqlite.org/c3ref/prepare.html
 sqlite3_prepare_v2 ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | SQL (UTF-8).
   Ptr CChar ->
   -- | Size of SQL, in bytes.
   CInt ->
   -- | /Out/: statement.
-  Ptr (Ptr Sqlite3_stmt) ->
+  Ptr (Ptr Sqlite.Bindings.Sqlite3_stmt) ->
   -- | /Out/: unused SQL.
   Ptr (Ptr CChar) ->
   -- | Result code.
@@ -1591,7 +1590,7 @@ sqlite3_prepare_v2 =
 -- | https://www.sqlite.org/c3ref/prepare.html
 sqlite3_prepare_v3 ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | SQL (UTF-8).
   Ptr CChar ->
   -- | Size of SQL, in bytes.
@@ -1599,7 +1598,7 @@ sqlite3_prepare_v3 ::
   -- | Flags.
   CUInt ->
   -- | /Out/: statement.
-  Ptr (Ptr Sqlite3_stmt) ->
+  Ptr (Ptr Sqlite.Bindings.Sqlite3_stmt) ->
   -- | /Out/: unused SQL.
   Ptr (Ptr CChar) ->
   -- | Result code.
@@ -1609,29 +1608,29 @@ sqlite3_prepare_v3 =
 
 -- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
 sqlite3_preupdate_blobwrite ::
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   IO CInt
 sqlite3_preupdate_blobwrite =
   Sqlite.Bindings.sqlite3_preupdate_blobwrite
 
 -- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
 sqlite3_preupdate_count ::
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   IO CInt
 sqlite3_preupdate_count =
   Sqlite.Bindings.sqlite3_preupdate_count
 
 -- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
 sqlite3_preupdate_depth ::
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   IO CInt
 sqlite3_preupdate_depth =
   Sqlite.Bindings.sqlite3_preupdate_depth
 
 -- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
 sqlite3_preupdate_hook ::
-  Ptr Sqlite3 ->
-  FunPtr (Ptr a -> Ptr Sqlite3 -> CInt -> CString -> CString -> Int64 -> Int64 -> IO ()) ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
+  FunPtr (Ptr a -> Ptr Sqlite.Bindings.Sqlite3 -> CInt -> CString -> CString -> Int64 -> Int64 -> IO ()) ->
   Ptr a ->
   IO (Ptr b)
 sqlite3_preupdate_hook =
@@ -1639,25 +1638,25 @@ sqlite3_preupdate_hook =
 
 -- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
 sqlite3_preupdate_new ::
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   CInt ->
-  Ptr (Ptr Sqlite3_value) ->
+  Ptr (Ptr Sqlite.Bindings.Sqlite3_value) ->
   IO CInt
 sqlite3_preupdate_new =
   Sqlite.Bindings.sqlite3_preupdate_new
 
 -- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
 sqlite3_preupdate_old ::
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   CInt ->
-  Ptr (Ptr Sqlite3_value) ->
+  Ptr (Ptr Sqlite.Bindings.Sqlite3_value) ->
   IO CInt
 sqlite3_preupdate_old =
   Sqlite.Bindings.sqlite3_preupdate_old
 
 -- | https://www.sqlite.org/c3ref/progress_handler.html
 sqlite3_progress_handler ::
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   CInt ->
   FunPtr (Ptr a -> IO CInt) ->
   Ptr a ->
@@ -1706,7 +1705,7 @@ sqlite3_release_memory =
 -- Reset a statement to its initial state. Does not clear parameter bindings.
 sqlite3_reset ::
   -- | Statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | Result code.
   IO CInt
 sqlite3_reset =
@@ -1718,7 +1717,7 @@ sqlite3_reset_auto_extension = undefined
 -- | https://www.sqlite.org/c3ref/result_blob.html
 sqlite3_result_blob ::
   -- | Function context.
-  Ptr Sqlite3_context ->
+  Ptr Sqlite.Bindings.Sqlite3_context ->
   Ptr a ->
   CInt ->
   FunPtr (Ptr a -> IO ()) ->
@@ -1729,7 +1728,7 @@ sqlite3_result_blob =
 -- | https://www.sqlite.org/c3ref/result_blob.html
 sqlite3_result_blob64 ::
   -- | Function context.
-  Ptr Sqlite3_context ->
+  Ptr Sqlite.Bindings.Sqlite3_context ->
   Ptr a ->
   Word64 ->
   FunPtr (Ptr a -> IO ()) ->
@@ -1740,7 +1739,7 @@ sqlite3_result_blob64 =
 -- | https://www.sqlite.org/c3ref/result_blob.html
 sqlite3_result_double ::
   -- | Function context.
-  Ptr Sqlite3_context ->
+  Ptr Sqlite.Bindings.Sqlite3_context ->
   CDouble ->
   IO ()
 sqlite3_result_double =
@@ -1749,7 +1748,7 @@ sqlite3_result_double =
 -- | https://www.sqlite.org/c3ref/result_blob.html
 sqlite3_result_error ::
   -- | Function context.
-  Ptr Sqlite3_context ->
+  Ptr Sqlite.Bindings.Sqlite3_context ->
   CString ->
   CInt ->
   IO ()
@@ -1759,7 +1758,7 @@ sqlite3_result_error =
 -- | https://www.sqlite.org/c3ref/result_blob.html
 sqlite3_result_error_code ::
   -- | Function context.
-  Ptr Sqlite3_context ->
+  Ptr Sqlite.Bindings.Sqlite3_context ->
   CInt ->
   IO ()
 sqlite3_result_error_code =
@@ -1768,7 +1767,7 @@ sqlite3_result_error_code =
 -- | https://www.sqlite.org/c3ref/result_blob.html
 sqlite3_result_error_nomem ::
   -- | Function context.
-  Ptr Sqlite3_context ->
+  Ptr Sqlite.Bindings.Sqlite3_context ->
   IO ()
 sqlite3_result_error_nomem =
   Sqlite.Bindings.sqlite3_result_error_nomem
@@ -1776,7 +1775,7 @@ sqlite3_result_error_nomem =
 -- | https://www.sqlite.org/c3ref/result_blob.html
 sqlite3_result_error_toobig ::
   -- | Function context.
-  Ptr Sqlite3_context ->
+  Ptr Sqlite.Bindings.Sqlite3_context ->
   IO ()
 sqlite3_result_error_toobig =
   Sqlite.Bindings.sqlite3_result_error_toobig
@@ -1784,7 +1783,7 @@ sqlite3_result_error_toobig =
 -- | https://www.sqlite.org/c3ref/result_blob.html
 sqlite3_result_int ::
   -- | Function context.
-  Ptr Sqlite3_context ->
+  Ptr Sqlite.Bindings.Sqlite3_context ->
   CInt ->
   IO ()
 sqlite3_result_int =
@@ -1793,7 +1792,7 @@ sqlite3_result_int =
 -- | https://www.sqlite.org/c3ref/result_blob.html
 sqlite3_result_int64 ::
   -- | Function context.
-  Ptr Sqlite3_context ->
+  Ptr Sqlite.Bindings.Sqlite3_context ->
   Int64 ->
   IO ()
 sqlite3_result_int64 =
@@ -1802,7 +1801,7 @@ sqlite3_result_int64 =
 -- | https://www.sqlite.org/c3ref/result_blob.html
 sqlite3_result_null ::
   -- | Function context.
-  Ptr Sqlite3_context ->
+  Ptr Sqlite.Bindings.Sqlite3_context ->
   IO ()
 sqlite3_result_null =
   Sqlite.Bindings.sqlite3_result_null
@@ -1810,7 +1809,7 @@ sqlite3_result_null =
 -- | https://www.sqlite.org/c3ref/result_blob.html
 sqlite3_result_pointer ::
   -- | Function context.
-  Ptr Sqlite3_context ->
+  Ptr Sqlite.Bindings.Sqlite3_context ->
   Ptr a ->
   CString ->
   FunPtr (Ptr a -> IO ()) ->
@@ -1823,7 +1822,7 @@ sqlite3_result_pointer =
 -- Set the subtype of the return value of a function.
 sqlite3_result_subtype ::
   -- | Function context.
-  Ptr Sqlite3_context ->
+  Ptr Sqlite.Bindings.Sqlite3_context ->
   -- | Subtype.
   CUInt ->
   IO ()
@@ -1833,7 +1832,7 @@ sqlite3_result_subtype =
 -- | https://www.sqlite.org/c3ref/result_blob.html
 sqlite3_result_text ::
   -- | Function context.
-  Ptr Sqlite3_context ->
+  Ptr Sqlite.Bindings.Sqlite3_context ->
   Ptr CChar ->
   CInt ->
   FunPtr (Ptr a -> IO ()) ->
@@ -1844,7 +1843,7 @@ sqlite3_result_text =
 -- | https://www.sqlite.org/c3ref/result_blob.html
 sqlite3_result_text64 ::
   -- | Function context.
-  Ptr Sqlite3_context ->
+  Ptr Sqlite.Bindings.Sqlite3_context ->
   Ptr CChar ->
   Word64 ->
   FunPtr (Ptr a -> IO ()) ->
@@ -1856,8 +1855,8 @@ sqlite3_result_text64 =
 -- | https://www.sqlite.org/c3ref/result_blob.html
 sqlite3_result_value ::
   -- | Function context.
-  Ptr Sqlite3_context ->
-  Ptr Sqlite3_value ->
+  Ptr Sqlite.Bindings.Sqlite3_context ->
+  Ptr Sqlite.Bindings.Sqlite3_value ->
   IO ()
 sqlite3_result_value =
   Sqlite.Bindings.sqlite3_result_value
@@ -1865,7 +1864,7 @@ sqlite3_result_value =
 -- | https://www.sqlite.org/c3ref/result_blob.html
 sqlite3_result_zeroblob ::
   -- | Function context.
-  Ptr Sqlite3_context ->
+  Ptr Sqlite.Bindings.Sqlite3_context ->
   CInt ->
   IO ()
 sqlite3_result_zeroblob =
@@ -1874,7 +1873,7 @@ sqlite3_result_zeroblob =
 -- | https://www.sqlite.org/c3ref/result_blob.html
 sqlite3_result_zeroblob64 ::
   -- | Function context.
-  Ptr Sqlite3_context ->
+  Ptr Sqlite.Bindings.Sqlite3_context ->
   Word64 ->
   IO CInt
 sqlite3_result_zeroblob64 =
@@ -1883,7 +1882,7 @@ sqlite3_result_zeroblob64 =
 -- | https://www.sqlite.org/c3ref/commit_hook.html
 sqlite3_rollback_hook ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | Rollback hook.
   FunPtr (Ptr a -> IO CInt) ->
   Ptr a ->
@@ -1893,7 +1892,7 @@ sqlite3_rollback_hook =
 
 -- | https://www.sqlite.org/c3ref/serialize.html
 sqlite3_serialize ::
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   CString ->
   Ptr Int64 ->
   CUInt ->
@@ -1903,7 +1902,7 @@ sqlite3_serialize =
 
 -- | https://www.sqlite.org/c3ref/set_authorizer.html
 sqlite3_set_authorizer ::
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   FunPtr (Ptr a -> CInt -> CString -> CString -> CString -> CString -> IO CInt) ->
   Ptr a ->
   IO CInt
@@ -1913,7 +1912,7 @@ sqlite3_set_authorizer =
 -- | https://www.sqlite.org/c3ref/get_auxdata.html
 sqlite3_set_auxdata ::
   -- | Function context.
-  Ptr Sqlite3_context ->
+  Ptr Sqlite.Bindings.Sqlite3_context ->
   CInt ->
   Ptr a ->
   FunPtr (Ptr a -> IO ()) ->
@@ -1923,7 +1922,7 @@ sqlite3_set_auxdata =
 
 -- | https://www.sqlite.org/c3ref/set_last_insert_rowid.html
 sqlite3_set_last_insert_rowid ::
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   Int64 ->
   IO ()
 sqlite3_set_last_insert_rowid =
@@ -1943,40 +1942,40 @@ sqlite3_sleep =
 
 -- | https://www.sqlite.org/c3ref/snapshot_cmp.html
 sqlite3_snapshot_cmp ::
-  Ptr Sqlite3_snapshot ->
-  Ptr Sqlite3_snapshot ->
+  Ptr Sqlite.Bindings.Sqlite3_snapshot ->
+  Ptr Sqlite.Bindings.Sqlite3_snapshot ->
   IO CInt
 sqlite3_snapshot_cmp =
   Sqlite.Bindings.sqlite3_snapshot_cmp
 
 -- | https://www.sqlite.org/c3ref/snapshot_free.html
 sqlite3_snapshot_free ::
-  Ptr Sqlite3_snapshot ->
+  Ptr Sqlite.Bindings.Sqlite3_snapshot ->
   IO ()
 sqlite3_snapshot_free =
   Sqlite.Bindings.sqlite3_snapshot_free
 
 -- | https://www.sqlite.org/c3ref/snapshot_get.html
 sqlite3_snapshot_get ::
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   CString ->
-  Ptr (Ptr Sqlite3_snapshot) ->
+  Ptr (Ptr Sqlite.Bindings.Sqlite3_snapshot) ->
   IO CInt
 sqlite3_snapshot_get =
   Sqlite.Bindings.sqlite3_snapshot_get
 
 -- | https://www.sqlite.org/c3ref/snapshot_open.html
 sqlite3_snapshot_open ::
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   CString ->
-  Ptr Sqlite3_snapshot ->
+  Ptr Sqlite.Bindings.Sqlite3_snapshot ->
   IO CInt
 sqlite3_snapshot_open =
   Sqlite.Bindings.sqlite3_snapshot_open
 
 -- | https://www.sqlite.org/c3ref/snapshot_recover.html
 sqlite3_snapshot_recover ::
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   CString ->
   IO CInt
 sqlite3_snapshot_recover =
@@ -2003,7 +2002,7 @@ sqlite3_sourceid =
 -- Get the SQL of a statement.
 sqlite3_sql ::
   -- | Statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | SQL (UTF-8).
   IO CString
 sqlite3_sql =
@@ -2034,7 +2033,7 @@ sqlite3_status64 =
 -- Produce the next row of a statement.
 sqlite3_step ::
   -- | Statement.
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   -- | Result code.
   IO CInt
 sqlite3_step =
@@ -2042,28 +2041,28 @@ sqlite3_step =
 
 -- | https://www.sqlite.org/c3ref/stmt_busy.html
 sqlite3_stmt_busy ::
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   IO CInt
 sqlite3_stmt_busy =
   Sqlite.Bindings.sqlite3_stmt_busy
 
 -- | https://www.sqlite.org/c3ref/stmt_isexplain.html
 sqlite3_stmt_isexplain ::
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   IO CInt
 sqlite3_stmt_isexplain =
   Sqlite.Bindings.sqlite3_stmt_isexplain
 
 -- | https://www.sqlite.org/c3ref/stmt_readonly.html
 sqlite3_stmt_readonly ::
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   IO CInt
 sqlite3_stmt_readonly =
   Sqlite.Bindings.sqlite3_stmt_readonly
 
 -- | https://www.sqlite.org/c3ref/stmt_scanstatus.html
 sqlite3_stmt_scanstatus ::
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   CInt ->
   CInt ->
   Ptr a ->
@@ -2073,14 +2072,14 @@ sqlite3_stmt_scanstatus =
 
 -- | https://www.sqlite.org/c3ref/stmt_scanstatus_reset.html
 sqlite3_stmt_scanstatus_reset ::
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   IO ()
 sqlite3_stmt_scanstatus_reset =
   Sqlite.Bindings.sqlite3_stmt_scanstatus_reset
 
 -- | https://www.sqlite.org/c3ref/stmt_status.html
 sqlite3_stmt_status ::
-  Ptr Sqlite3_stmt ->
+  Ptr Sqlite.Bindings.Sqlite3_stmt ->
   CInt ->
   CInt ->
   IO CInt
@@ -2138,14 +2137,14 @@ sqlite3_strnicmp =
 
 -- | https://www.sqlite.org/c3ref/system_errno.html
 sqlite3_system_errno ::
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   IO CInt
 sqlite3_system_errno =
   Sqlite.Bindings.sqlite3_system_errno
 
 -- | https://www.sqlite.org/c3ref/table_column_metadata.html
 sqlite3_table_column_metadata ::
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   CString ->
   CString ->
   CString ->
@@ -2165,21 +2164,21 @@ sqlite3_threadsafe =
 
 -- | https://www.sqlite.org/c3ref/total_changes.html
 sqlite3_total_changes ::
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   IO CInt
 sqlite3_total_changes =
   Sqlite.Bindings.sqlite3_total_changes
 
 -- | https://www.sqlite.org/c3ref/total_changes.html
 sqlite3_total_changes64 ::
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   IO Int64
 sqlite3_total_changes64 =
   Sqlite.Bindings.sqlite3_total_changes64
 
 -- | https://www.sqlite.org/c3ref/trace_v2.html
 sqlite3_trace_v2 ::
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   CUInt ->
   FunPtr (CUInt -> Ptr a -> Ptr b -> Ptr c -> IO CInt) ->
   Ptr a ->
@@ -2189,7 +2188,7 @@ sqlite3_trace_v2 =
 
 -- | https://www.sqlite.org/c3ref/txn_state.html
 sqlite3_txn_state ::
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   CString ->
   IO CInt
 sqlite3_txn_state =
@@ -2197,7 +2196,7 @@ sqlite3_txn_state =
 
 -- | https://www.sqlite.org/c3ref/unlock_notify.html
 sqlite3_unlock_notify ::
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   FunPtr (Ptr (Ptr a) -> CInt -> IO ()) ->
   Ptr a ->
   IO CInt
@@ -2206,7 +2205,7 @@ sqlite3_unlock_notify =
 
 -- | https://www.sqlite.org/c3ref/update_hook.html
 sqlite3_update_hook ::
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   FunPtr (Ptr a -> CInt -> CString -> CString -> Int64 -> IO ()) ->
   Ptr a ->
   IO (Ptr b)
@@ -2272,7 +2271,7 @@ sqlite3_uri_parameter =
 -- | https://www.sqlite.org/c3ref/user_data.html
 sqlite3_user_data ::
   -- | Function context.
-  Ptr Sqlite3_context ->
+  Ptr Sqlite.Bindings.Sqlite3_context ->
   IO (Ptr a)
 sqlite3_user_data =
   Sqlite.Bindings.sqlite3_user_data
@@ -2282,7 +2281,7 @@ sqlite3_user_data =
 -- Get the blob of a protected value.
 sqlite3_value_blob ::
   -- | Value.
-  Ptr Sqlite3_value ->
+  Ptr Sqlite.Bindings.Sqlite3_value ->
   -- | Blob.
   IO (Ptr a)
 sqlite3_value_blob =
@@ -2293,7 +2292,7 @@ sqlite3_value_blob =
 -- Get the size of a protected blob or string value, in bytes.
 sqlite3_value_bytes ::
   -- | Value.
-  Ptr Sqlite3_value ->
+  Ptr Sqlite.Bindings.Sqlite3_value ->
   -- | Size, in bytes.
   IO CInt
 sqlite3_value_bytes =
@@ -2304,7 +2303,7 @@ sqlite3_value_bytes =
 -- Get the double of a protected value.
 sqlite3_value_double ::
   -- | Value.
-  Ptr Sqlite3_value ->
+  Ptr Sqlite.Bindings.Sqlite3_value ->
   -- | Double.
   IO CDouble
 sqlite3_value_double =
@@ -2315,9 +2314,9 @@ sqlite3_value_double =
 -- Copy a value.
 sqlite3_value_dup ::
   -- | Value.
-  Ptr Sqlite3_value ->
+  Ptr Sqlite.Bindings.Sqlite3_value ->
   -- | Value copy.
-  IO (Ptr Sqlite3_value)
+  IO (Ptr Sqlite.Bindings.Sqlite3_value)
 sqlite3_value_dup =
   Sqlite.Bindings.sqlite3_value_dup
 
@@ -2326,7 +2325,7 @@ sqlite3_value_dup =
 -- Release memory acquired by 'sqlite3_value_dup'.
 sqlite3_value_free ::
   -- | Value.
-  Ptr Sqlite3_value ->
+  Ptr Sqlite.Bindings.Sqlite3_value ->
   IO ()
 sqlite3_value_free =
   Sqlite.Bindings.sqlite3_value_free
@@ -2336,7 +2335,7 @@ sqlite3_value_free =
 -- Get whether a protected value is a bound parameter.
 sqlite3_value_frombind ::
   -- | Value.
-  Ptr Sqlite3_value ->
+  Ptr Sqlite.Bindings.Sqlite3_value ->
   -- | 0 or 1.
   IO CInt
 sqlite3_value_frombind =
@@ -2347,7 +2346,7 @@ sqlite3_value_frombind =
 -- Get the integer of a protected value.
 sqlite3_value_int ::
   -- | Value.
-  Ptr Sqlite3_value ->
+  Ptr Sqlite.Bindings.Sqlite3_value ->
   -- | Integer.
   IO CInt
 sqlite3_value_int =
@@ -2358,7 +2357,7 @@ sqlite3_value_int =
 -- Get the integer of a protected value.
 sqlite3_value_int64 ::
   -- | Value.
-  Ptr Sqlite3_value ->
+  Ptr Sqlite.Bindings.Sqlite3_value ->
   -- | Integer.
   IO Int64
 sqlite3_value_int64 =
@@ -2369,7 +2368,7 @@ sqlite3_value_int64 =
 -- Within @xUpdate@, get whether the column corresponding to a protected value is unchanged.
 sqlite3_value_nochange ::
   -- | Value.
-  Ptr Sqlite3_value ->
+  Ptr Sqlite.Bindings.Sqlite3_value ->
   -- 0 or 1.
   IO CInt
 sqlite3_value_nochange =
@@ -2380,7 +2379,7 @@ sqlite3_value_nochange =
 -- Get the numeric type of a protected value.
 sqlite3_value_numeric_type ::
   -- | Value.
-  Ptr Sqlite3_value ->
+  Ptr Sqlite.Bindings.Sqlite3_value ->
   -- | Type.
   IO CInt
 sqlite3_value_numeric_type =
@@ -2391,7 +2390,7 @@ sqlite3_value_numeric_type =
 -- Get the pointer of a protected value.
 sqlite3_value_pointer ::
   -- | Value.
-  Ptr Sqlite3_value ->
+  Ptr Sqlite.Bindings.Sqlite3_value ->
   -- | Pointer type.
   CString ->
   -- | Pointer.
@@ -2404,7 +2403,7 @@ sqlite3_value_pointer =
 -- Get the subtype of the return value of a function.
 sqlite3_value_subtype ::
   -- | Value.
-  Ptr Sqlite3_value ->
+  Ptr Sqlite.Bindings.Sqlite3_value ->
   -- | Subtype.
   IO CUInt
 sqlite3_value_subtype =
@@ -2415,7 +2414,7 @@ sqlite3_value_subtype =
 -- Get the string of a protected value.
 sqlite3_value_text ::
   -- | Value.
-  Ptr Sqlite3_value ->
+  Ptr Sqlite.Bindings.Sqlite3_value ->
   -- | String (UTF-8)
   IO (Ptr CUChar)
 sqlite3_value_text =
@@ -2426,7 +2425,7 @@ sqlite3_value_text =
 -- Get the type of a protected value.
 sqlite3_value_type ::
   -- | Value.
-  Ptr Sqlite3_value ->
+  Ptr Sqlite.Bindings.Sqlite3_value ->
   -- | Type.
   IO CInt
 sqlite3_value_type =
@@ -2444,7 +2443,7 @@ sqlite3_vfs_find ::
   -- | VFS name (UTF-8).
   CString ->
   -- | VFS.
-  IO (Ptr Sqlite3_vfs)
+  IO (Ptr Sqlite.Bindings.Sqlite3_vfs)
 sqlite3_vfs_find =
   Sqlite.Bindings.sqlite3_vfs_find
 
@@ -2453,7 +2452,7 @@ sqlite3_vfs_find =
 -- Register a VFS.
 sqlite3_vfs_register ::
   -- | VFS.
-  Ptr Sqlite3_vfs ->
+  Ptr Sqlite.Bindings.Sqlite3_vfs ->
   -- | Make default? (0 or 1).
   CInt ->
   -- | Result code.
@@ -2466,7 +2465,7 @@ sqlite3_vfs_register =
 -- Unregister a VFS.
 sqlite3_vfs_unregister ::
   -- | VFS.
-  Ptr Sqlite3_vfs ->
+  Ptr Sqlite.Bindings.Sqlite3_vfs ->
   -- | Result code.
   IO CInt
 sqlite3_vfs_unregister =
@@ -2477,7 +2476,7 @@ sqlite3_vfs_unregister =
 -- Get the collating sequence of a virtual table constraint.
 sqlite3_vtab_collation ::
   -- | Index info (first argument to @xBestIndex@).
-  Ptr Sqlite3_index_info ->
+  Ptr Sqlite.Bindings.Sqlite3_index_info ->
   -- | @aConstraint[]@ index.
   CInt ->
   -- | Collating sequence name (UTF-8).
@@ -2485,11 +2484,11 @@ sqlite3_vtab_collation ::
 sqlite3_vtab_collation =
   Sqlite.Bindings.sqlite3_vtab_collation
 
-sqlite3_vtab_config__1 :: Ptr Sqlite3 -> CInt -> CInt -> IO CInt
+sqlite3_vtab_config__1 :: Ptr Sqlite.Bindings.Sqlite3 -> CInt -> CInt -> IO CInt
 sqlite3_vtab_config__1 =
   Sqlite.Bindings.sqlite3_vtab_config__1
 
-sqlite3_vtab_config__2 :: Ptr Sqlite3 -> CInt -> IO CInt
+sqlite3_vtab_config__2 :: Ptr Sqlite.Bindings.Sqlite3 -> CInt -> IO CInt
 sqlite3_vtab_config__2 =
   Sqlite.Bindings.sqlite3_vtab_config__2
 
@@ -2498,7 +2497,7 @@ sqlite3_vtab_config__2 =
 -- Get information about how the query planner wants output to be ordered.
 sqlite3_vtab_distinct ::
   -- | Index info (first argument to @xBestIndex@).
-  Ptr Sqlite3_index_info ->
+  Ptr Sqlite.Bindings.Sqlite3_index_info ->
   -- | 0, 1, 2, or 3.
   IO CInt
 sqlite3_vtab_distinct =
@@ -2509,7 +2508,7 @@ sqlite3_vtab_distinct =
 -- Get whether a virtual table constraint is an @IN@ operator that can be processed all at once.
 sqlite3_vtab_in ::
   -- | Index info (first argument to @xBestIndex@).
-  Ptr Sqlite3_index_info ->
+  Ptr Sqlite.Bindings.Sqlite3_index_info ->
   -- | @aConstraint[]@ index.
   CInt ->
   -- | -1, 0, or 1.
@@ -2524,9 +2523,9 @@ sqlite3_vtab_in =
 -- Get the first value on the right-hand side of an @IN@ constraint.
 sqlite3_vtab_in_first ::
   -- | Value.
-  Ptr Sqlite3_value ->
+  Ptr Sqlite.Bindings.Sqlite3_value ->
   -- | /Out/: Value.
-  Ptr (Ptr Sqlite3_value) ->
+  Ptr (Ptr Sqlite.Bindings.Sqlite3_value) ->
   -- | Result code.
   IO CInt
 sqlite3_vtab_in_first =
@@ -2537,9 +2536,9 @@ sqlite3_vtab_in_first =
 -- Get the next value on the right-hand side of an @IN@ constraint.
 sqlite3_vtab_in_next ::
   -- | Value.
-  Ptr Sqlite3_value ->
+  Ptr Sqlite.Bindings.Sqlite3_value ->
   -- | /Out/: Value.
-  Ptr (Ptr Sqlite3_value) ->
+  Ptr (Ptr Sqlite.Bindings.Sqlite3_value) ->
   -- | Result code.
   IO CInt
 sqlite3_vtab_in_next =
@@ -2550,7 +2549,7 @@ sqlite3_vtab_in_next =
 -- Within @xColumn@, get whether the column is being fetched as part of an @UPDATE@ in which its value will not change.
 sqlite3_vtab_nochange ::
   -- | Function context.
-  Ptr Sqlite3_context ->
+  Ptr Sqlite.Bindings.Sqlite3_context ->
   -- | 0 or 1.
   IO CInt
 sqlite3_vtab_nochange =
@@ -2561,7 +2560,7 @@ sqlite3_vtab_nochange =
 -- Within @xUpdate@ for an @INSERT@ or @UPDATE@, get the conflict resolution algorithm.
 sqlite3_vtab_on_conflict ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | Conflict resolution algorithm.
   IO CInt
 sqlite3_vtab_on_conflict =
@@ -2572,11 +2571,11 @@ sqlite3_vtab_on_conflict =
 -- Within @xBestIndex@, get the right-hand side of a virtual table constraint.
 sqlite3_vtab_rhs_value ::
   -- | Index info (first argument to @xBestIndex@).
-  Ptr Sqlite3_index_info ->
+  Ptr Sqlite.Bindings.Sqlite3_index_info ->
   -- | @aConstraint[]@ index.
   CInt ->
   -- | /Out/: value.
-  Ptr (Ptr Sqlite3_value) ->
+  Ptr (Ptr Sqlite.Bindings.Sqlite3_value) ->
   -- | Result code.
   IO CInt
 sqlite3_vtab_rhs_value =
@@ -2588,7 +2587,7 @@ sqlite3_vtab_rhs_value =
 -- of frames in the WAL.
 sqlite3_wal_autocheckpoint ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | Number of frames that will trigger a checkpoint.
   CInt ->
   -- | Result code.
@@ -2601,7 +2600,7 @@ sqlite3_wal_autocheckpoint =
 -- Checkpoint the WAL.
 sqlite3_wal_checkpoint ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | Database name (UTF-8).
   CString ->
   -- | Result code.
@@ -2614,7 +2613,7 @@ sqlite3_wal_checkpoint =
 -- Checkpoint the WAL.
 sqlite3_wal_checkpoint_v2 ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | Database name (UTF-8).
   CString ->
   -- | Checkpoint mode.
@@ -2633,9 +2632,9 @@ sqlite3_wal_checkpoint_v2 =
 -- Register a callback that is invoked each time data is committed to a database in WAL mode.
 sqlite3_wal_hook ::
   -- | Connection.
-  Ptr Sqlite3 ->
+  Ptr Sqlite.Bindings.Sqlite3 ->
   -- | Callback.
-  FunPtr (Ptr a -> Ptr Sqlite3 -> CString -> CInt -> IO CInt) ->
+  FunPtr (Ptr a -> Ptr Sqlite.Bindings.Sqlite3 -> CString -> CInt -> IO CInt) ->
   -- | Application data.
   Ptr a ->
   -- | Previous application data.

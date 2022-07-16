@@ -1,5 +1,3 @@
-{-# LANGUAGE CPP #-}
-
 module Sqlite.Bindings
   ( -- * Functions
     sqlite3_aggregate_context,
