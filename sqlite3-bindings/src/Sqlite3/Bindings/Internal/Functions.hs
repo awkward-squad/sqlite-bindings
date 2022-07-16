@@ -1,10 +1,18 @@
 module Sqlite3.Bindings.Internal.Functions where
 
+import Data.Bits ((.|.))
 import Data.Int (Int64)
+import Data.Text (Text)
 import Data.Word (Word64)
 import Foreign (FunPtr, Ptr)
 import Foreign.C (CChar (..), CDouble (..), CInt (..), CString, CUChar (..), CUInt (..))
+import Foreign.Marshal.Alloc (alloca)
+import Foreign.Ptr (nullPtr)
+import Foreign.Storable (Storable (peek))
 import qualified Sqlite.Bindings
+import Sqlite3.Bindings.Internal.Constants
+import Sqlite3.Bindings.Internal.Objects
+import Sqlite3.Bindings.Internal.Utils (textToCString)
 
 sqlite3_aggregate_context = undefined
 
@@ -1535,31 +1543,44 @@ sqlite3_normalized_sql =
 --
 -- Open a new database connection.
 sqlite3_open ::
-  -- | Database file (UTF-8).
-  CString ->
-  -- | /Out/: connection.
-  Ptr (Ptr Sqlite.Bindings.Sqlite3) ->
-  -- | Result code.
-  IO CInt
-sqlite3_open =
-  Sqlite.Bindings.sqlite3_open
+  -- | Database file.
+  Text ->
+  -- | Connection, result code.
+  IO (Maybe Sqlite3, CInt)
+sqlite3_open database =
+  textToCString database \c_database ->
+    alloca \connectionPtr -> do
+      code <- Sqlite.Bindings.sqlite3_open c_database connectionPtr
+      connection <- peek connectionPtr
+      pure (if connection == nullPtr then Nothing else Just (Sqlite3 connection), code)
 
 -- | https://www.sqlite.org/c3ref/open.html
 --
 -- Open a new database connection.
 sqlite3_open_v2 ::
-  -- | Database file (UTF-8).
-  CString ->
-  -- | /Out/: connection.
-  Ptr (Ptr Sqlite.Bindings.Sqlite3) ->
+  -- | Database file.
+  Text ->
+  -- | Mode.
+  SQLITE_OPEN_MODE ->
   -- | Flags.
-  CInt ->
+  SQLITE_OPEN_FLAGS ->
   -- | Name of VFS to use.
-  CString ->
-  -- | Result code.
-  IO CInt
-sqlite3_open_v2 =
-  Sqlite.Bindings.sqlite3_open_v2
+  Maybe Text ->
+  -- | Connection, result code.
+  IO (Maybe Sqlite3, CInt)
+sqlite3_open_v2 database (SQLITE_OPEN_MODE mode) (SQLITE_OPEN_FLAGS flags) maybeVfs =
+  textToCString database \c_database ->
+    alloca \connectionPtr ->
+      withVfs \c_vfs -> do
+        code <- Sqlite.Bindings.sqlite3_open_v2 c_database connectionPtr (mode .|. flags) c_vfs
+        connection <- peek connectionPtr
+        pure (if connection == nullPtr then Nothing else Just (Sqlite3 connection), code)
+  where
+    withVfs :: (CString -> IO a) -> IO a
+    withVfs k =
+      case maybeVfs of
+        Nothing -> k nullPtr
+        Just vfs -> textToCString vfs k
 
 -- | https://www.sqlite.org/c3ref/overload_function.html
 sqlite3_overload_function ::

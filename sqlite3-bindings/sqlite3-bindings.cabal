@@ -14,10 +14,20 @@ library
   import: component
   build-depends:
     base,
+    bytestring,
     sqlite-bindings,
+    text ^>= 2.0,
   exposed-modules: Sqlite3.Bindings
+  default-extensions:
+    BlockArguments
+    DerivingStrategies
+    LambdaCase
+    PatternSignatures
+    PatternSynonyms
+    ViewPatterns
   hs-source-dirs: src
   other-modules:
     Sqlite3.Bindings.Internal.Constants
     Sqlite3.Bindings.Internal.Functions
     Sqlite3.Bindings.Internal.Objects
+    Sqlite3.Bindings.Internal.Utils

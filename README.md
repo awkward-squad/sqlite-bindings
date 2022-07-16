@@ -5,6 +5,8 @@
 | `SQLITE_CONFIG_GETPCACHE` | Unused |
 | `SQLITE_CONFIG_PCACHE` | Unused |
 | `SQLITE_CONFIG_SCRATCH` | Unused |
+| `SQLITE_OPEN_PRIVATECACHE` | Deprecated |
+| `SQLITE_OPEN_SHAREDCACHE` | Deprecated |
 | `sqlite3_aggregate_count` | Deprecated |
 | `sqlite3_enable_load_extension` | Insecure |
 | `sqlite3_enable_shared_cache` | Deprecated |

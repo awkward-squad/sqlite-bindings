@@ -644,16 +644,10 @@ foreign import capi "sqlite3.h value SQLITE_OPEN_NOFOLLOW" _SQLITE_OPEN_NOFOLLOW
 foreign import capi "sqlite3.h value SQLITE_OPEN_NOMUTEX" _SQLITE_OPEN_NOMUTEX :: CInt
 
 -- https://www.sqlite.org/c3ref/c_open_autoproxy.html
-foreign import capi "sqlite3.h value SQLITE_OPEN_PRIVATECACHE" _SQLITE_OPEN_PRIVATECACHE :: CInt
-
--- https://www.sqlite.org/c3ref/c_open_autoproxy.html
 foreign import capi "sqlite3.h value SQLITE_OPEN_READONLY" _SQLITE_OPEN_READONLY :: CInt
 
 -- https://www.sqlite.org/c3ref/c_open_autoproxy.html
 foreign import capi "sqlite3.h value SQLITE_OPEN_READWRITE" _SQLITE_OPEN_READWRITE :: CInt
-
--- https://www.sqlite.org/c3ref/c_open_autoproxy.html
-foreign import capi "sqlite3.h value SQLITE_OPEN_SHAREDCACHE" _SQLITE_OPEN_SHAREDCACHE :: CInt
 
 -- https://www.sqlite.org/c3ref/c_open_autoproxy.html
 foreign import capi "sqlite3.h value SQLITE_OPEN_SUBJOURNAL" _SQLITE_OPEN_SUBJOURNAL :: CInt
