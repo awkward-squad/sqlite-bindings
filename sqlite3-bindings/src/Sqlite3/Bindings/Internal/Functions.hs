@@ -1233,11 +1233,11 @@ sqlite3_filename_wal =
 -- Finalize a statement.
 sqlite3_finalize ::
   -- | Statement.
-  Ptr Sqlite.Bindings.Sqlite3_stmt ->
+  Sqlite3_stmt ->
   -- | Result code.
   IO CInt
-sqlite3_finalize =
-  Sqlite.Bindings.sqlite3_finalize
+sqlite3_finalize (Sqlite3_stmt statement) =
+  Sqlite.Bindings.sqlite3_finalize statement
 
 -- | https://www.sqlite.org/c3ref/free.html
 sqlite3_free ::
