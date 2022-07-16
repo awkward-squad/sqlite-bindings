@@ -15,14 +15,13 @@ library
   build-depends:
     base,
     bytestring,
-    sqlite-bindings,
+    sqlite3-bindings-c,
     text ^>= 2.0,
   exposed-modules: Sqlite3.Bindings
   default-extensions:
     BlockArguments
     DerivingStrategies
     LambdaCase
-    PatternSignatures
     PatternSynonyms
     TypeApplications
     ViewPatterns

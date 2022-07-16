@@ -1,6 +1,6 @@
 cabal-version: 2.2
 
-name: sqlite-bindings
+name: sqlite3-bindings-c
 version: 0
 
 extra-source-files:
@@ -26,21 +26,21 @@ library
     CApiFFI
     DuplicateRecordFields
     RankNTypes
-  exposed-modules: Sqlite.Bindings
+  exposed-modules: Sqlite3.Bindings.C
   hs-source-dirs: src
   include-dirs: cbits
   includes: sqlite3.h
   other-modules:
-    Sqlite.Bindings.Internal.Constants
-    Sqlite.Bindings.Internal.Functions
-    Sqlite.Bindings.Internal.Objects
+    Sqlite3.Bindings.C.Internal.Constants
+    Sqlite3.Bindings.C.Internal.Functions
+    Sqlite3.Bindings.C.Internal.Objects
 
 test-suite tests
   import: component
   build-depends:
     base,
     bytestring,
-    sqlite-bindings,
+    sqlite3-bindings-c,
     tasty,
     tasty-hunit,
     text ^>= 2.0,

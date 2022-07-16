@@ -1,4 +1,4 @@
-module Sqlite.Bindings
+module Sqlite3.Bindings.C
   ( -- * Functions
     sqlite3_aggregate_context,
     sqlite3_auto_extension,
@@ -719,9 +719,9 @@ module Sqlite.Bindings
   )
 where
 
-import Sqlite.Bindings.Internal.Constants
-import Sqlite.Bindings.Internal.Functions
-import Sqlite.Bindings.Internal.Objects
+import Sqlite3.Bindings.C.Internal.Constants
+import Sqlite3.Bindings.C.Internal.Functions
+import Sqlite3.Bindings.C.Internal.Objects
 
 -- $sqlite-configuration
 --

@@ -1,37 +1,37 @@
 module Sqlite3.Bindings.Internal.Objects
   ( Sqlite3 (..),
-    Sqlite.Bindings.Sqlite3_api_routines,
-    Sqlite.Bindings.Sqlite3_backup,
-    Sqlite.Bindings.Sqlite3_blob,
-    Sqlite.Bindings.Sqlite3_context,
-    Sqlite.Bindings.Sqlite3_data_directory,
-    Sqlite.Bindings.Sqlite3_file,
-    Sqlite.Bindings.Sqlite3_index_info (..),
-    Sqlite.Bindings.Sqlite3_io_methods,
-    Sqlite.Bindings.Sqlite3_mem_methods,
-    Sqlite.Bindings.Sqlite3_module (..),
-    Sqlite.Bindings.Sqlite3_mutex,
-    Sqlite.Bindings.Sqlite3_mutex_methods,
-    Sqlite.Bindings.Sqlite3_pcache,
-    Sqlite.Bindings.Sqlite3_pcache_methods2,
-    Sqlite.Bindings.Sqlite3_pcache_page,
-    Sqlite.Bindings.Sqlite3_snapshot,
+    C.Sqlite3_api_routines,
+    C.Sqlite3_backup,
+    C.Sqlite3_blob,
+    C.Sqlite3_context,
+    C.Sqlite3_data_directory,
+    C.Sqlite3_file,
+    C.Sqlite3_index_info (..),
+    C.Sqlite3_io_methods,
+    C.Sqlite3_mem_methods,
+    C.Sqlite3_module (..),
+    C.Sqlite3_mutex,
+    C.Sqlite3_mutex_methods,
+    C.Sqlite3_pcache,
+    C.Sqlite3_pcache_methods2,
+    C.Sqlite3_pcache_page,
+    C.Sqlite3_snapshot,
     Sqlite3_stmt (..),
-    Sqlite.Bindings.Sqlite3_temp_directory,
-    Sqlite.Bindings.Sqlite3_value,
-    Sqlite.Bindings.Sqlite3_vfs (..),
-    Sqlite.Bindings.Sqlite3_vtab,
-    Sqlite.Bindings.Sqlite3_vtab_cursor,
+    C.Sqlite3_temp_directory,
+    C.Sqlite3_value,
+    C.Sqlite3_vfs (..),
+    C.Sqlite3_vtab,
+    C.Sqlite3_vtab_cursor,
   )
 where
 
 import Foreign.Ptr (Ptr)
-import qualified Sqlite.Bindings
+import qualified Sqlite3.Bindings.C as C
 
 -- | https://www.sqlite.org/c3ref/sqlite3.html
 newtype Sqlite3
-  = Sqlite3 (Ptr Sqlite.Bindings.Sqlite3)
+  = Sqlite3 (Ptr C.Sqlite3)
 
 -- | https://www.sqlite.org/c3ref/stmt.html
 newtype Sqlite3_stmt
-  = Sqlite3_stmt (Ptr Sqlite.Bindings.Sqlite3_stmt)
+  = Sqlite3_stmt (Ptr C.Sqlite3_stmt)

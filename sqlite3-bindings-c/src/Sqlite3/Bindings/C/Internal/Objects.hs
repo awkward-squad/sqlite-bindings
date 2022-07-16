@@ -1,4 +1,4 @@
-module Sqlite.Bindings.Internal.Objects where
+module Sqlite3.Bindings.C.Internal.Objects where
 
 import Foreign (FunPtr, Ptr)
 import Foreign.C (CInt, CString)

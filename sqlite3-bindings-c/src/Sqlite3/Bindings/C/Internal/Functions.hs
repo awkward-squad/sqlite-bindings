@@ -1,10 +1,10 @@
-module Sqlite.Bindings.Internal.Functions where
+module Sqlite3.Bindings.C.Internal.Functions where
 
 import Data.Int (Int64)
 import Data.Word (Word64)
 import Foreign (FunPtr, Ptr)
 import Foreign.C (CChar (..), CDouble (..), CInt (..), CString, CUChar (..), CUInt (..))
-import Sqlite.Bindings.Internal.Objects
+import Sqlite3.Bindings.C.Internal.Objects
 
 -- TODO look over all FunPtr and decide which functions need safe variants
 

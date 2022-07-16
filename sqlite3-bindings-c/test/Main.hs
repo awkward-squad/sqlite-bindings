@@ -15,7 +15,7 @@ import Foreign.C.Types (CInt)
 import Foreign.Marshal.Alloc (alloca)
 import Foreign.Ptr (Ptr)
 import Foreign.Storable (peek)
-import Sqlite.Bindings
+import Sqlite3.Bindings.C
 import Test.Tasty
 import Test.Tasty.HUnit
 

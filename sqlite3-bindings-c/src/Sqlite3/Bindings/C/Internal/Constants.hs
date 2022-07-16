@@ -1,7 +1,7 @@
 -- GHC thinks the SQLITE_STATIC/SQLITE_TRANSIENT are dodgy because they're function pointers that don't begin with "&"
 {-# OPTIONS_GHC -fno-warn-dodgy-foreign-imports #-}
 
-module Sqlite.Bindings.Internal.Constants where
+module Sqlite3.Bindings.C.Internal.Constants where
 
 import Foreign.C (CInt (..), CString)
 import Foreign.Ptr (FunPtr, Ptr)
