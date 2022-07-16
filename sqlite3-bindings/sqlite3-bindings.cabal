@@ -37,6 +37,7 @@ test-suite tests
   import: component
   build-depends:
     base,
+    bytestring,
     sqlite3-bindings,
     tasty,
     tasty-hunit,

@@ -1,6 +1,8 @@
 module Sqlite3.Bindings.Internal.Functions where
 
 import Data.Bits ((.|.))
+import Data.ByteString (ByteString)
+import qualified Data.ByteString.Unsafe as ByteString
 import Data.Int (Int64)
 import Data.Text (Text)
 import qualified Data.Text as Text
@@ -109,38 +111,16 @@ sqlite3_backup_step (Sqlite3_backup backup) n =
 -- Bind a blob to a parameter.
 sqlite3_bind_blob ::
   -- | Statement.
-  Ptr C.Sqlite3_stmt ->
+  Sqlite3_stmt ->
   -- | Parameter index (1-based).
-  CInt ->
+  Int ->
   -- | Blob.
-  Ptr a ->
-  -- | Size of blob, in bytes.
-  CInt ->
-  -- | Destructor, @SQLITE_STATIC@, or @SQLITE_TRANSIENT@.
-  FunPtr (Ptr a -> IO ()) ->
+  ByteString ->
   -- | Result code.
   IO CInt
-sqlite3_bind_blob =
-  C.sqlite3_bind_blob
-
--- | https://www.sqlite.org/c3ref/bind_blob.html
---
--- Bind a blob to a parameter.
-sqlite3_bind_blob64 ::
-  -- | Statement.
-  Ptr C.Sqlite3_stmt ->
-  -- | Parameter index (1-based).
-  CInt ->
-  -- | Blob.
-  Ptr a ->
-  -- | Size of blob, in bytes.
-  Word64 ->
-  -- | Destructor, @SQLITE_STATIC@, or @SQLITE_TRANSIENT@.
-  FunPtr (Ptr a -> IO ()) ->
-  -- | Result code.
-  IO CInt
-sqlite3_bind_blob64 =
-  C.sqlite3_bind_blob64
+sqlite3_bind_blob (Sqlite3_stmt statement) index blob =
+  ByteString.unsafeUseAsCStringLen blob \(c_blob, c_blob_len) ->
+    C.sqlite3_bind_blob statement (intToCInt index) c_blob (intToCInt c_blob_len) C._SQLITE_TRANSIENT
 
 -- | https://www.sqlite.org/c3ref/bind_blob.html
 --

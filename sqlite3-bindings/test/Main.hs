@@ -1,6 +1,8 @@
 module Main where
 
 import Control.Exception (bracket)
+import Data.ByteString (ByteString)
+import qualified Data.ByteString as ByteString
 import Data.Functor
 import Data.Text (Text)
 import qualified Data.Text as Text
@@ -13,6 +15,7 @@ main :: IO ()
 main =
   (defaultMain . testGroup "tests")
     [ testCase "sqlite3_backup_init / sqlite3_backup_finish" test_sqlite3_backup_init,
+      testCase "sqlite3_bind_blob" test_sqlite3_bind_blob,
       testCase "sqlite3_open / sqlite3_close" test_sqlite3_open
     ]
 
@@ -22,6 +25,14 @@ test_sqlite3_backup_init = do
     connect ":memory:" \c2 -> do
       backup <- check (backup_init c2 "main" c1 "main")
       check (backup_finish backup)
+
+test_sqlite3_bind_blob :: IO ()
+test_sqlite3_bind_blob = do
+  connect ":memory:" \conn -> do
+    (statement, _) <- check (prepare_v2 conn "select ?")
+    check (bind_blob statement 1 ByteString.empty)
+    check (bind_blob statement 1 (ByteString.pack [0]))
+    check (finalize statement)
 
 test_sqlite3_open :: IO ()
 test_sqlite3_open = do
@@ -47,9 +58,19 @@ backup_init dstConnection dstName srcConnection srcName =
     Nothing -> Left <$> sqlite3_errmsg dstConnection
     Just backup -> pure (Right backup)
 
+bind_blob :: Sqlite3_stmt -> Int -> ByteString -> IO (Either Text ())
+bind_blob statement index blob = do
+  code <- sqlite3_bind_blob statement index blob
+  pure (inspect code ())
+
 close :: Sqlite3 -> IO (Either Text ())
 close conn = do
   code <- sqlite3_close conn
+  pure (inspect code ())
+
+finalize :: Sqlite3_stmt -> IO (Either Text ())
+finalize statement = do
+  code <- sqlite3_finalize statement
   pure (inspect code ())
 
 open :: Text -> IO (Either Text Sqlite3)
@@ -64,6 +85,13 @@ open name = do
         Right _ -> pure ()
       pure result
 
+prepare_v2 :: Sqlite3 -> Text -> IO (Either Text (Sqlite3_stmt, Text))
+prepare_v2 conn sql = do
+  (maybeStatement, unusedSql, code) <- sqlite3_prepare_v2 conn sql
+  pure case maybeStatement of
+    Nothing -> inspect code undefined
+    Just statement -> Right (statement, unusedSql)
+
 --
 
 check :: IO (Either Text a) -> IO a
@@ -76,4 +104,4 @@ inspect :: CInt -> a -> Either Text a
 inspect code result =
   if code == _SQLITE_OK
     then Right result
-    else Left (sqlite3_errstr code)
+    else Left (sqlite3_errstr code <> " (" <> Text.pack (show code) <> ")")

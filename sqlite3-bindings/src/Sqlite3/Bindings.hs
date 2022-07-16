@@ -11,7 +11,6 @@ module Sqlite3.Bindings
     sqlite3_backup_remaining,
     sqlite3_backup_step,
     sqlite3_bind_blob,
-    sqlite3_bind_blob64,
     sqlite3_bind_double,
     sqlite3_bind_int,
     sqlite3_bind_int64,
