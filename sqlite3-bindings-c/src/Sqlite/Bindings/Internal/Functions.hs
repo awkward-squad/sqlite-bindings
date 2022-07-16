@@ -1847,20 +1847,20 @@ foreign import ccall unsafe
     Ptr Sqlite3_stmt ->
     IO CInt
 
--- | https://www.sqlite.org/c3ref/stmt_scanstatus.html
-foreign import ccall unsafe
-  sqlite3_stmt_scanstatus ::
-    Ptr Sqlite3_stmt ->
-    CInt ->
-    CInt ->
-    Ptr a ->
-    IO CInt
+-- -- | https://www.sqlite.org/c3ref/stmt_scanstatus.html
+-- foreign import ccall unsafe
+--   sqlite3_stmt_scanstatus ::
+--     Ptr Sqlite3_stmt ->
+--     CInt ->
+--     CInt ->
+--     Ptr a ->
+--     IO CInt
 
--- | https://www.sqlite.org/c3ref/stmt_scanstatus_reset.html
-foreign import ccall unsafe
-  sqlite3_stmt_scanstatus_reset ::
-    Ptr Sqlite3_stmt ->
-    IO ()
+-- -- | https://www.sqlite.org/c3ref/stmt_scanstatus_reset.html
+-- foreign import ccall unsafe
+--   sqlite3_stmt_scanstatus_reset ::
+--     Ptr Sqlite3_stmt ->
+--     IO ()
 
 -- | https://www.sqlite.org/c3ref/stmt_status.html
 foreign import ccall unsafe

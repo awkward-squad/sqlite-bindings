@@ -2060,22 +2060,22 @@ sqlite3_stmt_readonly ::
 sqlite3_stmt_readonly =
   Sqlite.Bindings.sqlite3_stmt_readonly
 
--- | https://www.sqlite.org/c3ref/stmt_scanstatus.html
-sqlite3_stmt_scanstatus ::
-  Ptr Sqlite.Bindings.Sqlite3_stmt ->
-  CInt ->
-  CInt ->
-  Ptr a ->
-  IO CInt
-sqlite3_stmt_scanstatus =
-  Sqlite.Bindings.sqlite3_stmt_scanstatus
+-- -- | https://www.sqlite.org/c3ref/stmt_scanstatus.html
+-- sqlite3_stmt_scanstatus ::
+--   Ptr Sqlite.Bindings.Sqlite3_stmt ->
+--   CInt ->
+--   CInt ->
+--   Ptr a ->
+--   IO CInt
+-- sqlite3_stmt_scanstatus =
+--   Sqlite.Bindings.sqlite3_stmt_scanstatus
 
--- | https://www.sqlite.org/c3ref/stmt_scanstatus_reset.html
-sqlite3_stmt_scanstatus_reset ::
-  Ptr Sqlite.Bindings.Sqlite3_stmt ->
-  IO ()
-sqlite3_stmt_scanstatus_reset =
-  Sqlite.Bindings.sqlite3_stmt_scanstatus_reset
+-- -- | https://www.sqlite.org/c3ref/stmt_scanstatus_reset.html
+-- sqlite3_stmt_scanstatus_reset ::
+--   Ptr Sqlite.Bindings.Sqlite3_stmt ->
+--   IO ()
+-- sqlite3_stmt_scanstatus_reset =
+--   Sqlite.Bindings.sqlite3_stmt_scanstatus_reset
 
 -- | https://www.sqlite.org/c3ref/stmt_status.html
 sqlite3_stmt_status ::
