@@ -16,7 +16,7 @@ module Sqlite3.Bindings.Internal.Objects
     Sqlite.Bindings.Sqlite3_pcache_methods2,
     Sqlite.Bindings.Sqlite3_pcache_page,
     Sqlite.Bindings.Sqlite3_snapshot,
-    Sqlite.Bindings.Sqlite3_stmt,
+    Sqlite3_stmt (..),
     Sqlite.Bindings.Sqlite3_temp_directory,
     Sqlite.Bindings.Sqlite3_value,
     Sqlite.Bindings.Sqlite3_vfs (..),
@@ -31,3 +31,7 @@ import qualified Sqlite.Bindings
 -- | https://www.sqlite.org/c3ref/sqlite3.html
 newtype Sqlite3
   = Sqlite3 (Ptr Sqlite.Bindings.Sqlite3)
+
+-- | https://www.sqlite.org/c3ref/stmt.html
+newtype Sqlite3_stmt
+  = Sqlite3_stmt (Ptr Sqlite.Bindings.Sqlite3_stmt)

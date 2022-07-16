@@ -3,16 +3,17 @@ module Sqlite3.Bindings.Internal.Functions where
 import Data.Bits ((.|.))
 import Data.Int (Int64)
 import Data.Text (Text)
+import qualified Data.Text as Text
 import Data.Word (Word64)
 import Foreign (FunPtr, Ptr)
 import Foreign.C (CChar (..), CDouble (..), CInt (..), CString, CUChar (..), CUInt (..))
 import Foreign.Marshal.Alloc (alloca)
-import Foreign.Ptr (nullPtr)
+import Foreign.Ptr (minusPtr, nullPtr, plusPtr)
 import Foreign.Storable (Storable (peek))
 import qualified Sqlite.Bindings
 import Sqlite3.Bindings.Internal.Constants
 import Sqlite3.Bindings.Internal.Objects
-import Sqlite3.Bindings.Internal.Utils (textToCString)
+import Sqlite3.Bindings.Internal.Utils (cstringLenToText, textToCString, textToCStringLen)
 
 sqlite3_aggregate_context = undefined
 
@@ -1594,19 +1595,30 @@ sqlite3_overload_function =
 -- | https://www.sqlite.org/c3ref/prepare.html
 sqlite3_prepare_v2 ::
   -- | Connection.
-  Ptr Sqlite.Bindings.Sqlite3 ->
-  -- | SQL (UTF-8).
-  Ptr CChar ->
-  -- | Size of SQL, in bytes.
-  CInt ->
-  -- | /Out/: statement.
-  Ptr (Ptr Sqlite.Bindings.Sqlite3_stmt) ->
-  -- | /Out/: unused SQL.
-  Ptr (Ptr CChar) ->
-  -- | Result code.
-  IO CInt
-sqlite3_prepare_v2 =
-  Sqlite.Bindings.sqlite3_prepare_v2
+  Sqlite3 ->
+  -- | SQL.
+  Text ->
+  -- | Statement, unused SQL, result code.
+  IO (Maybe Sqlite3_stmt, Text, CInt)
+sqlite3_prepare_v2 (Sqlite3 connection) sql =
+  textToCStringLen sql \c_sql c_sql_len ->
+    alloca \statementPtr ->
+      alloca \unusedSqlPtr -> do
+        code <-
+          Sqlite.Bindings.sqlite3_prepare_v2
+            connection
+            c_sql
+            (fromIntegral @Int @CInt c_sql_len)
+            statementPtr
+            unusedSqlPtr
+        statement <- peek statementPtr
+        c_unused_sql <- peek unusedSqlPtr
+        let unusedSqlLen = (c_sql `plusPtr` c_sql_len) `minusPtr` c_unused_sql
+        unusedSql <-
+          if unusedSqlLen > 0
+            then cstringLenToText c_unused_sql unusedSqlLen
+            else pure Text.empty
+        pure (if statement == nullPtr then Nothing else Just (Sqlite3_stmt statement), unusedSql, code)
 
 -- | https://www.sqlite.org/c3ref/prepare.html
 sqlite3_prepare_v3 ::
