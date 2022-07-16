@@ -83,8 +83,7 @@ module Sqlite.Bindings
     sqlite3_create_window_function,
     sqlite3_data_count,
     sqlite3_database_file_object,
-    sqlite3_db_cacheflush__safe,
-    sqlite3_db_cacheflush__unsafe,
+    sqlite3_db_cacheflush,
     -- $connections-configuration
     sqlite3_db_config__1,
     sqlite3_db_config__2,
