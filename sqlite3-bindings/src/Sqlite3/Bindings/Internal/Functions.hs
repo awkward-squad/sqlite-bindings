@@ -4,14 +4,12 @@ module Sqlite3.Bindings.Internal.Functions where
 
 import Control.Exception (bracket, mask_)
 import Data.Array (Array)
-import qualified Data.Array as Array
 import Data.Bits ((.|.))
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Unsafe as ByteString
 import Data.Int (Int64)
 import Data.Text (Text)
 import qualified Data.Text as Text
-import qualified Data.Text.Encoding.Error as Text
 import Data.Word (Word64)
 import Foreign.C (CChar (..), CDouble (..), CInt (..), CString, CUChar (..), CUInt (..))
 import Foreign.Marshal.Alloc (alloca)
@@ -20,7 +18,7 @@ import Foreign.Storable (Storable (peek))
 import qualified Sqlite3.Bindings.C as C
 import Sqlite3.Bindings.Internal.Constants
 import Sqlite3.Bindings.Internal.Objects
-import Sqlite3.Bindings.Internal.Utils (cintToInt, cstringLenToText, cstringToText, cstringsToTexts, cuintToWord, doubleToCDouble, intToCInt, textToCString, textToCStringLen, wordToCUInt)
+import Sqlite3.Bindings.Internal.Utils (carrayToArray, cintToInt, cstringLenToText, cstringToText, cuintToWord, doubleToCDouble, intToCInt, textToCString, textToCStringLen, wordToCUInt)
 import System.IO.Unsafe (unsafeDupablePerformIO)
 
 sqlite3_auto_extension = undefined
@@ -1140,7 +1138,7 @@ sqlite3_exec ::
   -- | SQL.
   Text ->
   -- | Callback.
-  Maybe (Array Int (Either Text.UnicodeException Text) -> Array Int (Either Text.UnicodeException Text) -> IO CInt) ->
+  Maybe (Array Int Text -> Array Int Text -> IO CInt) ->
   -- | Error message, result code.
   IO (Maybe Text, CInt)
 sqlite3_exec (Sqlite3 connection) sql maybeCallback =
@@ -1149,9 +1147,9 @@ sqlite3_exec (Sqlite3 connection) sql maybeCallback =
     Just callback ->
       bracket
         ( makeCallback0 \_ numCols c_values c_names -> do
-            print numCols
-            values <- cstringsToTexts numCols c_values
-            names <- cstringsToTexts numCols c_names
+            let convert = carrayToArray cstringToText numCols
+            values <- convert c_values
+            names <- convert c_names
             callback values names
         )
         freeHaskellFunPtr

@@ -8,7 +8,7 @@ module Sqlite3.Bindings.Internal.Utils
     cstringLenToText,
     textToCString,
     textToCStringLen,
-    cstringsToTexts,
+    carrayToArray,
   )
 where
 
@@ -19,9 +19,10 @@ import qualified Data.ByteString as ByteString
 import qualified Data.ByteString.Unsafe as ByteString
 import Data.Text (Text)
 import qualified Data.Text.Encoding as Text
-import qualified Data.Text.Encoding.Error as Text
 import Foreign.C (CChar, CDouble, CInt, CString, CUInt)
-import Foreign.Ptr (Ptr, castPtr, plusPtr)
+import Foreign.Ptr (Ptr, plusPtr)
+import Foreign.Storable (Storable)
+import qualified Foreign.Storable as Storable
 
 cintToInt :: CInt -> Int
 cintToInt =
@@ -62,15 +63,15 @@ textToCStringLen text action =
   where
     bytes = Text.encodeUtf8 text
 
-cstringsToTexts :: CInt -> Ptr CString -> IO (Array Int (Either Text.UnicodeException Text))
-cstringsToTexts (cintToInt -> n) c_string0 = do
-  texts <- Array.IO.newArray_ @Array.IO.IOArray @(Either Text.UnicodeException Text) (0, n - 1)
-  let loop :: Int -> Ptr CString -> IO ()
-      loop !i (castPtr @CString @CChar -> c_string) =
+carrayToArray :: forall a b. Storable a => (a -> IO b) -> CInt -> Ptr a -> IO (Array Int b)
+carrayToArray convert (cintToInt -> n) p0 = do
+  arr <- Array.IO.newArray_ @Array.IO.IOArray @b (0, n - 1)
+  let loop :: Int -> Ptr a -> IO ()
+      loop !i p =
         when (i < n) do
-          bytes <- ByteString.packCString c_string
-          print (c_string, bytes)
-          Array.IO.writeArray texts i (Right "placeholder") -- (Text.decodeUtf8' bytes)
-          loop (i + 1) (c_string `plusPtr` ByteString.length bytes)
-  loop 0 c_string0
-  Array.IO.freeze texts
+          a <- Storable.peek p
+          b <- convert a
+          Array.IO.writeArray arr i b
+          loop (i + 1) (p0 `plusPtr` Storable.sizeOf (undefined :: Ptr ()))
+  loop 0 p0
+  Array.IO.freeze arr
