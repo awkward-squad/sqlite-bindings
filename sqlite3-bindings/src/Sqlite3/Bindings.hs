@@ -2,7 +2,6 @@
 
 module Sqlite3.Bindings
   ( -- * Functions
-    sqlite3_aggregate_context,
     sqlite3_auto_extension,
     sqlite3_autovacuum_pages,
     sqlite3_backup_finish,

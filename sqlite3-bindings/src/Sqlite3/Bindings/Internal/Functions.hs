@@ -1,5 +1,8 @@
+{-# LANGUAGE CApiFFI #-}
+
 module Sqlite3.Bindings.Internal.Functions where
 
+import Control.Exception (mask_)
 import Data.Bits ((.|.))
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Unsafe as ByteString
@@ -7,18 +10,15 @@ import Data.Int (Int64)
 import Data.Text (Text)
 import qualified Data.Text as Text
 import Data.Word (Word64)
-import Foreign (FunPtr, Ptr)
 import Foreign.C (CChar (..), CDouble (..), CInt (..), CString, CUChar (..), CUInt (..))
 import Foreign.Marshal.Alloc (alloca)
-import Foreign.Ptr (minusPtr, nullPtr, plusPtr)
+import Foreign.Ptr (FunPtr, Ptr, castFunPtrToPtr, minusPtr, nullFunPtr, nullPtr, plusPtr)
 import Foreign.Storable (Storable (peek))
 import qualified Sqlite3.Bindings.C as C
 import Sqlite3.Bindings.Internal.Constants
 import Sqlite3.Bindings.Internal.Objects
-import Sqlite3.Bindings.Internal.Utils (cintToInt, cstringLenToText, cstringToText, doubleToCDouble, intToCInt, textToCString, textToCStringLen)
+import Sqlite3.Bindings.Internal.Utils (cintToInt, cstringLenToText, cstringToText, cuintToWord, doubleToCDouble, intToCInt, textToCString, textToCStringLen, wordToCUInt)
 import System.IO.Unsafe (unsafeDupablePerformIO)
-
-sqlite3_aggregate_context = undefined
 
 sqlite3_auto_extension = undefined
 
@@ -27,17 +27,20 @@ sqlite3_auto_extension = undefined
 -- Register a callback that is invoked prior to each autovacuum.
 sqlite3_autovacuum_pages ::
   -- | Connection.
-  Ptr C.Sqlite3 ->
+  Sqlite3 ->
   -- | Callback.
-  FunPtr (Ptr a -> CString -> CUInt -> CUInt -> CUInt -> IO CUInt) ->
-  -- | Application data.
-  Ptr a ->
-  -- | Application data destructor.
-  FunPtr (Ptr a -> IO ()) ->
+  (Maybe (Text -> Word -> Word -> Word -> IO Word)) ->
   -- | Result code.
   IO CInt
-sqlite3_autovacuum_pages =
-  C.sqlite3_autovacuum_pages
+sqlite3_autovacuum_pages (Sqlite3 connection) = \case
+  Nothing -> C.sqlite3_autovacuum_pages connection nullFunPtr nullPtr nullFunPtr
+  Just callback ->
+    mask_ do
+      c_callback <-
+        makeCallback0 \_ c_name numPages numFreePages pageSize -> do
+          name <- cstringToText c_name
+          wordToCUInt <$> callback name (cuintToWord numPages) (cuintToWord numFreePages) (cuintToWord pageSize)
+      C.sqlite3_autovacuum_pages connection c_callback (castFunPtrToPtr c_callback) hs_free_fun_ptr
 
 -- | https://www.sqlite.org/c3ref/backup_finish.html
 --
@@ -2682,3 +2685,13 @@ sqlite3_wal_hook ::
   IO (Ptr b)
 sqlite3_wal_hook =
   C.sqlite3_wal_hook
+
+--
+
+foreign import capi unsafe "HsFFI.h &hs_free_fun_ptr"
+  hs_free_fun_ptr :: FunPtr (Ptr a -> IO ())
+
+foreign import ccall "wrapper"
+  makeCallback0 ::
+    (Ptr a -> CString -> CUInt -> CUInt -> CUInt -> IO CUInt) ->
+    IO (FunPtr (Ptr a -> CString -> CUInt -> CUInt -> CUInt -> IO CUInt))

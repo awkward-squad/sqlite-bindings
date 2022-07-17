@@ -6,15 +6,16 @@ import Foreign (FunPtr, Ptr)
 import Foreign.C (CChar (..), CDouble (..), CInt (..), CString, CUChar (..), CUInt (..))
 import Sqlite3.Bindings.C.Internal.Objects
 
--- TODO look over all FunPtr and decide which functions need safe variants
-
 -- | https://www.sqlite.org/c3ref/aggregate_context.html
+--
+-- Allocate memory for an aggregate function.
 foreign import ccall unsafe
   sqlite3_aggregate_context ::
     -- | Function context.
     Ptr Sqlite3_context ->
     -- | Size, in bytes.
     CInt ->
+    -- | Memory.
     IO (Ptr a)
 
 -- | https://www.sqlite.org/c3ref/auto_extension.html
