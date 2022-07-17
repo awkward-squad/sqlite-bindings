@@ -1780,8 +1780,12 @@ foreign import ccall unsafe
   sqlite3_set_last_insert_rowid :: Ptr Sqlite3 -> Int64 -> IO ()
 
 -- | https://www.sqlite.org/c3ref/initialize.html
+--
+-- Deinitialize the library.
 foreign import ccall unsafe
-  sqlite3_shutdown :: IO CInt
+  sqlite3_shutdown ::
+    -- | Result code.
+    IO CInt
 
 -- | https://www.sqlite.org/c3ref/sleep.html
 foreign import ccall safe
@@ -2118,7 +2122,7 @@ foreign import ccall unsafe
   sqlite3_value_dup ::
     -- | Value.
     Ptr Sqlite3_value ->
-    -- | Value copy.
+    -- | Value copy (protected).
     IO (Ptr Sqlite3_value)
 
 -- | https://www.sqlite.org/c3ref/value_dup.html

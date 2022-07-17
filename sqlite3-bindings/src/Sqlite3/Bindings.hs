@@ -19,7 +19,6 @@ module Sqlite3.Bindings
     sqlite3_bind_parameter_name,
     sqlite3_bind_pointer,
     sqlite3_bind_text,
-    sqlite3_bind_text64,
     sqlite3_bind_value,
     sqlite3_bind_zeroblob,
     sqlite3_bind_zeroblob64,

@@ -1,10 +1,11 @@
 module Main where
 
-import Control.Exception (bracket)
+import Control.Exception (SomeException, catch, mask, throwIO, uninterruptibleMask_)
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as ByteString
 import Data.Functor
 import Data.IORef
+import Data.Int (Int64)
 import Data.Text (Text)
 import qualified Data.Text as Text
 import Foreign.C.Types (CInt)
@@ -13,13 +14,14 @@ import Test.Tasty
 import Test.Tasty.HUnit
 
 main :: IO ()
-main =
-  (defaultMain . testGroup "tests")
-    [ testCase "sqlite3_autovacuum_pages" test_sqlite3_autovacuum_pages,
-      testCase "sqlite3_backup_*" test_sqlite3_backup,
-      testCase "sqlite3_bind_blob" test_sqlite3_bind_blob,
-      testCase "sqlite3_open / sqlite3_close" test_sqlite3_open
-    ]
+main = do
+  withSqliteLibrary do
+    (defaultMain . testGroup "tests")
+      [ testCase "sqlite3_autovacuum_pages" test_sqlite3_autovacuum_pages,
+        testCase "sqlite3_backup_*" test_sqlite3_backup,
+        testCase "sqlite3_bind_*" test_sqlite3_bind,
+        testCase "sqlite3_open / sqlite3_close" test_sqlite3_open
+      ]
 
 test_sqlite3_autovacuum_pages :: IO ()
 test_sqlite3_autovacuum_pages = do
@@ -41,6 +43,7 @@ test_sqlite3_backup = do
       withBackup (conn1, "main") (conn2, "main") \backup -> do
         sqlite3_backup_pagecount backup >>= assertEqual "" 0
         sqlite3_backup_remaining backup >>= assertEqual "" 0
+
   withConnection ":memory:" \conn1 ->
     withConnection ":memory:" \conn2 -> do
       check (exec conn1 "create table foo (bar)")
@@ -56,12 +59,34 @@ test_sqlite3_backup = do
         backup_step backup 1 >>= assertEqual "" (Left "no more rows available (101)")
         sqlite3_backup_remaining backup >>= assertEqual "" 0
 
-test_sqlite3_bind_blob :: IO ()
-test_sqlite3_bind_blob = do
+test_sqlite3_bind :: IO ()
+test_sqlite3_bind = do
   withConnection ":memory:" \conn -> do
     withStatement conn "select ?" \(statement, _) -> do
+      sqlite3_bind_parameter_count statement >>= assertEqual "" 1
+
       check (bind_blob statement 1 ByteString.empty)
       check (bind_blob statement 1 (ByteString.pack [0]))
+      check (bind_double statement 1 0)
+      check (bind_int statement 1 0)
+      check (bind_int64 statement 1 0)
+      check (bind_null statement 1)
+      check (bind_text statement 1 "")
+      check (bind_text statement 1 "foo")
+
+      bind_int statement 0 0 >>= assertEqual "" (Left "column index out of range (25)")
+      bind_int statement 2 0 >>= assertEqual "" (Left "column index out of range (25)")
+
+    withStatement conn "select ?, :foo, @bar, $baz" \(statement, _) -> do
+      sqlite3_bind_parameter_count statement >>= assertEqual "" 4
+      sqlite3_bind_parameter_index statement ":foo" >>= assertEqual "" (Just 2)
+      sqlite3_bind_parameter_index statement "@bar" >>= assertEqual "" (Just 3)
+      sqlite3_bind_parameter_index statement "$baz" >>= assertEqual "" (Just 4)
+      sqlite3_bind_parameter_name statement 0 >>= assertEqual "" Nothing
+      sqlite3_bind_parameter_name statement 1 >>= assertEqual "" Nothing
+      sqlite3_bind_parameter_name statement 2 >>= assertEqual "" (Just ":foo")
+      sqlite3_bind_parameter_name statement 3 >>= assertEqual "" (Just "@bar")
+      sqlite3_bind_parameter_name statement 4 >>= assertEqual "" (Just "$baz")
 
 test_sqlite3_open :: IO ()
 test_sqlite3_open = do
@@ -73,15 +98,31 @@ test_sqlite3_open = do
 
 withConnection :: Text -> (Sqlite3 -> IO a) -> IO a
 withConnection name =
-  bracket (check (open name)) (check . close)
+  brackety (open name) close
 
 withBackup :: (Sqlite3, Text) -> (Sqlite3, Text) -> (Sqlite3_backup -> IO a) -> IO a
-withBackup (conn1, name1) (conn2, name2) action =
-  bracket (check (backup_init conn2 name2 conn1 name1)) (check . backup_finish) action
+withBackup (conn1, name1) (conn2, name2) =
+  brackety (backup_init conn2 name2 conn1 name1) backup_finish
+
+withSqliteLibrary :: IO a -> IO a
+withSqliteLibrary action =
+  brackety initialize (\() -> shutdown) \() -> action
 
 withStatement :: Sqlite3 -> Text -> ((Sqlite3_stmt, Text) -> IO a) -> IO a
 withStatement conn sql =
-  bracket (check (prepare_v2 conn sql)) (\(statement, _) -> check (finalize statement))
+  brackety (prepare_v2 conn sql) (\(statement, _) -> finalize statement)
+
+brackety :: IO (Either Text a) -> (a -> IO (Either Text ())) -> (a -> IO b) -> IO b
+brackety acquire release action =
+  mask \restore -> do
+    value <- check (restore acquire)
+    let cleanup = uninterruptibleMask_ (release value)
+    result <-
+      restore (action value) `catch` \(exception :: SomeException) -> do
+        void cleanup
+        throwIO exception
+    check cleanup
+    pure result
 
 ------------------------------------------------------------------------------------------------------------------------
 -- API wrappers that return Either Text
@@ -112,11 +153,37 @@ bind_blob statement index blob = do
   code <- sqlite3_bind_blob statement index blob
   pure (inspect code ())
 
+bind_double :: Sqlite3_stmt -> Int -> Double -> IO (Either Text ())
+bind_double statement index n = do
+  code <- sqlite3_bind_double statement index n
+  pure (inspect code ())
+
+bind_int :: Sqlite3_stmt -> Int -> Int -> IO (Either Text ())
+bind_int statement index n = do
+  code <- sqlite3_bind_int statement index n
+  pure (inspect code ())
+
+bind_int64 :: Sqlite3_stmt -> Int -> Int64 -> IO (Either Text ())
+bind_int64 statement index n = do
+  code <- sqlite3_bind_int64 statement index n
+  pure (inspect code ())
+
+bind_null :: Sqlite3_stmt -> Int -> IO (Either Text ())
+bind_null statement index = do
+  code <- sqlite3_bind_null statement index
+  pure (inspect code ())
+
+bind_text :: Sqlite3_stmt -> Int -> Text -> IO (Either Text ())
+bind_text statement index string = do
+  code <- sqlite3_bind_text statement index string
+  pure (inspect code ())
+
 close :: Sqlite3 -> IO (Either Text ())
 close conn = do
   code <- sqlite3_close conn
   pure (inspect code ())
 
+-- TODO take callback
 exec :: Sqlite3 -> Text -> IO (Either Text ())
 exec conn sql = do
   (maybeErrorMsg, code) <- sqlite3_exec conn sql Nothing
@@ -127,6 +194,11 @@ exec conn sql = do
 finalize :: Sqlite3_stmt -> IO (Either Text ())
 finalize statement = do
   code <- sqlite3_finalize statement
+  pure (inspect code ())
+
+initialize :: IO (Either Text ())
+initialize = do
+  code <- sqlite3_initialize
   pure (inspect code ())
 
 open :: Text -> IO (Either Text Sqlite3)
@@ -147,6 +219,11 @@ prepare_v2 conn sql = do
   pure case maybeStatement of
     Nothing -> inspect code undefined
     Just statement -> Right (statement, unusedSql)
+
+shutdown :: IO (Either Text ())
+shutdown = do
+  code <- sqlite3_shutdown
+  pure (inspect code ())
 
 ------------------------------------------------------------------------------------------------------------------------
 -- Test helpers

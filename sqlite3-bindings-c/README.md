@@ -1,3 +1,7 @@
+#### Overview
+
+This library provides (mostly) complete bindings to SQLite.
+
 #### Things that probably won't get bindings
 
 | Symbol | Reason |

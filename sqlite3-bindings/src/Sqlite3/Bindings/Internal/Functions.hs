@@ -249,40 +249,16 @@ sqlite3_bind_pointer =
 -- Bind a string to a parameter.
 sqlite3_bind_text ::
   -- | Statement.
-  Ptr C.Sqlite3_stmt ->
+  Sqlite3_stmt ->
   -- | Parameter index (1-based).
-  CInt ->
-  -- | String (UTF-8).
-  Ptr CChar ->
-  -- | Size of string, in bytes.
-  CInt ->
-  -- | Destructor, @SQLITE_STATIC@, or @SQLITE_TRANSIENT@.
-  FunPtr (Ptr a -> IO ()) ->
+  Int ->
+  -- | String.
+  Text ->
   -- | Result code.
   IO CInt
-sqlite3_bind_text =
-  C.sqlite3_bind_text
-
--- | https://www.sqlite.org/c3ref/bind_blob.html
---
--- Bind a string to a parameter.
-sqlite3_bind_text64 ::
-  -- | Statement.
-  Ptr C.Sqlite3_stmt ->
-  -- | Parameter index (1-based).
-  CInt ->
-  -- | String (UTF-8).
-  Ptr CChar ->
-  -- | Size of string, in bytes.
-  Word64 ->
-  -- | Destructor, @SQLITE_STATIC@, or @SQLITE_TRANSIENT@.
-  FunPtr (Ptr a -> IO ()) ->
-  -- | Encoding.
-  CUChar ->
-  -- | Result code.
-  IO CInt
-sqlite3_bind_text64 =
-  C.sqlite3_bind_text64
+sqlite3_bind_text (Sqlite3_stmt statement) index string =
+  textToCStringLen string \c_string c_string_len ->
+    C.sqlite3_bind_text statement (intToCInt index) c_string (intToCInt c_string_len) C._SQLITE_TRANSIENT
 
 -- | https://www.sqlite.org/c3ref/bind_blob.html
 --
@@ -2013,7 +1989,11 @@ sqlite3_set_last_insert_rowid =
   C.sqlite3_set_last_insert_rowid
 
 -- | https://www.sqlite.org/c3ref/initialize.html
-sqlite3_shutdown :: IO CInt
+--
+-- Deinitialize the library.
+sqlite3_shutdown ::
+  -- | Result code.
+  IO CInt
 sqlite3_shutdown =
   C.sqlite3_shutdown
 
@@ -2399,7 +2379,7 @@ sqlite3_value_double =
 sqlite3_value_dup ::
   -- | Value.
   Ptr C.Sqlite3_value ->
-  -- | Value copy.
+  -- | Value copy (protected).
   IO (Ptr C.Sqlite3_value)
 sqlite3_value_dup =
   C.sqlite3_value_dup
