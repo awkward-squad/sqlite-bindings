@@ -6,19 +6,21 @@ import Control.Exception (bracket, mask_)
 import Data.Array (Array)
 import Data.Bits ((.|.))
 import Data.ByteString (ByteString)
+import qualified Data.ByteString.Internal as ByteString
 import qualified Data.ByteString.Unsafe as ByteString
 import Data.Int (Int64)
 import Data.Text (Text)
 import qualified Data.Text as Text
 import Data.Word (Word64)
 import Foreign.C (CChar (..), CDouble (..), CInt (..), CString, CUChar (..), CUInt (..))
+import Foreign.ForeignPtr (withForeignPtr)
 import Foreign.Marshal.Alloc (alloca)
 import Foreign.Ptr (FunPtr, Ptr, castFunPtrToPtr, freeHaskellFunPtr, minusPtr, nullFunPtr, nullPtr, plusPtr)
 import Foreign.Storable (Storable (peek))
 import qualified Sqlite3.Bindings.C as C
 import Sqlite3.Bindings.Internal.Constants
 import Sqlite3.Bindings.Internal.Objects
-import Sqlite3.Bindings.Internal.Utils (carrayToArray, cintToInt, cstringLenToText, cstringToText, cuintToWord, doubleToCDouble, intToCInt, textToCString, textToCStringLen, wordToCUInt)
+import Sqlite3.Bindings.Internal.Utils (boolToCInt, carrayToArray, cintToInt, cstringLenToText, cstringToText, cuintToWord, doubleToCDouble, intToCInt, textToCString, textToCStringLen, wordToCUInt)
 import System.IO.Unsafe (unsafeDupablePerformIO)
 
 sqlite3_auto_extension = undefined
@@ -290,21 +292,6 @@ sqlite3_bind_zeroblob ::
 sqlite3_bind_zeroblob (Sqlite3_stmt statement) index n =
   C.sqlite3_bind_zeroblob statement (intToCInt index) (intToCInt n)
 
--- | https://www.sqlite.org/c3ref/bind_blob.html
---
--- Bind a blob of zeroes to a parameter.
-sqlite3_bind_zeroblob64 ::
-  -- | Statement.
-  Sqlite3_stmt ->
-  -- | Parameter index (1-based).
-  Int ->
-  -- | Size of blob, in bytes.
-  Word64 ->
-  -- | Result code.
-  IO CInt
-sqlite3_bind_zeroblob64 (Sqlite3_stmt statement) index n =
-  C.sqlite3_bind_zeroblob64 statement (intToCInt index) n
-
 -- | https://www.sqlite.org/c3ref/blob_bytes.html
 --
 -- Get the size of a blob, in bytes.
@@ -321,51 +308,59 @@ sqlite3_blob_bytes =
 -- Close a blob.
 sqlite3_blob_close ::
   -- | Blob.
-  Ptr C.Sqlite3_blob ->
+  Sqlite3_blob ->
   -- | Result code.
   IO CInt
-sqlite3_blob_close =
-  C.sqlite3_blob_close
+sqlite3_blob_close (Sqlite3_blob blob) =
+  C.sqlite3_blob_close blob
 
 -- | https://www.sqlite.org/c3ref/blob_open.html
 --
 -- Open a blob.
 sqlite3_blob_open ::
   -- | Connection.
-  Ptr C.Sqlite3 ->
-  -- | Database name (UTF-8).
-  CString ->
-  -- | Table name (UTF-8).
-  CString ->
-  -- | Column name (UTF-8).
-  CString ->
+  Sqlite3 ->
+  -- | Database name.
+  Text ->
+  -- | Table name.
+  Text ->
+  -- | Column name.
+  Text ->
   -- | Rowid.
   Int64 ->
-  -- | Read-only if 0, else read-write.
-  CInt ->
-  -- | /Out/: blob.
-  Ptr (Ptr C.Sqlite3_blob) ->
-  -- | Result code.
-  IO CInt
-sqlite3_blob_open =
-  C.sqlite3_blob_open
+  -- | Read-only (false) or read-write (true)
+  Bool ->
+  -- | Blob, result code.
+  IO (Maybe Sqlite3_blob, CInt)
+sqlite3_blob_open (Sqlite3 connection) database table column rowid mode = do
+  (blob, code) <-
+    textToCString database \c_database ->
+      textToCString table \c_table ->
+        textToCString column \c_column ->
+          alloca \blobPtr -> do
+            code <- C.sqlite3_blob_open connection c_database c_table c_column rowid (boolToCInt mode) blobPtr
+            blob <- peek blobPtr
+            pure (blob, code)
+  pure (if blob == nullPtr then Nothing else Just (Sqlite3_blob blob), code)
 
 -- | https://www.sqlite.org/c3ref/blob_read.html
 --
 -- Read data from a blob.
 sqlite3_blob_read ::
   -- | Blob.
-  Ptr C.Sqlite3_blob ->
-  -- | Buffer to read into.
-  Ptr a ->
-  -- | Size of buffer to read into.
-  CInt ->
+  Sqlite3_blob ->
+  -- | Number of blob bytes to read.
+  Int ->
   -- | Byte offset into blob to read from.
-  CInt ->
-  -- | Result code.
-  IO CInt
-sqlite3_blob_read =
-  C.sqlite3_blob_read
+  Int ->
+  -- | Error code or bytes.
+  IO (Either CInt ByteString)
+sqlite3_blob_read (Sqlite3_blob blob) len offset = do
+  foreignPtr <- ByteString.mallocByteString len
+  code <-
+    withForeignPtr foreignPtr \ptr ->
+      C.sqlite3_blob_read blob ptr (intToCInt len) (intToCInt offset)
+  pure (if code == C._SQLITE_OK then Right (ByteString.BS foreignPtr len) else Left code)
 
 -- | https://www.sqlite.org/c3ref/blob_reopen.html
 --
@@ -1376,14 +1371,14 @@ sqlite3_keyword_name =
 
 -- | https://www.sqlite.org/c3ref/last_insert_rowid.html
 --
--- Get the rowid of the most recent insert into a table with a rowid.
+-- Get the rowid of the most recent insert into a rowid table.
 sqlite3_last_insert_rowid ::
   -- | Connection.
-  Ptr C.Sqlite3 ->
+  Sqlite3 ->
   -- | Rowid.
   IO Int64
-sqlite3_last_insert_rowid =
-  C.sqlite3_last_insert_rowid
+sqlite3_last_insert_rowid (Sqlite3 connection) =
+  C.sqlite3_last_insert_rowid connection
 
 -- | https://www.sqlite.org/c3ref/libversion.html
 --

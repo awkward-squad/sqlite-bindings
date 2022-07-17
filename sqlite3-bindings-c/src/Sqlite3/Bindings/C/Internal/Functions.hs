@@ -1261,7 +1261,7 @@ foreign import ccall unsafe
 
 -- | https://www.sqlite.org/c3ref/last_insert_rowid.html
 --
--- Get the rowid of the most recent insert into a table with a rowid.
+-- Get the rowid of the most recent insert into a rowid table.
 foreign import ccall unsafe
   sqlite3_last_insert_rowid ::
     -- | Connection.

@@ -1,5 +1,6 @@
 module Sqlite3.Bindings.Internal.Utils
-  ( cintToInt,
+  ( boolToCInt,
+    cintToInt,
     intToCInt,
     cuintToWord,
     wordToCUInt,
@@ -23,6 +24,11 @@ import Foreign.C (CChar, CDouble, CInt, CString, CUInt)
 import Foreign.Ptr (Ptr, plusPtr)
 import Foreign.Storable (Storable)
 import qualified Foreign.Storable as Storable
+
+boolToCInt :: Bool -> CInt
+boolToCInt = \case
+  False -> 0
+  True -> 1
 
 cintToInt :: CInt -> Int
 cintToInt =

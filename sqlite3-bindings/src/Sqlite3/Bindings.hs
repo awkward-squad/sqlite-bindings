@@ -21,7 +21,6 @@ module Sqlite3.Bindings
     sqlite3_bind_text,
     sqlite3_bind_value,
     sqlite3_bind_zeroblob,
-    sqlite3_bind_zeroblob64,
     sqlite3_blob_bytes,
     sqlite3_blob_close,
     sqlite3_blob_open,

@@ -20,6 +20,8 @@ main = do
       [ testCase "sqlite3_autovacuum_pages" test_sqlite3_autovacuum_pages,
         testCase "sqlite3_backup_*" test_sqlite3_backup,
         testCase "sqlite3_bind_*" test_sqlite3_bind,
+        testCase "sqlite3_blob_*" test_sqlite3_blob,
+        testCase "sqlite3_last_insert_rowid" test_sqlite3_last_insert_rowid,
         testCase "sqlite3_open / sqlite3_close" test_sqlite3_open
       ]
 
@@ -59,6 +61,7 @@ test_sqlite3_backup = do
         backup_step backup 1 >>= assertEqual "" (Left "no more rows available (101)")
         sqlite3_backup_remaining backup >>= assertEqual "" 0
 
+-- TODO sqlite3_bind_pointer, sqlite3_bind_value
 test_sqlite3_bind :: IO ()
 test_sqlite3_bind = do
   withConnection ":memory:" \conn -> do
@@ -73,6 +76,8 @@ test_sqlite3_bind = do
       check (bind_null statement 1)
       check (bind_text statement 1 "")
       check (bind_text statement 1 "foo")
+      check (bind_zeroblob statement 1 0)
+      check (bind_zeroblob statement 1 1)
 
       bind_int statement 0 0 >>= assertEqual "" (Left "column index out of range (25)")
       bind_int statement 2 0 >>= assertEqual "" (Left "column index out of range (25)")
@@ -87,6 +92,31 @@ test_sqlite3_bind = do
       sqlite3_bind_parameter_name statement 2 >>= assertEqual "" (Just ":foo")
       sqlite3_bind_parameter_name statement 3 >>= assertEqual "" (Just "@bar")
       sqlite3_bind_parameter_name statement 4 >>= assertEqual "" (Just "$baz")
+
+test_sqlite3_blob :: IO ()
+test_sqlite3_blob = do
+  withConnection ":memory:" \conn -> do
+    check (exec conn "create table foo (bar)")
+    check (exec conn "insert into foo values (x'01020304')")
+    rowid <- sqlite3_last_insert_rowid conn
+    withBlob conn "main" "foo" "bar" rowid True \blob -> do
+      blob_read blob 0 0 >>= assertEqual "" (Right ByteString.empty)
+      blob_read blob 2 0 >>= assertEqual "" (Right (ByteString.pack [1, 2]))
+      blob_read blob 2 2 >>= assertEqual "" (Right (ByteString.pack [3, 4]))
+      blob_read blob 5 0 >>= assertEqual "" (Left "SQL logic error (1)")
+      blob_read blob 0 5 >>= assertEqual "" (Left "SQL logic error (1)")
+
+test_sqlite3_last_insert_rowid :: IO ()
+test_sqlite3_last_insert_rowid = do
+  withConnection ":memory:" \conn -> do
+    sqlite3_last_insert_rowid conn >>= assertEqual "" 0
+    check (exec conn "create table foo (bar)")
+    check (exec conn "insert into foo values (1)")
+    sqlite3_last_insert_rowid conn >>= assertEqual "" 1
+    check (exec conn "create table bar (baz primary key) without rowid")
+    check (exec conn "insert into bar values (1)")
+    check (exec conn "insert into bar values (2)")
+    sqlite3_last_insert_rowid conn >>= assertEqual "" 1
 
 test_sqlite3_open :: IO ()
 test_sqlite3_open = do
@@ -103,6 +133,10 @@ withConnection name =
 withBackup :: (Sqlite3, Text) -> (Sqlite3, Text) -> (Sqlite3_backup -> IO a) -> IO a
 withBackup (conn1, name1) (conn2, name2) =
   brackety (backup_init conn2 name2 conn1 name1) backup_finish
+
+withBlob :: Sqlite3 -> Text -> Text -> Text -> Int64 -> Bool -> (Sqlite3_blob -> IO a) -> IO a
+withBlob conn database table column rowid mode =
+  brackety (blob_open conn database table column rowid mode) blob_close
 
 withSqliteLibrary :: IO a -> IO a
 withSqliteLibrary action =
@@ -177,6 +211,34 @@ bind_text :: Sqlite3_stmt -> Int -> Text -> IO (Either Text ())
 bind_text statement index string = do
   code <- sqlite3_bind_text statement index string
   pure (inspect code ())
+
+bind_zeroblob :: Sqlite3_stmt -> Int -> Int -> IO (Either Text ())
+bind_zeroblob statement index n = do
+  code <- sqlite3_bind_zeroblob statement index n
+  pure (inspect code ())
+
+blob_close :: Sqlite3_blob -> IO (Either Text ())
+blob_close blob = do
+  code <- sqlite3_blob_close blob
+  pure (inspect code ())
+
+blob_open :: Sqlite3 -> Text -> Text -> Text -> Int64 -> Bool -> IO (Either Text Sqlite3_blob)
+blob_open conn database table column rowid mode = do
+  (maybeBlob, code) <- sqlite3_blob_open conn database table column rowid mode
+  case maybeBlob of
+    Nothing -> pure (inspect code undefined)
+    Just blob -> do
+      let result = inspect code blob
+      case result of
+        Left _ -> void (blob_close blob)
+        Right _ -> pure ()
+      pure result
+
+blob_read :: Sqlite3_blob -> Int -> Int -> IO (Either Text ByteString)
+blob_read blob len offset =
+  sqlite3_blob_read blob len offset <&> \case
+    Left code -> inspect code undefined
+    Right bytes -> Right bytes
 
 close :: Sqlite3 -> IO (Either Text ())
 close conn = do
