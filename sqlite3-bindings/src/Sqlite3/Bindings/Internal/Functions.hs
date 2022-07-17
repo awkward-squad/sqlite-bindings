@@ -2,22 +2,25 @@
 
 module Sqlite3.Bindings.Internal.Functions where
 
-import Control.Exception (mask_)
+import Control.Exception (bracket, mask_)
+import Data.Array (Array)
+import qualified Data.Array as Array
 import Data.Bits ((.|.))
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Unsafe as ByteString
 import Data.Int (Int64)
 import Data.Text (Text)
 import qualified Data.Text as Text
+import qualified Data.Text.Encoding.Error as Text
 import Data.Word (Word64)
 import Foreign.C (CChar (..), CDouble (..), CInt (..), CString, CUChar (..), CUInt (..))
 import Foreign.Marshal.Alloc (alloca)
-import Foreign.Ptr (FunPtr, Ptr, castFunPtrToPtr, minusPtr, nullFunPtr, nullPtr, plusPtr)
+import Foreign.Ptr (FunPtr, Ptr, castFunPtrToPtr, freeHaskellFunPtr, minusPtr, nullFunPtr, nullPtr, plusPtr)
 import Foreign.Storable (Storable (peek))
 import qualified Sqlite3.Bindings.C as C
 import Sqlite3.Bindings.Internal.Constants
 import Sqlite3.Bindings.Internal.Objects
-import Sqlite3.Bindings.Internal.Utils (cintToInt, cstringLenToText, cstringToText, cuintToWord, doubleToCDouble, intToCInt, textToCString, textToCStringLen, wordToCUInt)
+import Sqlite3.Bindings.Internal.Utils (cintToInt, cstringLenToText, cstringToText, cstringsToTexts, cuintToWord, doubleToCDouble, intToCInt, textToCString, textToCStringLen, wordToCUInt)
 import System.IO.Unsafe (unsafeDupablePerformIO)
 
 sqlite3_auto_extension = undefined
@@ -37,7 +40,7 @@ sqlite3_autovacuum_pages (Sqlite3 connection) = \case
   Just callback ->
     mask_ do
       c_callback <-
-        makeCallback0 \_ c_name numPages numFreePages pageSize -> do
+        makeCallback1 \_ c_name numPages numFreePages pageSize -> do
           name <- cstringToText c_name
           wordToCUInt <$> callback name (cuintToWord numPages) (cuintToWord numFreePages) (cuintToWord pageSize)
       C.sqlite3_autovacuum_pages connection c_callback (castFunPtrToPtr c_callback) hs_free_fun_ptr
@@ -1127,6 +1130,45 @@ sqlite3_drop_modules ::
   IO CInt
 sqlite3_drop_modules =
   C.sqlite3_drop_modules
+
+-- | https://www.sqlite.org/c3ref/exec.html
+--
+-- Execute zero or more SQL statements separated by semicolons.
+sqlite3_exec ::
+  -- | Connection.
+  Sqlite3 ->
+  -- | SQL.
+  Text ->
+  -- | Callback.
+  Maybe (Array Int (Either Text.UnicodeException Text) -> Array Int (Either Text.UnicodeException Text) -> IO CInt) ->
+  -- | Error message, result code.
+  IO (Maybe Text, CInt)
+sqlite3_exec (Sqlite3 connection) sql maybeCallback =
+  case maybeCallback of
+    Nothing -> go nullFunPtr
+    Just callback ->
+      bracket
+        ( makeCallback0 \_ numCols c_values c_names -> do
+            print numCols
+            values <- cstringsToTexts numCols c_values
+            names <- cstringsToTexts numCols c_names
+            callback values names
+        )
+        freeHaskellFunPtr
+        go
+  where
+    go :: FunPtr (Ptr a -> CInt -> Ptr CString -> Ptr CString -> IO CInt) -> IO (Maybe Text, CInt)
+    go c_callback =
+      textToCString sql \c_sql ->
+        alloca \errorMessagePtr -> do
+          code <- C.sqlite3_exec connection c_sql c_callback nullPtr errorMessagePtr
+          c_error_message <- peek errorMessagePtr
+          if c_error_message == nullPtr
+            then pure (Nothing, code)
+            else do
+              errorMessage <- cstringToText c_error_message
+              sqlite3_free c_error_message
+              pure (Just errorMessage, code)
 
 -- | https://www.sqlite.org/c3ref/extended_result_codes.html
 sqlite3_extended_result_codes ::
@@ -2693,5 +2735,10 @@ foreign import capi unsafe "HsFFI.h &hs_free_fun_ptr"
 
 foreign import ccall "wrapper"
   makeCallback0 ::
+    (Ptr a -> CInt -> Ptr CString -> Ptr CString -> IO CInt) ->
+    IO (FunPtr (Ptr a -> CInt -> Ptr CString -> Ptr CString -> IO CInt))
+
+foreign import ccall "wrapper"
+  makeCallback1 ::
     (Ptr a -> CString -> CUInt -> CUInt -> CUInt -> IO CUInt) ->
     IO (FunPtr (Ptr a -> CString -> CUInt -> CUInt -> CUInt -> IO CUInt))

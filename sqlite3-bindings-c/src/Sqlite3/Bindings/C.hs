@@ -100,6 +100,7 @@ module Sqlite3.Bindings.C
     sqlite3_errmsg,
     sqlite3_error_offset,
     sqlite3_errstr,
+    sqlite3_exec,
     sqlite3_expanded_sql,
     sqlite3_extended_errcode,
     sqlite3_extended_result_codes,

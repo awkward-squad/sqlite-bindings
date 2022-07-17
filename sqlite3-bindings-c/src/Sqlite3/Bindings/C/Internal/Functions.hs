@@ -1035,6 +1035,25 @@ foreign import ccall unsafe
     Ptr CString ->
     IO CInt
 
+-- | https://www.sqlite.org/c3ref/exec.html
+--
+-- Execute zero or more SQL statements separated by semicolons.
+foreign import ccall safe
+  -- TODO document why safe
+  sqlite3_exec ::
+    -- | Connection.
+    Ptr Sqlite3 ->
+    -- | SQL (UTF-8).
+    CString ->
+    -- | Callback.
+    FunPtr (Ptr a -> CInt -> Ptr CString -> Ptr CString -> IO CInt) ->
+    -- | Application data.
+    Ptr a ->
+    -- | /Out/: error message.
+    Ptr CString ->
+    -- | Result code.
+    IO CInt
+
 -- | https://www.sqlite.org/c3ref/extended_result_codes.html
 foreign import ccall unsafe
   sqlite3_extended_result_codes ::

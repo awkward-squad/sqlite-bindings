@@ -10,3 +10,5 @@
 - sqlite-bindings: don't export SQLITE_OPEN_ flags? (what about VFS-only)
 - rename repo sqlite3-bindings
 - test autovacuum callback
+- cstringsToTexts
+- is there a decodeUtf8 :: ShortByteString -> Text?
