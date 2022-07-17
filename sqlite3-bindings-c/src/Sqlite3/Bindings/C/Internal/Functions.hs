@@ -89,7 +89,7 @@ foreign import ccall unsafe
 --
 -- Copy pages from the source database to the destination database of a backup.
 foreign import ccall safe
-  -- safe because: sqlite3_busy_handler
+  -- safe because: sqlite3_autovacuum_pages, sqlite3_busy_handler
   sqlite3_backup_step ::
     -- | Backup.
     Ptr Sqlite3_backup ->
@@ -1039,7 +1039,7 @@ foreign import ccall unsafe
 --
 -- Execute zero or more SQL statements separated by semicolons.
 foreign import ccall safe
-  -- TODO document why safe
+  -- safe because: sqlite3_autovacuum_pages,
   sqlite3_exec ::
     -- | Connection.
     Ptr Sqlite3 ->
@@ -1867,7 +1867,7 @@ foreign import ccall unsafe
 --
 -- Produce the next row of a statement.
 foreign import ccall safe
-  -- safe because: sqlite3_create_function
+  -- safe because: sqlite3_autovacuum_pages, sqlite3_create_function
   sqlite3_step ::
     -- | Statement.
     Ptr Sqlite3_stmt ->

@@ -16,14 +16,14 @@ main :: IO ()
 main =
   (defaultMain . testGroup "tests")
     [ testCase "sqlite3_autovacuum_pages" test_sqlite3_autovacuum_pages,
-      testCase "sqlite3_backup_init / sqlite3_backup_finish" test_sqlite3_backup_init,
+      testCase "sqlite3_backup_*" test_sqlite3_backup,
       testCase "sqlite3_bind_blob" test_sqlite3_bind_blob,
       testCase "sqlite3_open / sqlite3_close" test_sqlite3_open
     ]
 
 test_sqlite3_autovacuum_pages :: IO ()
 test_sqlite3_autovacuum_pages = do
-  connect ":memory:" \conn -> do
+  withConnection ":memory:" \conn -> do
     countRef <- newIORef (0 :: Int)
     check (exec conn "pragma auto_vacuum = full")
     check (exec conn "create table foo(bar)")
@@ -34,33 +34,57 @@ test_sqlite3_autovacuum_pages = do
     count <- readIORef countRef
     assertEqual "" 1 count
 
-test_sqlite3_backup_init :: IO ()
-test_sqlite3_backup_init = do
-  connect ":memory:" \c1 ->
-    connect ":memory:" \c2 -> do
-      backup <- check (backup_init c2 "main" c1 "main")
-      check (backup_finish backup)
+test_sqlite3_backup :: IO ()
+test_sqlite3_backup = do
+  withConnection ":memory:" \conn1 ->
+    withConnection ":memory:" \conn2 ->
+      withBackup (conn1, "main") (conn2, "main") \backup -> do
+        sqlite3_backup_pagecount backup >>= assertEqual "" 0
+        sqlite3_backup_remaining backup >>= assertEqual "" 0
+  withConnection ":memory:" \conn1 ->
+    withConnection ":memory:" \conn2 -> do
+      check (exec conn1 "create table foo (bar)")
+      check (exec conn1 "insert into foo values (1)")
+      withBackup (conn1, "main") (conn2, "main") \backup -> do
+        sqlite3_backup_pagecount backup >>= assertEqual "" 0
+        sqlite3_backup_remaining backup >>= assertEqual "" 0
+        backup_step backup 0 >>= assertEqual "" (Right ())
+        sqlite3_backup_pagecount backup >>= assertEqual "" 2
+        sqlite3_backup_remaining backup >>= assertEqual "" 2
+        backup_step backup 1 >>= assertEqual "" (Right ())
+        sqlite3_backup_remaining backup >>= assertEqual "" 1
+        backup_step backup 1 >>= assertEqual "" (Left "no more rows available (101)")
+        sqlite3_backup_remaining backup >>= assertEqual "" 0
 
 test_sqlite3_bind_blob :: IO ()
 test_sqlite3_bind_blob = do
-  connect ":memory:" \conn -> do
-    (statement, _) <- check (prepare_v2 conn "select ?")
-    check (bind_blob statement 1 ByteString.empty)
-    check (bind_blob statement 1 (ByteString.pack [0]))
-    check (finalize statement)
+  withConnection ":memory:" \conn -> do
+    withStatement conn "select ?" \(statement, _) -> do
+      check (bind_blob statement 1 ByteString.empty)
+      check (bind_blob statement 1 (ByteString.pack [0]))
 
 test_sqlite3_open :: IO ()
 test_sqlite3_open = do
-  connect ":memory:" \_ -> pure ()
-  connect "" \_ -> pure ()
+  withConnection ":memory:" \_ -> pure ()
+  withConnection "" \_ -> pure ()
 
---
+------------------------------------------------------------------------------------------------------------------------
+-- Exception-safe acquire/release actions
 
-connect :: Text -> (Sqlite3 -> IO a) -> IO a
-connect name action =
-  bracket (check (open name)) (check . close) action
+withConnection :: Text -> (Sqlite3 -> IO a) -> IO a
+withConnection name =
+  bracket (check (open name)) (check . close)
 
---
+withBackup :: (Sqlite3, Text) -> (Sqlite3, Text) -> (Sqlite3_backup -> IO a) -> IO a
+withBackup (conn1, name1) (conn2, name2) action =
+  bracket (check (backup_init conn2 name2 conn1 name1)) (check . backup_finish) action
+
+withStatement :: Sqlite3 -> Text -> ((Sqlite3_stmt, Text) -> IO a) -> IO a
+withStatement conn sql =
+  bracket (check (prepare_v2 conn sql)) (\(statement, _) -> check (finalize statement))
+
+------------------------------------------------------------------------------------------------------------------------
+-- API wrappers that return Either Text
 
 autovacuum_pages :: Sqlite3 -> Maybe (Text -> Word -> Word -> Word -> IO Word) -> IO (Either Text ())
 autovacuum_pages conn callback = do
@@ -77,6 +101,11 @@ backup_init dstConnection dstName srcConnection srcName =
   sqlite3_backup_init dstConnection dstName srcConnection srcName >>= \case
     Nothing -> Left <$> sqlite3_errmsg dstConnection
     Just backup -> pure (Right backup)
+
+backup_step :: Sqlite3_backup -> Int -> IO (Either Text ())
+backup_step backup n = do
+  code <- sqlite3_backup_step backup n
+  pure (inspect code ())
 
 bind_blob :: Sqlite3_stmt -> Int -> ByteString -> IO (Either Text ())
 bind_blob statement index blob = do
@@ -119,7 +148,8 @@ prepare_v2 conn sql = do
     Nothing -> inspect code undefined
     Just statement -> Right (statement, unusedSql)
 
---
+------------------------------------------------------------------------------------------------------------------------
+-- Test helpers
 
 check :: IO (Either Text a) -> IO a
 check action =

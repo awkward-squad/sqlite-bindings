@@ -1,11 +1,11 @@
 - Make accurate safe/unsafe bindings
 - Expose compile-time options as flags
+  - https://www.sqlite.org/compile.html
 - Figure out versioning scheme
 - Make low-level haskellified wrapper (called `sqlite3`)?
 - auto extension xEntryPoint fiasco
 - make sure all pure funcs don't have IO
 - objects
-- rename sqlite-bindings -> sqlite3-bindings-c
 - sqlite-bindings: what to do about CInt result code?
 - sqlite-bindings: don't export SQLITE_OPEN_ flags? (what about VFS-only)
 - rename repo sqlite3-bindings
