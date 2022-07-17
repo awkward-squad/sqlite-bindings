@@ -4,6 +4,7 @@ import Control.Exception (bracket)
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as ByteString
 import Data.Functor
+import Data.IORef
 import Data.Text (Text)
 import qualified Data.Text as Text
 import Foreign.C.Types (CInt)
@@ -14,10 +15,24 @@ import Test.Tasty.HUnit
 main :: IO ()
 main =
   (defaultMain . testGroup "tests")
-    [ testCase "sqlite3_backup_init / sqlite3_backup_finish" test_sqlite3_backup_init,
+    [ testCase "sqlite3_autovacuum_pages" test_sqlite3_autovacuum_pages,
+      testCase "sqlite3_backup_init / sqlite3_backup_finish" test_sqlite3_backup_init,
       testCase "sqlite3_bind_blob" test_sqlite3_bind_blob,
       testCase "sqlite3_open / sqlite3_close" test_sqlite3_open
     ]
+
+test_sqlite3_autovacuum_pages :: IO ()
+test_sqlite3_autovacuum_pages = do
+  connect ":memory:" \conn -> do
+    countRef <- newIORef (0 :: Int)
+    check (exec conn "pragma auto_vacuum = full")
+    check (exec conn "create table foo(bar)")
+    check (autovacuum_pages conn (Just \_ _ n _ -> modifyIORef' countRef (+ 1) $> n))
+    check (exec conn "insert into foo values (1)")
+    check (autovacuum_pages conn Nothing)
+    check (exec conn "insert into foo values (1)")
+    count <- readIORef countRef
+    assertEqual "" 1 count
 
 test_sqlite3_backup_init :: IO ()
 test_sqlite3_backup_init = do
@@ -47,6 +62,11 @@ connect name action =
 
 --
 
+autovacuum_pages :: Sqlite3 -> Maybe (Text -> Word -> Word -> Word -> IO Word) -> IO (Either Text ())
+autovacuum_pages conn callback = do
+  code <- sqlite3_autovacuum_pages conn callback
+  pure (inspect code ())
+
 backup_finish :: Sqlite3_backup -> IO (Either Text ())
 backup_finish backup = do
   code <- sqlite3_backup_finish backup
@@ -67,6 +87,13 @@ close :: Sqlite3 -> IO (Either Text ())
 close conn = do
   code <- sqlite3_close conn
   pure (inspect code ())
+
+exec :: Sqlite3 -> Text -> IO (Either Text ())
+exec conn sql = do
+  (maybeErrorMsg, code) <- sqlite3_exec conn sql Nothing
+  pure case inspect code () of
+    Left errorMsg -> Left (errorMsg <> maybe Text.empty ("; " <>) maybeErrorMsg)
+    Right () -> Right ()
 
 finalize :: Sqlite3_stmt -> IO (Either Text ())
 finalize statement = do
