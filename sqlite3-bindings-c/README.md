@@ -20,6 +20,11 @@ This library provides (mostly) complete bindings to SQLite.
 | `sqlite3_global_recover` | Deprecated |
 | `sqlite3_memory_alarm` | Deprecated |
 | `sqlite3_mprintf` | No useful non-variadic usage |
+| `sqlite3_mutex_alloc` | Intended for internal use |
+| `sqlite3_mutex_enter` | Intended for internal use |
+| `sqlite3_mutex_free` | Intended for internal use |
+| `sqlite3_mutex_leave` | Intended for internal use |
+| `sqlite3_mutex_try` | Intended for internal use |
 | `sqlite3_os_end` | Shouldn't be called by application |
 | `sqlite3_os_init` | Shouldn't be called by application |
 | `sqlite3_prepare` | Deprecated |

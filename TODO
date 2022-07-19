@@ -10,3 +10,9 @@
 - sqlite-bindings: don't export SQLITE_OPEN_ flags? (what about VFS-only)
 - rename repo sqlite3-bindings
 - is there a decodeUtf8 :: ShortByteString -> Text?
+- test all functions
+- sqlite-bindings: look over exported constants
+- sqlite-bindings: higher-level object records
+- sqlite-bindings: allow (some) callbacks to throw exceptions? (e.g. exec)
+- sqlite-bindings: exec callback: cache column names
+- sqlite extensions e.g. carray?

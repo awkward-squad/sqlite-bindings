@@ -18,10 +18,10 @@ foreign import ccall unsafe
     -- | Memory.
     IO (Ptr a)
 
--- | https://www.sqlite.org/c3ref/auto_extension.html
---
--- Register an extension that is automatically loaded by every new connection.
-sqlite3_auto_extension = undefined
+---- | https://www.sqlite.org/c3ref/auto_extension.html
+----
+---- Register an extension that is automatically loaded by every new connection.
+-- sqlite3_auto_extension = undefined
 
 -- | https://www.sqlite.org/c3ref/autovacuum_pages.html
 --
@@ -111,7 +111,7 @@ foreign import ccall unsafe
     Ptr a ->
     -- | Size of blob, in bytes.
     CInt ->
-    -- | Destructor, @SQLITE_STATIC@, or @SQLITE_TRANSIENT@.
+    -- | Blob destructor, @SQLITE_STATIC@, or @SQLITE_TRANSIENT@.
     FunPtr (Ptr a -> IO ()) ->
     -- | Result code.
     IO CInt
@@ -129,7 +129,7 @@ foreign import ccall unsafe
     Ptr a ->
     -- | Size of blob, in bytes.
     Word64 ->
-    -- | Destructor, @SQLITE_STATIC@, or @SQLITE_TRANSIENT@.
+    -- | Blob destructor, @SQLITE_STATIC@, or @SQLITE_TRANSIENT@.
     FunPtr (Ptr a -> IO ()) ->
     -- | Result code.
     IO CInt
@@ -253,7 +253,7 @@ foreign import ccall unsafe
     Ptr CChar ->
     -- | Size of string, in bytes.
     CInt ->
-    -- | Destructor, @SQLITE_STATIC@, or @SQLITE_TRANSIENT@.
+    -- | String destructor, @SQLITE_STATIC@, or @SQLITE_TRANSIENT@.
     FunPtr (Ptr a -> IO ()) ->
     -- | Result code.
     IO CInt
@@ -271,7 +271,7 @@ foreign import ccall unsafe
     Ptr CChar ->
     -- | Size of string, in bytes.
     Word64 ->
-    -- | Destructor, @SQLITE_STATIC@, or @SQLITE_TRANSIENT@.
+    -- | String destructor, @SQLITE_STATIC@, or @SQLITE_TRANSIENT@.
     FunPtr (Ptr a -> IO ()) ->
     -- | Encoding.
     CUChar ->
@@ -380,7 +380,7 @@ foreign import ccall unsafe
 
 -- | https://www.sqlite.org/c3ref/blob_reopen.html
 --
--- Point an open blob at a different row in the same table.
+-- Point an open blob at a different blob in the same table.
 foreign import ccall unsafe
   sqlite3_blob_reopen ::
     -- | Blob.
@@ -406,39 +406,53 @@ foreign import ccall unsafe
     -- | Result code.
     IO CInt
 
--- | [__Register a callback to handle `SQLITE_BUSY` errors__](https://www.sqlite.org/c3ref/busy_handler.html)
+-- | https://www.sqlite.org/c3ref/busy_handler.html
+--
+-- Register a callback that may be invoked when @SQLITE_BUSY@ would otherwise be returned from a function.
 foreign import ccall unsafe
   sqlite3_busy_handler ::
     -- | Connection.
     Ptr Sqlite3 ->
+    -- | Callback.
     FunPtr (Ptr a -> CInt -> IO CInt) ->
+    -- | Application data.
     Ptr a ->
+    -- | Result code.
     IO CInt
 
--- | [__Set a busy timeout__](https://www.sqlite.org/c3ref/busy_timeout.html)
+-- | https://www.sqlite.org/c3ref/busy_timeout.html
+--
+-- Register a callback (with 'sqlite3_busy_handler') that sleeps.
 foreign import ccall unsafe
   sqlite3_busy_timeout ::
     -- | Connection.
     Ptr Sqlite3 ->
     -- | Number of millseconds.
     CInt ->
+    -- | Result code.
     IO CInt
 
--- | [__Cancel automatic extension loading__](https://www.sqlite.org/c3ref/cancel_auto_extension.html)
-sqlite3_cancel_auto_extension = undefined
+-- -- | [__Cancel automatic extension loading__](https://www.sqlite.org/c3ref/cancel_auto_extension.html)
+-- sqlite3_cancel_auto_extension = undefined
 
 -- | https://www.sqlite.org/c3ref/changes.html
+--
+-- Get the number of rows modified, inserted, or deleted by the most recent @UPDATE@, @INSERT@, or @DELETE@ statement.
 foreign import ccall unsafe
   sqlite3_changes ::
     -- | Connection.
     Ptr Sqlite3 ->
+    -- | Number of rows.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/changes.html
+--
+-- Get the number of rows modified, inserted, or deleted by the most recent @UPDATE@, @INSERT@, or @DELETE@ statement.
 foreign import ccall unsafe
   sqlite3_changes64 ::
     -- | Connection.
     Ptr Sqlite3 ->
+    -- | Number of rows.
     IO Int64
 
 -- | https://www.sqlite.org/c3ref/clear_bindings.html
@@ -463,9 +477,9 @@ foreign import ccall unsafe
 
 -- | https://www.sqlite.org/c3ref/close.html
 --
--- Close a database connection. If it has any unfinalized statements, open blob handlers, or unfinished backups, mark
--- the connection as unusable and make arrangements to deallocate it after all statements are finalized, blob handlers
--- are closed, and backups are finished.
+-- Attempt to close a database connection, but if it has any unfinalized statements, open blob handlers, or unfinished
+-- backups, mark the connection as unusable and make arrangements to deallocate it after all statements are finalized,
+-- blob handlers are closed, and backups are finished.
 foreign import ccall unsafe
   sqlite3_close_v2 ::
     -- | Connection.
@@ -522,12 +536,15 @@ foreign import ccall unsafe
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/column_database_name.html
+--
+-- Get the original database name for a result column.
 foreign import ccall unsafe
   sqlite3_column_database_name ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
     -- | Column index (0-based).
     CInt ->
+    -- | Database name (UTF-8).
     IO CString
 
 -- | https://www.sqlite.org/c3ref/column_decltype.html
@@ -579,30 +596,39 @@ foreign import ccall unsafe
     IO Int64
 
 -- | https://www.sqlite.org/c3ref/column_name.html
+--
+-- Get the column name of a result column.
 foreign import ccall unsafe
   sqlite3_column_name ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
     -- | Column index (0-based).
     CInt ->
+    -- | Column name (UTF-8).
     IO CString
 
 -- | https://www.sqlite.org/c3ref/column_database_name.html
+--
+-- Get the original column name of a result column.
 foreign import ccall unsafe
   sqlite3_column_origin_name ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
     -- | Column index (0-based).
     CInt ->
+    -- | Column name (UTF-8).
     IO CString
 
 -- | https://www.sqlite.org/c3ref/column_database_name.html
+--
+-- Get the original table name for a result column.
 foreign import ccall unsafe
   sqlite3_column_table_name ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
     -- | Column index (0-based).
     CInt ->
+    -- | Table name (UTF-8).
     IO CString
 
 -- | https://www.sqlite.org/c3ref/column_blob.html
@@ -642,13 +668,17 @@ foreign import ccall unsafe
     IO (Ptr Sqlite3_value)
 
 -- | https://www.sqlite.org/c3ref/commit_hook.html
+--
+-- Register a callback that is invoked whenever a transaction is committed.
 foreign import ccall unsafe
   sqlite3_commit_hook ::
     -- | Connection.
     Ptr Sqlite3 ->
     -- | Commit hook.
     FunPtr (Ptr a -> IO CInt) ->
+    -- | Application data.
     Ptr a ->
+    -- | Previous application data.
     IO (Ptr b)
 
 -- | https://www.sqlite.org/c3ref/compileoption_get.html
@@ -672,10 +702,13 @@ foreign import ccall unsafe
     CInt
 
 -- | https://www.sqlite.org/c3ref/complete.html
+--
+-- Get whether a SQL statement is complete.
 foreign import ccall unsafe
   sqlite3_complete ::
     -- | SQL (UTF-8).
     CString ->
+    -- | 0 (incomplete), 1 (complete), or @SQLITE_NOMEM@ (memory allocation failure).
     CInt
 
 foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__1 :: CInt -> IO CInt
@@ -705,6 +738,8 @@ foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__12 :: CInt
 foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__13 :: CInt -> Int64 -> IO CInt
 
 -- | https://www.sqlite.org/c3ref/context_db_handle.html
+--
+-- Get the connection for a function.
 foreign import ccall unsafe
   sqlite3_context_db_handle ::
     -- | Function context.
@@ -815,6 +850,7 @@ foreign import ccall unsafe
     FunPtr (Ptr Sqlite3_context -> IO ()) ->
     -- | Application data destructor.
     FunPtr (Ptr a -> IO ()) ->
+    -- | Result code.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/create_module.html
@@ -853,7 +889,7 @@ foreign import ccall unsafe
 
 -- | https://www.sqlite.org/c3ref/create_function.html
 --
--- Create an aggregate function or an aggregate window function.
+-- Create an aggregate window function.
 foreign import ccall unsafe
   sqlite3_create_window_function ::
     -- | Connection.
@@ -876,6 +912,7 @@ foreign import ccall unsafe
     FunPtr (Ptr Sqlite3_context -> CInt -> Ptr (Ptr Sqlite3_value) -> IO ()) ->
     -- | Application data destructor.
     FunPtr (Ptr a -> IO ()) ->
+    -- | Result code.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/data_count.html
@@ -898,12 +935,13 @@ foreign import ccall unsafe
 
 -- | https://www.sqlite.org/c3ref/db_cacheflush.html
 --
--- Flush all dirty pager-cache pages to disk, for all attached databases.
+-- Flush all databases' dirty pager-cache pages to disk.
 foreign import ccall safe
   -- safe because: sqlite3_busy_handler
   sqlite3_db_cacheflush ::
     -- | Connection.
     Ptr Sqlite3 ->
+    -- | Result code.
     IO CInt
 
 foreign import capi unsafe "sqlite3.h sqlite3_db_config" sqlite3_db_config__1 :: Ptr Sqlite3 -> CInt -> CString -> IO CInt
@@ -914,7 +952,7 @@ foreign import capi unsafe "sqlite3.h sqlite3_db_config" sqlite3_db_config__3 ::
 
 -- | https://www.sqlite.org/c3ref/db_filename.html
 --
--- Get the filename for an attached database.
+-- Get the filename for a database.
 foreign import ccall unsafe
   sqlite3_db_filename ::
     -- | Connection.
@@ -946,7 +984,7 @@ foreign import ccall unsafe
 
 -- | https://www.sqlite.org/c3ref/db_name.html
 --
--- Get the name of an attached database.
+-- Get the name of a database.
 foreign import ccall unsafe
   sqlite3_db_name ::
     -- | Connection
@@ -958,14 +996,14 @@ foreign import ccall unsafe
 
 -- | https://www.sqlite.org/c3ref/db_readonly.html
 --
--- Get whether an attached database is read-only.
+-- Get whether a database is read-only.
 foreign import ccall unsafe
   sqlite3_db_readonly ::
     -- | Connection.
     Ptr Sqlite3 ->
     -- | Database name (UTF-8).
     CString ->
-    -- | 0 or 1, or -1 if the database is not attached.
+    -- | -1 (not attached), 0 (not read-only), or 1 (read-only).
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/db_release_memory.html
@@ -1008,7 +1046,9 @@ foreign import ccall unsafe
     -- | Result code.
     IO CInt
 
--- | [__Deserialize a database__](https://www.sqlite.org/c3ref/deserialize.html)
+-- | https://www.sqlite.org/c3ref/deserialize.html
+--
+-- Deserialize a database.
 foreign import ccall unsafe
   sqlite3_deserialize ::
     -- | Connection.
@@ -1024,15 +1064,19 @@ foreign import ccall unsafe
     Int64 ->
     -- | Flags.
     CUInt ->
+    -- | Result code.
     IO CInt
 
--- | [__Remove unnecessary virtual table implementations__](https://www.sqlite.org/c3ref/drop_modules.html)
+-- | https://www.sqlite.org/c3ref/drop_modules.html
+--
+-- Remove virtual table modules.
 foreign import ccall unsafe
   sqlite3_drop_modules ::
     -- | Connection.
     Ptr Sqlite3 ->
     -- | Names of virtual table modules to keep (UTF-8).
     Ptr CString ->
+    -- | Result code.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/exec.html
@@ -1055,21 +1099,25 @@ foreign import ccall safe
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/extended_result_codes.html
+--
+-- Set whether to return extended result codes.
 foreign import ccall unsafe
   sqlite3_extended_result_codes ::
     -- | Connection.
     Ptr Sqlite3 ->
+    -- | 0 or 1.
     CInt ->
+    -- | Result code.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/errcode.html
 --
--- Get the error code of the most recent failure on a connection.
+-- Get the result code of the most recent failure on a connection.
 foreign import ccall unsafe
   sqlite3_errcode ::
     -- | Connection.
     Ptr Sqlite3 ->
-    -- | Error code.
+    -- | Result code.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/errcode.html
@@ -1083,10 +1131,13 @@ foreign import ccall unsafe
     IO CString
 
 -- | https://www.sqlite.org/c3ref/errcode.html
+--
+-- Get the byte offset into the SQL that the most recent failure on a connection refers to.
 foreign import ccall unsafe
   sqlite3_error_offset ::
     -- | Connection.
     Ptr Sqlite3 ->
+    -- | Byte offset, or -1 if not applicable.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/errcode.html
@@ -1110,12 +1161,18 @@ foreign import ccall unsafe
     IO CString
 
 -- | https://www.sqlite.org/c3ref/errcode.html
+--
+-- Get the extended result code of the most recent failure on a connection.
 foreign import ccall unsafe
   sqlite3_extended_errcode ::
     -- | Connection.
     Ptr Sqlite3 ->
+    -- | Result code.
     IO CInt
 
+-- | https://www.sqlite.org/c3ref/file_control.html
+--
+-- Call @xFileControl@.
 foreign import ccall unsafe
   sqlite3_file_control ::
     -- | Connection.
@@ -1161,7 +1218,7 @@ foreign import ccall unsafe
 
 -- | https://www.sqlite.org/c3ref/finalize.html
 --
--- Finalize a statement.
+-- Release a statement.
 foreign import ccall unsafe
   sqlite3_finalize ::
     -- | Statement.
@@ -1170,15 +1227,20 @@ foreign import ccall unsafe
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/free.html
+--
+-- Release memory acquired by 'sqlite3_malloc', 'sqlite3_malloc64', 'sqlite3_realloc', or 'sqlite3_realloc64'.
 foreign import ccall unsafe
-  sqlite3_free :: Ptr a -> IO ()
+  sqlite3_free ::
+    -- | Memory.
+    Ptr a ->
+    IO ()
 
 -- | https://www.sqlite.org/c3ref/create_filename.html
 --
--- Release memory acquired by 'sqlite3_create_filename'.
+-- Release a VFS filename.
 foreign import ccall unsafe
   sqlite3_free_filename ::
-    -- | Filename.
+    -- | Filename (UTF-8).
     CString ->
     IO ()
 
@@ -1193,11 +1255,15 @@ foreign import ccall unsafe
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/get_auxdata.html
+--
+-- Get the metadata of a function argument.
 foreign import ccall unsafe
   sqlite3_get_auxdata ::
     -- | Function context.
     Ptr Sqlite3_context ->
+    -- | Argument index (0-based).
     CInt ->
+    -- | Metadata.
     IO (Ptr a)
 
 -- | https://www.sqlite.org/c3ref/hard_heap_limit64.html
@@ -1220,7 +1286,7 @@ foreign import ccall unsafe
 
 -- | https://www.sqlite.org/c3ref/interrupt.html
 --
--- Cause all in-progress operations to abort and return `SQLITE_INTERRUPT` at the earliest opportunity.
+-- Cause all in-progress operations to return `SQLITE_INTERRUPT` at the earliest opportunity.
 foreign import ccall unsafe
   sqlite3_interrupt ::
     -- | Connection.
@@ -1314,7 +1380,7 @@ foreign import ccall unsafe
 -- Write a message to the error log.
 foreign import capi unsafe "sqlite3.h sqlite3_log"
   sqlite3_log ::
-    -- | Error code.
+    -- | Result code.
     CInt ->
     -- | Error message.
     CString ->
@@ -1347,14 +1413,16 @@ foreign import ccall unsafe
   sqlite3_memory_highwater ::
     -- | Reset highest value? (0 or 1).
     CInt ->
-    -- | Highest value (prior to reset, if reset).
+    -- | Highest value (prior to this reset, if this is a reset).
     IO Int64
 
 -- | https://www.sqlite.org/c3ref/memory_highwater.html
 --
 -- Get the size of live memory, in bytes.
 foreign import ccall unsafe
-  sqlite3_memory_used :: IO Int64
+  sqlite3_memory_used ::
+    -- | Size of memory, in bytes.
+    IO Int64
 
 -- | https://www.sqlite.org/c3ref/free.html
 --
@@ -1367,65 +1435,18 @@ foreign import ccall unsafe
     -- | Size of memory, in bytes.
     IO Word64
 
--- | https://www.sqlite.org/c3ref/mutex_alloc.html
---
--- Create a mutex.
-foreign import ccall unsafe
-  sqlite3_mutex_alloc ::
-    -- | Mutex type.
-    CInt ->
-    -- | Mutex.
-    IO (Ptr Sqlite3_mutex)
+-- sqlite3_mutex_held = undefined
 
--- | https://www.sqlite.org/c3ref/mutex_alloc.html
---
--- Acquire a mutex (blocking).
-foreign import ccall safe
-  sqlite3_mutex_enter ::
-    -- | Mutex.
-    Ptr Sqlite3_mutex ->
-    IO ()
-
--- | https://www.sqlite.org/c3ref/mutex_alloc.html
---
--- Destroy a mutex.
-foreign import ccall unsafe
-  sqlite3_mutex_free ::
-    -- | Mutex.
-    Ptr Sqlite3_mutex ->
-    IO ()
-
-sqlite3_mutex_held = undefined
-
--- | https://www.sqlite.org/c3ref/mutex_alloc.html
---
--- Release a mutex. The mutex must have been acquired on the same OS thread.
-foreign import ccall unsafe
-  sqlite3_mutex_leave ::
-    -- | Mutex.
-    Ptr Sqlite3_mutex ->
-    IO ()
-
-sqlite3_mutex_notheld = undefined
-
--- | https://www.sqlite.org/c3ref/mutex_alloc.html
---
--- Acquire a mutex (non-blocking).
-foreign import ccall unsafe
-  sqlite3_mutex_try ::
-    -- | Mutex.
-    Ptr Sqlite3_mutex ->
-    -- | Result code.
-    IO CInt
+-- sqlite3_mutex_notheld = undefined
 
 -- | https://www.sqlite.org/c3ref/next_stmt.html
 --
--- Get the first or next statement of a connection.
+-- Get the next statement of a connection.
 foreign import ccall unsafe
   sqlite3_next_stmt ::
     -- | Connection.
     Ptr Sqlite3 ->
-    -- | Statement, or null to get the first statement.
+    -- | Statement.
     Ptr Sqlite3_stmt ->
     -- | Next statement.
     IO (Ptr Sqlite3_stmt)
@@ -1471,8 +1492,18 @@ foreign import ccall safe
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/overload_function.html
+--
+-- Ensure a placeholder function exists, to be overloaded by @xFindFunction@.
 foreign import ccall unsafe
-  sqlite3_overload_function :: Ptr Sqlite3 -> CString -> CInt -> IO CInt
+  sqlite3_overload_function ::
+    -- | Connection.
+    Ptr Sqlite3 ->
+    -- | Function name (UTF-8).
+    CString ->
+    -- | Number of arguments.
+    CInt ->
+    -- | Result code.
+    IO CInt
 
 -- | https://www.sqlite.org/c3ref/prepare.html
 foreign import ccall safe
@@ -1509,41 +1540,41 @@ foreign import ccall unsafe
     -- | Result code.
     IO CInt
 
--- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
-foreign import ccall unsafe
-  sqlite3_preupdate_blobwrite :: Ptr Sqlite3 -> IO CInt
+-- -- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
+-- foreign import ccall unsafe
+--   sqlite3_preupdate_blobwrite :: Ptr Sqlite3 -> IO CInt
 
--- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
-foreign import ccall unsafe
-  sqlite3_preupdate_count :: Ptr Sqlite3 -> IO CInt
+-- -- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
+-- foreign import ccall unsafe
+--   sqlite3_preupdate_count :: Ptr Sqlite3 -> IO CInt
 
--- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
-foreign import ccall unsafe
-  sqlite3_preupdate_depth :: Ptr Sqlite3 -> IO CInt
+-- -- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
+-- foreign import ccall unsafe
+--   sqlite3_preupdate_depth :: Ptr Sqlite3 -> IO CInt
 
--- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
-foreign import ccall unsafe
-  sqlite3_preupdate_hook ::
-    Ptr Sqlite3 ->
-    FunPtr (Ptr a -> Ptr Sqlite3 -> CInt -> CString -> CString -> Int64 -> Int64 -> IO ()) ->
-    Ptr a ->
-    IO (Ptr b)
+-- -- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
+-- foreign import ccall unsafe
+--   sqlite3_preupdate_hook ::
+--     Ptr Sqlite3 ->
+--     FunPtr (Ptr a -> Ptr Sqlite3 -> CInt -> CString -> CString -> Int64 -> Int64 -> IO ()) ->
+--     Ptr a ->
+--     IO (Ptr b)
 
--- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
-foreign import ccall unsafe
-  sqlite3_preupdate_new ::
-    Ptr Sqlite3 ->
-    CInt ->
-    Ptr (Ptr Sqlite3_value) ->
-    IO CInt
+-- -- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
+-- foreign import ccall unsafe
+--   sqlite3_preupdate_new ::
+--     Ptr Sqlite3 ->
+--     CInt ->
+--     Ptr (Ptr Sqlite3_value) ->
+--     IO CInt
 
--- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
-foreign import ccall unsafe
-  sqlite3_preupdate_old ::
-    Ptr Sqlite3 ->
-    CInt ->
-    Ptr (Ptr Sqlite3_value) ->
-    IO CInt
+-- -- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
+-- foreign import ccall unsafe
+--   sqlite3_preupdate_old ::
+--     Ptr Sqlite3 ->
+--     CInt ->
+--     Ptr (Ptr Sqlite3_value) ->
+--     IO CInt
 
 -- | https://www.sqlite.org/c3ref/progress_handler.html
 foreign import ccall unsafe
@@ -1555,8 +1586,15 @@ foreign import ccall unsafe
     IO ()
 
 -- | https://www.sqlite.org/c3ref/randomness.html
+--
+-- Generate random bytes.
 foreign import ccall unsafe
-  sqlite3_randomness :: CInt -> Ptr a -> IO ()
+  sqlite3_randomness ::
+    -- | Number of bytes to generate.
+    CInt ->
+    -- | /Out/: buffer.
+    Ptr a ->
+    IO ()
 
 -- | https://www.sqlite.org/c3ref/free.html
 foreign import ccall unsafe
@@ -1587,8 +1625,8 @@ foreign import ccall unsafe
     -- | Result code.
     IO CInt
 
--- | https://www.sqlite.org/c3ref/reset_auto_extension.html
-sqlite3_reset_auto_extension = undefined
+-- -- | https://www.sqlite.org/c3ref/reset_auto_extension.html
+-- sqlite3_reset_auto_extension = undefined
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
 foreign import ccall unsafe
@@ -1749,12 +1787,19 @@ foreign import ccall unsafe
     IO (Ptr b)
 
 -- | https://www.sqlite.org/c3ref/serialize.html
+--
+-- Serialize a database.
 foreign import ccall unsafe
   sqlite3_serialize ::
+    -- | Connection.
     Ptr Sqlite3 ->
+    -- | Database name (UTF-8).
     CString ->
+    -- | /Out/: size of database, in bytes.
     Ptr Int64 ->
+    -- | Flags.
     CUInt ->
+    -- | Serialized database.
     IO (Ptr CUChar)
 
 -- | https://www.sqlite.org/c3ref/set_authorizer.html
@@ -1766,12 +1811,17 @@ foreign import ccall unsafe
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/get_auxdata.html
+--
+-- Set the metadata of a function argument.
 foreign import ccall unsafe
   sqlite3_set_auxdata ::
     -- | Function context.
     Ptr Sqlite3_context ->
+    -- | Argument index (0-based).
     CInt ->
+    -- | Metadata.
     Ptr a ->
+    -- | Metadata destructor.
     FunPtr (Ptr a -> IO ()) ->
     IO ()
 

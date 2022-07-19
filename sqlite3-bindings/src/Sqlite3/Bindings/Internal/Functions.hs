@@ -353,7 +353,7 @@ sqlite3_blob_read ::
   Int ->
   -- | Byte offset into blob to read from.
   Int ->
-  -- | Error code or bytes.
+  -- | Result code, or bytes.
   IO (Either CInt ByteString)
 sqlite3_blob_read (Sqlite3_blob blob) len offset = do
   foreignPtr <- ByteString.mallocByteString len
@@ -364,7 +364,7 @@ sqlite3_blob_read (Sqlite3_blob blob) len offset = do
 
 -- | https://www.sqlite.org/c3ref/blob_reopen.html
 --
--- Point an open blob at a different row in the same table.
+-- Point an open blob at a different blob in the same table.
 sqlite3_blob_reopen ::
   -- | Blob.
   Ptr C.Sqlite3_blob ->
@@ -392,22 +392,30 @@ sqlite3_blob_write ::
 sqlite3_blob_write =
   C.sqlite3_blob_write
 
--- | [__Register a callback to handle `SQLITE_BUSY` errors__](https://www.sqlite.org/c3ref/busy_handler.html)
+-- | https://www.sqlite.org/c3ref/busy_handler.html
+--
+-- Register a callback that may be invoked when @SQLITE_BUSY@ would otherwise be returned from a function.
 sqlite3_busy_handler ::
   -- | Connection.
   Ptr C.Sqlite3 ->
+  -- | Callback.
   FunPtr (Ptr a -> CInt -> IO CInt) ->
+  -- | Application data.
   Ptr a ->
+  -- | Result code.
   IO CInt
 sqlite3_busy_handler =
   C.sqlite3_busy_handler
 
--- | [__Set a busy timeout__](https://www.sqlite.org/c3ref/busy_timeout.html)
+-- | https://www.sqlite.org/c3ref/busy_timeout.html
+--
+-- Register a callback (with 'sqlite3_busy_handler') that sleeps.
 sqlite3_busy_timeout ::
   -- | Connection.
   Ptr C.Sqlite3 ->
   -- | Number of millseconds.
   CInt ->
+  -- | Result code.
   IO CInt
 sqlite3_busy_timeout =
   C.sqlite3_busy_timeout
@@ -416,17 +424,23 @@ sqlite3_busy_timeout =
 sqlite3_cancel_auto_extension = undefined
 
 -- | https://www.sqlite.org/c3ref/changes.html
+--
+-- Get the number of rows modified, inserted, or deleted by the most recent @UPDATE@, @INSERT@, or @DELETE@ statement.
 sqlite3_changes ::
   -- | Connection.
   Ptr C.Sqlite3 ->
+  -- | Number of rows.
   IO CInt
 sqlite3_changes =
   C.sqlite3_changes
 
 -- | https://www.sqlite.org/c3ref/changes.html
+--
+-- Get the number of rows modified, inserted, or deleted by the most recent @UPDATE@, @INSERT@, or @DELETE@ statement.
 sqlite3_changes64 ::
   -- | Connection.
   Ptr C.Sqlite3 ->
+  -- | Number of rows.
   IO Int64
 sqlite3_changes64 =
   C.sqlite3_changes64
@@ -455,9 +469,9 @@ sqlite3_close (Sqlite3 connection) =
 
 -- | https://www.sqlite.org/c3ref/close.html
 --
--- Close a database connection. If it has any unfinalized statements, open blob handlers, or unfinished backups, mark
--- the connection as unusable and make arrangements to deallocate it after all statements are finalized, blob handlers
--- are closed, and backups are finished.
+-- Attempt to close a database connection, but if it has any unfinalized statements, open blob handlers, or unfinished
+-- backups, mark the connection as unusable and make arrangements to deallocate it after all statements are finalized,
+-- blob handlers are closed, and backups are finished.
 sqlite3_close_v2 ::
   -- | Connection.
   Sqlite3 ->
@@ -519,11 +533,14 @@ sqlite3_column_count =
   C.sqlite3_column_count
 
 -- | https://www.sqlite.org/c3ref/column_database_name.html
+--
+-- Get the original database name for a result column.
 sqlite3_column_database_name ::
   -- | Statement.
   Ptr C.Sqlite3_stmt ->
   -- | Column index (0-based).
   CInt ->
+  -- | Database name.
   IO CString
 sqlite3_column_database_name =
   C.sqlite3_column_database_name
@@ -581,31 +598,40 @@ sqlite3_column_int64 =
   C.sqlite3_column_int64
 
 -- | https://www.sqlite.org/c3ref/column_name.html
+--
+-- Get the column name of a result column.
 sqlite3_column_name ::
   -- | Statement.
   Ptr C.Sqlite3_stmt ->
   -- | Column index (0-based).
   CInt ->
+  -- | Column name.
   IO CString
 sqlite3_column_name =
   C.sqlite3_column_name
 
 -- | https://www.sqlite.org/c3ref/column_database_name.html
+--
+-- Get the original column name of a result column.
 sqlite3_column_origin_name ::
   -- | Statement.
   Ptr C.Sqlite3_stmt ->
   -- | Column index (0-based).
   CInt ->
+  -- | Column name.
   IO CString
 sqlite3_column_origin_name =
   C.sqlite3_column_origin_name
 
 -- | https://www.sqlite.org/c3ref/column_database_name.html
+--
+-- Get the original table name for a result column.
 sqlite3_column_table_name ::
   -- | Statement.
   Ptr C.Sqlite3_stmt ->
   -- | Column index (0-based).
   CInt ->
+  -- | Table name.
   IO CString
 sqlite3_column_table_name =
   C.sqlite3_column_table_name
@@ -650,12 +676,16 @@ sqlite3_column_value =
   C.sqlite3_column_value
 
 -- | https://www.sqlite.org/c3ref/commit_hook.html
+--
+-- Register a callback that is invoked whenever a transaction is committed.
 sqlite3_commit_hook ::
   -- | Connection.
   Ptr C.Sqlite3 ->
   -- | Commit hook.
   FunPtr (Ptr a -> IO CInt) ->
+  -- | Application data.
   Ptr a ->
+  -- | Previous application data.
   IO (Ptr b)
 sqlite3_commit_hook =
   C.sqlite3_commit_hook
@@ -683,9 +713,12 @@ sqlite3_compileoption_used =
   C.sqlite3_compileoption_used
 
 -- | https://www.sqlite.org/c3ref/complete.html
+--
+-- Get whether a SQL statement is complete.
 sqlite3_complete ::
   -- | SQL (UTF-8).
   CString ->
+  -- | 0 (incomplete), 1 (complete), or @SQLITE_NOMEM@ (memory allocation failure).
   CInt
 sqlite3_complete =
   C.sqlite3_complete
@@ -743,6 +776,8 @@ sqlite3_config__13 =
   C.sqlite3_config__13
 
 -- | https://www.sqlite.org/c3ref/context_db_handle.html
+--
+-- Get the connection for a function.
 sqlite3_context_db_handle ::
   -- | Function context.
   Ptr C.Sqlite3_context ->
@@ -857,6 +892,7 @@ sqlite3_create_function_v2 ::
   FunPtr (Ptr C.Sqlite3_context -> IO ()) ->
   -- | Application data destructor.
   FunPtr (Ptr a -> IO ()) ->
+  -- | Result code.
   IO CInt
 sqlite3_create_function_v2 =
   C.sqlite3_create_function_v2
@@ -899,7 +935,7 @@ sqlite3_create_module_v2 =
 
 -- | https://www.sqlite.org/c3ref/create_function.html
 --
--- Create an aggregate function or an aggregate window function.
+-- Create an aggregate window function.
 sqlite3_create_window_function ::
   -- | Connection.
   Ptr C.Sqlite3 ->
@@ -921,6 +957,7 @@ sqlite3_create_window_function ::
   FunPtr (Ptr C.Sqlite3_context -> CInt -> Ptr (Ptr C.Sqlite3_value) -> IO ()) ->
   -- | Application data destructor.
   FunPtr (Ptr a -> IO ()) ->
+  -- | Result code.
   IO CInt
 sqlite3_create_window_function =
   C.sqlite3_create_window_function
@@ -947,10 +984,11 @@ sqlite3_database_file_object =
 
 -- | https://www.sqlite.org/c3ref/db_cacheflush.html
 --
--- Flush all dirty pager-cache pages to disk, for all attached databases.
+-- Flush all databases' dirty pager-cache pages to disk.
 sqlite3_db_cacheflush ::
   -- | Connection.
   Ptr C.Sqlite3 ->
+  -- | Result code.
   IO CInt
 sqlite3_db_cacheflush =
   C.sqlite3_db_cacheflush
@@ -969,7 +1007,7 @@ sqlite3_db_config__3 =
 
 -- | https://www.sqlite.org/c3ref/db_filename.html
 --
--- Get the filename for an attached database.
+-- Get the filename for a database.
 sqlite3_db_filename ::
   -- | Connection.
   Ptr C.Sqlite3 ->
@@ -1004,7 +1042,7 @@ sqlite3_db_mutex =
 
 -- | https://www.sqlite.org/c3ref/db_name.html
 --
--- Get the name of an attached database.
+-- Get the name of a database.
 sqlite3_db_name ::
   -- | Connection
   Ptr C.Sqlite3 ->
@@ -1017,13 +1055,13 @@ sqlite3_db_name =
 
 -- | https://www.sqlite.org/c3ref/db_readonly.html
 --
--- Get whether an attached database is read-only.
+-- Get whether a database is read-only.
 sqlite3_db_readonly ::
   -- | Connection.
   Ptr C.Sqlite3 ->
   -- | Database name (UTF-8).
   CString ->
-  -- | 0 or 1, or -1 if the database is not attached.
+  -- | -1 (not attached), 0 (not read-only), or 1 (read-only).
   IO CInt
 sqlite3_db_readonly =
   C.sqlite3_db_readonly
@@ -1071,7 +1109,9 @@ sqlite3_declare_vtab ::
 sqlite3_declare_vtab =
   C.sqlite3_declare_vtab
 
--- | [__Deserialize a database__](https://www.sqlite.org/c3ref/deserialize.html)
+-- | https://www.sqlite.org/c3ref/deserialize.html
+--
+-- Deserialize a database.
 sqlite3_deserialize ::
   -- | Connection.
   Ptr C.Sqlite3 ->
@@ -1086,16 +1126,20 @@ sqlite3_deserialize ::
   Int64 ->
   -- | Flags.
   CUInt ->
+  -- | Result code.
   IO CInt
 sqlite3_deserialize =
   C.sqlite3_deserialize
 
--- | [__Remove unnecessary virtual table implementations__](https://www.sqlite.org/c3ref/drop_modules.html)
+-- | https://www.sqlite.org/c3ref/drop_modules.html
+--
+-- Remove virtual table modules.
 sqlite3_drop_modules ::
   -- | Connection.
   Ptr C.Sqlite3 ->
   -- | Names of virtual table modules to keep (UTF-8).
   Ptr CString ->
+  -- | Result code.
   IO CInt
 sqlite3_drop_modules =
   C.sqlite3_drop_modules
@@ -1140,21 +1184,25 @@ sqlite3_exec (Sqlite3 connection) sql maybeCallback =
               pure (Just errorMessage, code)
 
 -- | https://www.sqlite.org/c3ref/extended_result_codes.html
+--
+-- Set whether to return extended result codes.
 sqlite3_extended_result_codes ::
   -- | Connection.
   Ptr C.Sqlite3 ->
+  -- | 0 or 1.
   CInt ->
+  -- | Result code.
   IO CInt
 sqlite3_extended_result_codes =
   C.sqlite3_extended_result_codes
 
 -- | https://www.sqlite.org/c3ref/errcode.html
 --
--- Get the error code of the most recent failure on a connection.
+-- Get the result code of the most recent failure on a connection.
 sqlite3_errcode ::
   -- | Connection.
   Sqlite3 ->
-  -- | Error code.
+  -- | Result code.
   IO CInt
 sqlite3_errcode (Sqlite3 connection) =
   C.sqlite3_errcode connection
@@ -1172,9 +1220,12 @@ sqlite3_errmsg (Sqlite3 connection) = do
   cstringToText c_string
 
 -- | https://www.sqlite.org/c3ref/errcode.html
+--
+-- Get the byte offset into the SQL that the most recent failure on a connection refers to.
 sqlite3_error_offset ::
   -- | Connection.
   Ptr C.Sqlite3 ->
+  -- | Byte offset, or -1 if not applicable.
   IO CInt
 sqlite3_error_offset =
   C.sqlite3_error_offset
@@ -1202,13 +1253,19 @@ sqlite3_expanded_sql =
   C.sqlite3_expanded_sql
 
 -- | https://www.sqlite.org/c3ref/errcode.html
+--
+-- Get the extended result code of the most recent failure on a connection.
 sqlite3_extended_errcode ::
   -- | Connection.
   Ptr C.Sqlite3 ->
+  -- | Result code.
   IO CInt
 sqlite3_extended_errcode =
   C.sqlite3_extended_errcode
 
+-- | https://www.sqlite.org/c3ref/file_control.html
+--
+-- Call @xFileControl@.
 sqlite3_file_control ::
   -- | Connection.
   Ptr C.Sqlite3 ->
@@ -1258,7 +1315,7 @@ sqlite3_filename_wal =
 
 -- | https://www.sqlite.org/c3ref/finalize.html
 --
--- Finalize a statement.
+-- Release a statement.
 sqlite3_finalize ::
   -- | Statement.
   Sqlite3_stmt ->
@@ -1268,7 +1325,10 @@ sqlite3_finalize (Sqlite3_stmt statement) =
   C.sqlite3_finalize statement
 
 -- | https://www.sqlite.org/c3ref/free.html
+--
+-- Release memory acquired by 'sqlite3_malloc', 'sqlite3_malloc64', 'sqlite3_realloc', or 'sqlite3_realloc64'.
 sqlite3_free ::
+  -- | Memory.
   Ptr a ->
   IO ()
 sqlite3_free =
@@ -1276,9 +1336,9 @@ sqlite3_free =
 
 -- | https://www.sqlite.org/c3ref/create_filename.html
 --
--- Release memory acquired by 'sqlite3_create_filename'.
+-- Release a VFS filename.
 sqlite3_free_filename ::
-  -- | Filename.
+  -- | Filename (UTF-8).
   CString ->
   IO ()
 sqlite3_free_filename =
@@ -1296,10 +1356,14 @@ sqlite3_get_autocommit =
   C.sqlite3_get_autocommit
 
 -- | https://www.sqlite.org/c3ref/get_auxdata.html
+--
+-- Get the metadata of a function argument.
 sqlite3_get_auxdata ::
   -- | Function context.
   Ptr C.Sqlite3_context ->
+  -- | Argument index (0-based).
   CInt ->
+  -- | Metadata.
   IO (Ptr a)
 sqlite3_get_auxdata =
   C.sqlite3_get_auxdata
@@ -1326,7 +1390,7 @@ sqlite3_initialize =
 
 -- | https://www.sqlite.org/c3ref/interrupt.html
 --
--- Cause all in-progress operations to abort and return `SQLITE_INTERRUPT` at the earliest opportunity.
+-- Cause all in-progress operations to return `SQLITE_INTERRUPT` at the earliest opportunity.
 sqlite3_interrupt ::
   -- | Connection.
   Ptr C.Sqlite3 ->
@@ -1428,7 +1492,7 @@ sqlite3_load_extension =
 --
 -- Write a message to the error log.
 sqlite3_log ::
-  -- | Error code.
+  -- | Result code.
   CInt ->
   -- | Error message.
   CString ->
@@ -1464,7 +1528,7 @@ sqlite3_malloc64 =
 sqlite3_memory_highwater ::
   -- | Reset highest value? (0 or 1).
   CInt ->
-  -- | Highest value (prior to reset, if reset).
+  -- | Highest value (prior to this reset, if this is a reset).
   IO Int64
 sqlite3_memory_highwater =
   C.sqlite3_memory_highwater
@@ -1472,7 +1536,9 @@ sqlite3_memory_highwater =
 -- | https://www.sqlite.org/c3ref/memory_highwater.html
 --
 -- Get the size of live memory, in bytes.
-sqlite3_memory_used :: IO Int64
+sqlite3_memory_used ::
+  -- | Size of memory, in bytes.
+  IO Int64
 sqlite3_memory_used =
   C.sqlite3_memory_used
 
@@ -1488,69 +1554,15 @@ sqlite3_msize ::
 sqlite3_msize =
   C.sqlite3_msize
 
--- | https://www.sqlite.org/c3ref/mutex_alloc.html
---
--- Create a mutex.
-sqlite3_mutex_alloc ::
-  -- | Mutex type.
-  CInt ->
-  -- | Mutex.
-  IO (Ptr C.Sqlite3_mutex)
-sqlite3_mutex_alloc =
-  C.sqlite3_mutex_alloc
-
--- | https://www.sqlite.org/c3ref/mutex_alloc.html
---
--- Acquire a mutex (blocking).
-sqlite3_mutex_enter ::
-  -- | Mutex.
-  Ptr C.Sqlite3_mutex ->
-  IO ()
-sqlite3_mutex_enter =
-  C.sqlite3_mutex_enter
-
--- | https://www.sqlite.org/c3ref/mutex_alloc.html
---
--- Destroy a mutex.
-sqlite3_mutex_free ::
-  -- | Mutex.
-  Ptr C.Sqlite3_mutex ->
-  IO ()
-sqlite3_mutex_free =
-  C.sqlite3_mutex_free
-
-sqlite3_mutex_held = undefined
-
--- | https://www.sqlite.org/c3ref/mutex_alloc.html
---
--- Release a mutex. The mutex must have been acquired on the same OS thread.
-sqlite3_mutex_leave ::
-  -- | Mutex.
-  Ptr C.Sqlite3_mutex ->
-  IO ()
-sqlite3_mutex_leave =
-  C.sqlite3_mutex_leave
-
-sqlite3_mutex_notheld = undefined
-
--- | https://www.sqlite.org/c3ref/mutex_alloc.html
---
--- Acquire a mutex (non-blocking).
-sqlite3_mutex_try ::
-  -- | Mutex.
-  Ptr C.Sqlite3_mutex ->
-  -- | Result code.
-  IO CInt
-sqlite3_mutex_try =
-  C.sqlite3_mutex_try
+-- sqlite3_mutex_notheld = undefined
 
 -- | https://www.sqlite.org/c3ref/next_stmt.html
 --
--- Get the first or next statement of a connection.
+-- Get the next statement of a connection.
 sqlite3_next_stmt ::
   -- | Connection.
   Ptr C.Sqlite3 ->
-  -- | Statement, or null to get the first statement.
+  -- | Statement.
   Ptr C.Sqlite3_stmt ->
   -- | Next statement.
   IO (Ptr C.Sqlite3_stmt)
@@ -1612,10 +1624,16 @@ sqlite3_open_v2 database (SQLITE_OPEN_MODE mode) (SQLITE_OPEN_FLAGS flags) maybe
         Just vfs -> textToCString vfs k
 
 -- | https://www.sqlite.org/c3ref/overload_function.html
+--
+-- Ensure a placeholder function exists, to be overloaded by @xFindFunction@.
 sqlite3_overload_function ::
+  -- | Connection.
   Ptr C.Sqlite3 ->
+  -- | Function name (UTF-8).
   CString ->
+  -- | Number of arguments.
   CInt ->
+  -- | Result code.
   IO CInt
 sqlite3_overload_function =
   C.sqlite3_overload_function
@@ -1661,53 +1679,53 @@ sqlite3_prepare_v3 ::
 sqlite3_prepare_v3 =
   C.sqlite3_prepare_v3
 
--- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
-sqlite3_preupdate_blobwrite ::
-  Ptr C.Sqlite3 ->
-  IO CInt
-sqlite3_preupdate_blobwrite =
-  C.sqlite3_preupdate_blobwrite
+-- -- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
+-- sqlite3_preupdate_blobwrite ::
+--   Ptr C.Sqlite3 ->
+--   IO CInt
+-- sqlite3_preupdate_blobwrite =
+--   C.sqlite3_preupdate_blobwrite
 
--- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
-sqlite3_preupdate_count ::
-  Ptr C.Sqlite3 ->
-  IO CInt
-sqlite3_preupdate_count =
-  C.sqlite3_preupdate_count
+-- -- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
+-- sqlite3_preupdate_count ::
+--   Ptr C.Sqlite3 ->
+--   IO CInt
+-- sqlite3_preupdate_count =
+--   C.sqlite3_preupdate_count
 
--- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
-sqlite3_preupdate_depth ::
-  Ptr C.Sqlite3 ->
-  IO CInt
-sqlite3_preupdate_depth =
-  C.sqlite3_preupdate_depth
+-- -- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
+-- sqlite3_preupdate_depth ::
+--   Ptr C.Sqlite3 ->
+--   IO CInt
+-- sqlite3_preupdate_depth =
+--   C.sqlite3_preupdate_depth
 
--- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
-sqlite3_preupdate_hook ::
-  Ptr C.Sqlite3 ->
-  FunPtr (Ptr a -> Ptr C.Sqlite3 -> CInt -> CString -> CString -> Int64 -> Int64 -> IO ()) ->
-  Ptr a ->
-  IO (Ptr b)
-sqlite3_preupdate_hook =
-  C.sqlite3_preupdate_hook
+-- -- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
+-- sqlite3_preupdate_hook ::
+--   Ptr C.Sqlite3 ->
+--   FunPtr (Ptr a -> Ptr C.Sqlite3 -> CInt -> CString -> CString -> Int64 -> Int64 -> IO ()) ->
+--   Ptr a ->
+--   IO (Ptr b)
+-- sqlite3_preupdate_hook =
+--   C.sqlite3_preupdate_hook
 
--- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
-sqlite3_preupdate_new ::
-  Ptr C.Sqlite3 ->
-  CInt ->
-  Ptr (Ptr C.Sqlite3_value) ->
-  IO CInt
-sqlite3_preupdate_new =
-  C.sqlite3_preupdate_new
+-- -- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
+-- sqlite3_preupdate_new ::
+--   Ptr C.Sqlite3 ->
+--   CInt ->
+--   Ptr (Ptr C.Sqlite3_value) ->
+--   IO CInt
+-- sqlite3_preupdate_new =
+--   C.sqlite3_preupdate_new
 
--- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
-sqlite3_preupdate_old ::
-  Ptr C.Sqlite3 ->
-  CInt ->
-  Ptr (Ptr C.Sqlite3_value) ->
-  IO CInt
-sqlite3_preupdate_old =
-  C.sqlite3_preupdate_old
+-- -- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
+-- sqlite3_preupdate_old ::
+--   Ptr C.Sqlite3 ->
+--   CInt ->
+--   Ptr (Ptr C.Sqlite3_value) ->
+--   IO CInt
+-- sqlite3_preupdate_old =
+--   C.sqlite3_preupdate_old
 
 -- | https://www.sqlite.org/c3ref/progress_handler.html
 sqlite3_progress_handler ::
@@ -1720,8 +1738,12 @@ sqlite3_progress_handler =
   C.sqlite3_progress_handler
 
 -- | https://www.sqlite.org/c3ref/randomness.html
+--
+-- Generate random bytes.
 sqlite3_randomness ::
+  -- | Number of bytes to generate.
   CInt ->
+  -- | /Out/: buffer.
   Ptr a ->
   IO ()
 sqlite3_randomness =
@@ -1946,11 +1968,18 @@ sqlite3_rollback_hook =
   C.sqlite3_rollback_hook
 
 -- | https://www.sqlite.org/c3ref/serialize.html
+--
+-- Serialize a database.
 sqlite3_serialize ::
+  -- | Connection.
   Ptr C.Sqlite3 ->
+  -- | Database name (UTF-8).
   CString ->
+  -- | /Out/: size of database, in bytes.
   Ptr Int64 ->
+  -- | Flags.
   CUInt ->
+  -- | Serialized database.
   IO (Ptr CUChar)
 sqlite3_serialize =
   C.sqlite3_serialize
@@ -1965,11 +1994,16 @@ sqlite3_set_authorizer =
   C.sqlite3_set_authorizer
 
 -- | https://www.sqlite.org/c3ref/get_auxdata.html
+--
+-- Set the metadata of a function argument.
 sqlite3_set_auxdata ::
   -- | Function context.
   Ptr C.Sqlite3_context ->
+  -- | Argument index (0-based).
   CInt ->
+  -- | Metadata.
   Ptr a ->
+  -- | Metadata destructor.
   FunPtr (Ptr a -> IO ()) ->
   IO ()
 sqlite3_set_auxdata =
