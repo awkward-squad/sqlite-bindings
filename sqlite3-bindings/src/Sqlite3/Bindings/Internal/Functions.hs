@@ -1750,17 +1750,27 @@ sqlite3_randomness =
   C.sqlite3_randomness
 
 -- | https://www.sqlite.org/c3ref/free.html
+--
+-- Resize a memory allocation.
 sqlite3_realloc ::
+  -- | Memory.
   Ptr a ->
+  -- | Size of memory, in bytes.
   CInt ->
+  -- | Memory.
   IO (Ptr a)
 sqlite3_realloc =
   C.sqlite3_realloc
 
 -- | https://www.sqlite.org/c3ref/free.html
+--
+-- Resize a memory allocation.
 sqlite3_realloc64 ::
+  -- | Memory.
   Ptr a ->
+  -- | Size of memory, in bytes.
   Int64 ->
+  -- | Memory.
   IO (Ptr a)
 sqlite3_realloc64 =
   C.sqlite3_realloc64
@@ -1792,56 +1802,78 @@ sqlite3_reset (Sqlite3_stmt statement) =
 sqlite3_reset_auto_extension = undefined
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
+--
+-- Return a blob from a function.
 sqlite3_result_blob ::
   -- | Function context.
   Ptr C.Sqlite3_context ->
+  -- | Blob.
   Ptr a ->
+  -- | Size of blob, in bytes.
   CInt ->
+  -- | Blob destructor, @SQLITE_STATIC@, or @SQLITE_TRANSIENT@.
   FunPtr (Ptr a -> IO ()) ->
   IO ()
 sqlite3_result_blob =
   C.sqlite3_result_blob
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
+--
+-- Return a blob from a function.
 sqlite3_result_blob64 ::
   -- | Function context.
   Ptr C.Sqlite3_context ->
+  -- | Blob.
   Ptr a ->
+  -- | Size of blob, in bytes.
   Word64 ->
+  -- | Blob destructor, @SQLITE_STATIC@, or @SQLITE_TRANSIENT@.
   FunPtr (Ptr a -> IO ()) ->
   IO ()
 sqlite3_result_blob64 =
   C.sqlite3_result_blob64
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
+--
+-- Return a double from a function.
 sqlite3_result_double ::
   -- | Function context.
   Ptr C.Sqlite3_context ->
+  -- | Double.
   CDouble ->
   IO ()
 sqlite3_result_double =
   C.sqlite3_result_double
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
+--
+-- Throw an exception from a function.
 sqlite3_result_error ::
   -- | Function context.
   Ptr C.Sqlite3_context ->
+  -- | Error message (UTF-8).
   CString ->
+  -- | Size of error message, in bytes, or -1 to use the entire message.
   CInt ->
   IO ()
 sqlite3_result_error =
   C.sqlite3_result_error
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
+--
+-- Throw an exception from a function.
 sqlite3_result_error_code ::
   -- | Function context.
   Ptr C.Sqlite3_context ->
+  -- | Result code.
   CInt ->
   IO ()
 sqlite3_result_error_code =
   C.sqlite3_result_error_code
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
+--
+-- Throw a @SQLITE_NOMEM@ exception from a function.
 sqlite3_result_error_nomem ::
   -- | Function context.
   Ptr C.Sqlite3_context ->
@@ -1850,6 +1882,8 @@ sqlite3_result_error_nomem =
   C.sqlite3_result_error_nomem
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
+--
+-- Throw a @SQLITE_TOOBIG@ exception from a function.
 sqlite3_result_error_toobig ::
   -- | Function context.
   Ptr C.Sqlite3_context ->
@@ -1858,24 +1892,32 @@ sqlite3_result_error_toobig =
   C.sqlite3_result_error_toobig
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
+--
+-- Return an integer from a function.
 sqlite3_result_int ::
   -- | Function context.
   Ptr C.Sqlite3_context ->
+  -- | Integer.
   CInt ->
   IO ()
 sqlite3_result_int =
   C.sqlite3_result_int
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
+--
+-- Return an integer from a function.
 sqlite3_result_int64 ::
   -- | Function context.
   Ptr C.Sqlite3_context ->
+  -- | Integer.
   Int64 ->
   IO ()
 sqlite3_result_int64 =
   C.sqlite3_result_int64
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
+--
+-- Return null from a function.
 sqlite3_result_null ::
   -- | Function context.
   Ptr C.Sqlite3_context ->
@@ -1884,11 +1926,16 @@ sqlite3_result_null =
   C.sqlite3_result_null
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
+--
+-- Return null from a function, and associate it with a pointer.
 sqlite3_result_pointer ::
   -- | Function context.
   Ptr C.Sqlite3_context ->
+  -- | Pointer.
   Ptr a ->
+  -- | Pointer type.
   CString ->
+  -- | Pointer destructor.
   FunPtr (Ptr a -> IO ()) ->
   IO ()
 sqlite3_result_pointer =
@@ -1907,62 +1954,87 @@ sqlite3_result_subtype =
   C.sqlite3_result_subtype
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
+--
+-- Return a string from a function.
 sqlite3_result_text ::
   -- | Function context.
   Ptr C.Sqlite3_context ->
+  -- | String (UTF-8).
   Ptr CChar ->
+  -- | Size of string, in bytes.
   CInt ->
+  -- | String destructor, @SQLITE_STATIC@, or @SQLITE_TRANSIENT@.
   FunPtr (Ptr a -> IO ()) ->
   IO ()
 sqlite3_result_text =
   C.sqlite3_result_text
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
+--
+-- Return a string from a function.
 sqlite3_result_text64 ::
   -- | Function context.
   Ptr C.Sqlite3_context ->
+  -- | String (UTF-8).
   Ptr CChar ->
+  -- | Size of string, in bytes.
   Word64 ->
+  -- | String destructor, @SQLITE_STATIC@, or @SQLITE_TRANSIENT@.
   FunPtr (Ptr a -> IO ()) ->
+  -- | Encoding.
   CUChar ->
   IO ()
 sqlite3_result_text64 =
   C.sqlite3_result_text64
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
+--
+-- Return a value from a function.
 sqlite3_result_value ::
   -- | Function context.
   Ptr C.Sqlite3_context ->
+  -- | Value.
   Ptr C.Sqlite3_value ->
   IO ()
 sqlite3_result_value =
   C.sqlite3_result_value
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
+--
+-- Return a blob of zeroes from a function.
 sqlite3_result_zeroblob ::
   -- | Function context.
   Ptr C.Sqlite3_context ->
+  -- | Size of blob, in bytes.
   CInt ->
   IO ()
 sqlite3_result_zeroblob =
   C.sqlite3_result_zeroblob
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
+--
+-- Return a blob of zeroes from a function.
 sqlite3_result_zeroblob64 ::
   -- | Function context.
   Ptr C.Sqlite3_context ->
+  -- | Size of blob, in bytes.
   Word64 ->
+  -- | Result code.
   IO CInt
 sqlite3_result_zeroblob64 =
   C.sqlite3_result_zeroblob64
 
 -- | https://www.sqlite.org/c3ref/commit_hook.html
+--
+-- Register a callback that is invoked whenever a transaction is committed.
 sqlite3_rollback_hook ::
   -- | Connection.
   Ptr C.Sqlite3 ->
   -- | Rollback hook.
   FunPtr (Ptr a -> IO CInt) ->
+  -- | Application data.
   Ptr a ->
+  -- | Previous application data.
   IO (Ptr b)
 sqlite3_rollback_hook =
   C.sqlite3_rollback_hook
@@ -1985,10 +2057,16 @@ sqlite3_serialize =
   C.sqlite3_serialize
 
 -- | https://www.sqlite.org/c3ref/set_authorizer.html
+--
+-- Register a callback that is invoked during statement preparation to authorize actions.
 sqlite3_set_authorizer ::
+  -- | Connection.
   Ptr C.Sqlite3 ->
+  -- | Callback.
   FunPtr (Ptr a -> CInt -> CString -> CString -> CString -> CString -> IO CInt) ->
+  -- | Application data.
   Ptr a ->
+  -- | Result code.
   IO CInt
 sqlite3_set_authorizer =
   C.sqlite3_set_authorizer
@@ -2010,8 +2088,12 @@ sqlite3_set_auxdata =
   C.sqlite3_set_auxdata
 
 -- | https://www.sqlite.org/c3ref/set_last_insert_rowid.html
+--
+-- Set the return value of the next 'sqlite3_last_insert_rowid'.
 sqlite3_set_last_insert_rowid ::
+  -- | Connection.
   Ptr C.Sqlite3 ->
+  -- | Rowid.
   Int64 ->
   IO ()
 sqlite3_set_last_insert_rowid =
@@ -2027,32 +2109,50 @@ sqlite3_shutdown =
   C.sqlite3_shutdown
 
 -- | https://www.sqlite.org/c3ref/sleep.html
+--
+-- Suspend execution.
 sqlite3_sleep ::
+  -- | Duration, in milliseconds.
   CInt ->
+  -- | Duration actually suspended, in milliseconds.
   IO CInt
 sqlite3_sleep =
   C.sqlite3_sleep
 
 -- | https://www.sqlite.org/c3ref/snapshot_cmp.html
+--
+-- Compare the ages of two snapshots of the same database.
 sqlite3_snapshot_cmp ::
+  -- | First snapshot.
   Ptr C.Sqlite3_snapshot ->
+  -- | Second snapshot.
   Ptr C.Sqlite3_snapshot ->
+  -- | Negative if first snapshot is older, 0 if the snapshots are equal, or positive if the first snapshot is newer.
   IO CInt
 sqlite3_snapshot_cmp =
   C.sqlite3_snapshot_cmp
 
 -- | https://www.sqlite.org/c3ref/snapshot_free.html
+--
+-- Release a snapshot.
 sqlite3_snapshot_free ::
+  -- | Snapshot.
   Ptr C.Sqlite3_snapshot ->
   IO ()
 sqlite3_snapshot_free =
   C.sqlite3_snapshot_free
 
 -- | https://www.sqlite.org/c3ref/snapshot_get.html
+--
+-- Create a snapshot.
 sqlite3_snapshot_get ::
+  -- | Connection.
   Ptr C.Sqlite3 ->
+  -- | Database name (UTF-8).
   CString ->
+  -- | /Out/: snapshot.
   Ptr (Ptr C.Sqlite3_snapshot) ->
+  -- | Result code.
   IO CInt
 sqlite3_snapshot_get =
   C.sqlite3_snapshot_get

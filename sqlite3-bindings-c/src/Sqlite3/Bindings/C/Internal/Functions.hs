@@ -89,7 +89,6 @@ foreign import ccall unsafe
 --
 -- Copy pages from the source database to the destination database of a backup.
 foreign import ccall safe
-  -- safe because: sqlite3_autovacuum_pages, sqlite3_busy_handler
   sqlite3_backup_step ::
     -- | Backup.
     Ptr Sqlite3_backup ->
@@ -937,7 +936,6 @@ foreign import ccall unsafe
 --
 -- Flush all databases' dirty pager-cache pages to disk.
 foreign import ccall safe
-  -- safe because: sqlite3_busy_handler
   sqlite3_db_cacheflush ::
     -- | Connection.
     Ptr Sqlite3 ->
@@ -1083,7 +1081,6 @@ foreign import ccall unsafe
 --
 -- Execute zero or more SQL statements separated by semicolons.
 foreign import ccall safe
-  -- safe because: sqlite3_autovacuum_pages,
   sqlite3_exec ::
     -- | Connection.
     Ptr Sqlite3 ->
@@ -1465,7 +1462,6 @@ foreign import ccall unsafe
 --
 -- Open a new database connection.
 foreign import ccall safe
-  -- safe because: sqlite3_auto_extension
   sqlite3_open ::
     -- | Database file (UTF-8).
     CString ->
@@ -1478,7 +1474,6 @@ foreign import ccall safe
 --
 -- Open a new database connection.
 foreign import ccall safe
-  -- safe because: sqlite3_auto_extension
   sqlite3_open_v2 ::
     -- | Database file (UTF-8).
     CString ->
@@ -1507,7 +1502,6 @@ foreign import ccall unsafe
 
 -- | https://www.sqlite.org/c3ref/prepare.html
 foreign import ccall safe
-  -- safe because: sqlite3_collation_needed
   sqlite3_prepare_v2 ::
     -- | Connection.
     Ptr Sqlite3 ->
@@ -1523,7 +1517,7 @@ foreign import ccall safe
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/prepare.html
-foreign import ccall unsafe
+foreign import ccall safe
   sqlite3_prepare_v3 ::
     -- | Connection.
     Ptr Sqlite3 ->
@@ -1597,12 +1591,28 @@ foreign import ccall unsafe
     IO ()
 
 -- | https://www.sqlite.org/c3ref/free.html
+--
+-- Resize a memory allocation.
 foreign import ccall unsafe
-  sqlite3_realloc :: Ptr a -> CInt -> IO (Ptr a)
+  sqlite3_realloc ::
+    -- | Memory.
+    Ptr a ->
+    -- | Size of memory, in bytes.
+    CInt ->
+    -- | Memory.
+    IO (Ptr a)
 
 -- | https://www.sqlite.org/c3ref/free.html
+--
+-- Resize a memory allocation.
 foreign import ccall unsafe
-  sqlite3_realloc64 :: Ptr a -> Int64 -> IO (Ptr a)
+  sqlite3_realloc64 ::
+    -- | Memory.
+    Ptr a ->
+    -- | Size of memory, in bytes.
+    Int64 ->
+    -- | Memory.
+    IO (Ptr a)
 
 -- | https://www.sqlite.org/c3ref/release_memory.html
 --
@@ -1629,51 +1639,73 @@ foreign import ccall unsafe
 -- sqlite3_reset_auto_extension = undefined
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
+--
+-- Return a blob from a function.
 foreign import ccall unsafe
   sqlite3_result_blob ::
     -- | Function context.
     Ptr Sqlite3_context ->
+    -- | Blob.
     Ptr a ->
+    -- | Size of blob, in bytes.
     CInt ->
+    -- | Blob destructor, @SQLITE_STATIC@, or @SQLITE_TRANSIENT@.
     FunPtr (Ptr a -> IO ()) ->
     IO ()
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
+--
+-- Return a blob from a function.
 foreign import ccall unsafe
   sqlite3_result_blob64 ::
     -- | Function context.
     Ptr Sqlite3_context ->
+    -- | Blob.
     Ptr a ->
+    -- | Size of blob, in bytes.
     Word64 ->
+    -- | Blob destructor, @SQLITE_STATIC@, or @SQLITE_TRANSIENT@.
     FunPtr (Ptr a -> IO ()) ->
     IO ()
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
+--
+-- Return a double from a function.
 foreign import ccall unsafe
   sqlite3_result_double ::
     -- | Function context.
     Ptr Sqlite3_context ->
+    -- | Double.
     CDouble ->
     IO ()
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
+--
+-- Throw an exception from a function.
 foreign import ccall unsafe
   sqlite3_result_error ::
     -- | Function context.
     Ptr Sqlite3_context ->
+    -- | Error message (UTF-8).
     CString ->
+    -- | Size of error message, in bytes, or -1 to use the entire message.
     CInt ->
     IO ()
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
+--
+-- Throw an exception from a function.
 foreign import ccall unsafe
   sqlite3_result_error_code ::
     -- | Function context.
     Ptr Sqlite3_context ->
+    -- | Result code.
     CInt ->
     IO ()
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
+--
+-- Throw a @SQLITE_NOMEM@ exception from a function.
 foreign import ccall unsafe
   sqlite3_result_error_nomem ::
     -- | Function context.
@@ -1681,6 +1713,8 @@ foreign import ccall unsafe
     IO ()
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
+--
+-- Throw a @SQLITE_TOOBIG@ exception from a function.
 foreign import ccall unsafe
   sqlite3_result_error_toobig ::
     -- | Function context.
@@ -1688,22 +1722,30 @@ foreign import ccall unsafe
     IO ()
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
+--
+-- Return an integer from a function.
 foreign import ccall unsafe
   sqlite3_result_int ::
     -- | Function context.
     Ptr Sqlite3_context ->
+    -- | Integer.
     CInt ->
     IO ()
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
+--
+-- Return an integer from a function.
 foreign import ccall unsafe
   sqlite3_result_int64 ::
     -- | Function context.
     Ptr Sqlite3_context ->
+    -- | Integer.
     Int64 ->
     IO ()
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
+--
+-- Return null from a function.
 foreign import ccall unsafe
   sqlite3_result_null ::
     -- | Function context.
@@ -1711,12 +1753,17 @@ foreign import ccall unsafe
     IO ()
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
+--
+-- Return null from a function, and associate it with a pointer.
 foreign import ccall unsafe
   sqlite3_result_pointer ::
     -- | Function context.
     Ptr Sqlite3_context ->
+    -- | Pointer.
     Ptr a ->
+    -- | Pointer type.
     CString ->
+    -- | Pointer destructor.
     FunPtr (Ptr a -> IO ()) ->
     IO ()
 
@@ -1732,58 +1779,83 @@ foreign import ccall unsafe
     IO ()
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
+--
+-- Return a string from a function.
 foreign import ccall unsafe
   sqlite3_result_text ::
     -- | Function context.
     Ptr Sqlite3_context ->
+    -- | String (UTF-8).
     Ptr CChar ->
+    -- | Size of string, in bytes.
     CInt ->
+    -- | String destructor, @SQLITE_STATIC@, or @SQLITE_TRANSIENT@.
     FunPtr (Ptr a -> IO ()) ->
     IO ()
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
+--
+-- Return a string from a function.
 foreign import ccall unsafe
   sqlite3_result_text64 ::
     -- | Function context.
     Ptr Sqlite3_context ->
+    -- | String (UTF-8).
     Ptr CChar ->
+    -- | Size of string, in bytes.
     Word64 ->
+    -- | String destructor, @SQLITE_STATIC@, or @SQLITE_TRANSIENT@.
     FunPtr (Ptr a -> IO ()) ->
+    -- | Encoding.
     CUChar ->
     IO ()
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
+--
+-- Return a value from a function.
 foreign import ccall unsafe
   sqlite3_result_value ::
     -- | Function context.
     Ptr Sqlite3_context ->
+    -- | Value.
     Ptr Sqlite3_value ->
     IO ()
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
+--
+-- Return a blob of zeroes from a function.
 foreign import ccall unsafe
   sqlite3_result_zeroblob ::
     -- | Function context.
     Ptr Sqlite3_context ->
+    -- | Size of blob, in bytes.
     CInt ->
     IO ()
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
+--
+-- Return a blob of zeroes from a function.
 foreign import ccall unsafe
   sqlite3_result_zeroblob64 ::
     -- | Function context.
     Ptr Sqlite3_context ->
+    -- | Size of blob, in bytes.
     Word64 ->
+    -- | Result code.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/commit_hook.html
+--
+-- Register a callback that is invoked whenever a transaction is committed.
 foreign import ccall unsafe
   sqlite3_rollback_hook ::
     -- | Connection.
     Ptr Sqlite3 ->
     -- | Rollback hook.
     FunPtr (Ptr a -> IO CInt) ->
+    -- | Application data.
     Ptr a ->
+    -- | Previous application data.
     IO (Ptr b)
 
 -- | https://www.sqlite.org/c3ref/serialize.html
@@ -1803,11 +1875,17 @@ foreign import ccall unsafe
     IO (Ptr CUChar)
 
 -- | https://www.sqlite.org/c3ref/set_authorizer.html
+--
+-- Register a callback that is invoked during statement preparation to authorize actions.
 foreign import ccall unsafe
   sqlite3_set_authorizer ::
+    -- | Connection.
     Ptr Sqlite3 ->
+    -- | Callback.
     FunPtr (Ptr a -> CInt -> CString -> CString -> CString -> CString -> IO CInt) ->
+    -- | Application data.
     Ptr a ->
+    -- | Result code.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/get_auxdata.html
@@ -1826,8 +1904,15 @@ foreign import ccall unsafe
     IO ()
 
 -- | https://www.sqlite.org/c3ref/set_last_insert_rowid.html
+--
+-- Set the return value of the next 'sqlite3_last_insert_rowid'.
 foreign import ccall unsafe
-  sqlite3_set_last_insert_rowid :: Ptr Sqlite3 -> Int64 -> IO ()
+  sqlite3_set_last_insert_rowid ::
+    -- | Connection.
+    Ptr Sqlite3 ->
+    -- | Rowid.
+    Int64 ->
+    IO ()
 
 -- | https://www.sqlite.org/c3ref/initialize.html
 --
@@ -1838,26 +1923,48 @@ foreign import ccall unsafe
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/sleep.html
+--
+-- Suspend execution.
 foreign import ccall safe
-  sqlite3_sleep :: CInt -> IO CInt
+  sqlite3_sleep ::
+    -- | Duration, in milliseconds.
+    CInt ->
+    -- | Duration actually suspended, in milliseconds.
+    IO CInt
 
 -- | https://www.sqlite.org/c3ref/snapshot_cmp.html
+--
+-- Compare the ages of two snapshots of the same database.
 foreign import ccall unsafe
   sqlite3_snapshot_cmp ::
+    -- | First snapshot.
     Ptr Sqlite3_snapshot ->
+    -- | Second snapshot.
     Ptr Sqlite3_snapshot ->
+    -- | Negative if first snapshot is older, 0 if the snapshots are equal, or positive if the first snapshot is newer.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/snapshot_free.html
+--
+-- Release a snapshot.
 foreign import ccall unsafe
-  sqlite3_snapshot_free :: Ptr Sqlite3_snapshot -> IO ()
+  sqlite3_snapshot_free ::
+    -- | Snapshot.
+    Ptr Sqlite3_snapshot ->
+    IO ()
 
 -- | https://www.sqlite.org/c3ref/snapshot_get.html
+--
+-- Create a snapshot.
 foreign import ccall unsafe
   sqlite3_snapshot_get ::
+    -- | Connection.
     Ptr Sqlite3 ->
+    -- | Database name (UTF-8).
     CString ->
+    -- | /Out/: snapshot.
     Ptr (Ptr Sqlite3_snapshot) ->
+    -- | Result code.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/snapshot_open.html
@@ -1921,7 +2028,6 @@ foreign import ccall unsafe
 --
 -- Produce the next row of a statement.
 foreign import ccall safe
-  -- safe because: sqlite3_autovacuum_pages, sqlite3_create_function
   sqlite3_step ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
