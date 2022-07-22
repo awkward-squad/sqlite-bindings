@@ -409,7 +409,7 @@ sqlite3_busy_handler =
 
 -- | https://www.sqlite.org/c3ref/busy_timeout.html
 --
--- Register a callback (with 'sqlite3_busy_handler') that sleeps.
+-- Register a 'sqlite3_busy_handler' callback that sleeps.
 sqlite3_busy_timeout ::
   -- | Connection.
   Ptr C.Sqlite3 ->
@@ -707,7 +707,7 @@ sqlite3_compileoption_get =
 sqlite3_compileoption_used ::
   -- | Option name (UTF-8).
   CString ->
-  -- | 0 or 1.
+  -- | @0@ or @1@.
   CInt
 sqlite3_compileoption_used =
   C.sqlite3_compileoption_used
@@ -718,59 +718,98 @@ sqlite3_compileoption_used =
 sqlite3_complete ::
   -- | SQL (UTF-8).
   CString ->
-  -- | 0 (incomplete), 1 (complete), or @SQLITE_NOMEM@ (memory allocation failure).
+  -- | @0@ (incomplete), @1@ (complete), or @SQLITE_NOMEM@ (memory allocation failure).
   CInt
 sqlite3_complete =
   C.sqlite3_complete
 
+-- https://www.sqlite.org/c3ref/config.html
+--
+-- Configure the library.
 sqlite3_config__1 :: CInt -> IO CInt
 sqlite3_config__1 =
   C.sqlite3_config__1
 
+-- https://www.sqlite.org/c3ref/config.html
+--
+-- Configure the library.
 sqlite3_config__2 :: CInt -> Ptr C.Sqlite3_mem_methods -> IO CInt
 sqlite3_config__2 =
   C.sqlite3_config__2
 
+-- https://www.sqlite.org/c3ref/config.html
+--
+-- Configure the library.
 sqlite3_config__3 :: CInt -> Ptr a -> CInt -> CInt -> IO CInt
 sqlite3_config__3 =
   C.sqlite3_config__3
 
+-- https://www.sqlite.org/c3ref/config.html
+--
+-- Configure the library.
 sqlite3_config__4 :: CInt -> CInt -> IO CInt
 sqlite3_config__4 =
   C.sqlite3_config__4
 
+-- https://www.sqlite.org/c3ref/config.html
+--
+-- Configure the library.
 sqlite3_config__5 :: CInt -> Ptr C.Sqlite3_mutex_methods -> IO CInt
 sqlite3_config__5 =
   C.sqlite3_config__5
 
+-- https://www.sqlite.org/c3ref/config.html
+--
+-- Configure the library.
 sqlite3_config__6 :: CInt -> CInt -> CInt -> IO CInt
 sqlite3_config__6 =
   C.sqlite3_config__6
 
+-- https://www.sqlite.org/c3ref/config.html
+--
+-- Configure the library.
 sqlite3_config__7 :: CInt -> FunPtr (Ptr a -> CInt -> CString -> IO ()) -> Ptr a -> IO CInt
 sqlite3_config__7 =
   C.sqlite3_config__7
 
+-- https://www.sqlite.org/c3ref/config.html
+--
+-- Configure the library.
 sqlite3_config__8 :: CInt -> Ptr C.Sqlite3_pcache_methods2 -> IO CInt
 sqlite3_config__8 =
   C.sqlite3_config__8
 
+-- https://www.sqlite.org/c3ref/config.html
+--
+-- Configure the library.
 sqlite3_config__9 :: CInt -> FunPtr (Ptr a -> Ptr C.Sqlite3 -> CString -> CInt -> IO ()) -> Ptr a -> IO CInt
 sqlite3_config__9 =
   C.sqlite3_config__9
 
+-- https://www.sqlite.org/c3ref/config.html
+--
+-- Configure the library.
 sqlite3_config__10 :: CInt -> Int64 -> Int64 -> IO CInt
 sqlite3_config__10 =
   C.sqlite3_config__10
 
+-- https://www.sqlite.org/c3ref/config.html
+--
+-- Configure the library.
 sqlite3_config__11 :: CInt -> Ptr CInt -> IO CInt
 sqlite3_config__11 =
   C.sqlite3_config__11
 
+-- https://www.sqlite.org/c3ref/config.html
+--
+-- Configure the library.
 sqlite3_config__12 :: CInt -> CUInt -> IO CInt
 sqlite3_config__12 =
   C.sqlite3_config__12
 
+-- https://www.sqlite.org/c3ref/config.html
+--
+-- Configure the library.
 sqlite3_config__13 :: CInt -> Int64 -> IO CInt
 sqlite3_config__13 =
   C.sqlite3_config__13
@@ -975,10 +1014,12 @@ sqlite3_data_count =
 
 -- | https://www.sqlite.org/c3ref/database_file_object.html
 --
--- Get the file object for a journal.
+-- Get the database file object for a journal file.
 sqlite3_database_file_object ::
+  -- | Journal file (UTF-8).
   CString ->
-  IO (Ptr C.Sqlite3_file)
+  -- | Database file object.
+  IO (Ptr Sqlite3_file)
 sqlite3_database_file_object =
   C.sqlite3_database_file_object
 
@@ -993,14 +1034,23 @@ sqlite3_db_cacheflush ::
 sqlite3_db_cacheflush =
   C.sqlite3_db_cacheflush
 
+-- https://www.sqlite.org/c3ref/db_config.html
+--
+-- Configure a connection.
 sqlite3_db_config__1 :: Ptr C.Sqlite3 -> CInt -> CString -> IO CInt
 sqlite3_db_config__1 =
   C.sqlite3_db_config__1
 
+-- https://www.sqlite.org/c3ref/db_config.html
+--
+-- Configure a connection.
 sqlite3_db_config__2 :: Ptr C.Sqlite3 -> CInt -> Ptr a -> CInt -> CInt -> IO CInt
 sqlite3_db_config__2 =
   C.sqlite3_db_config__2
 
+-- https://www.sqlite.org/c3ref/db_config.html
+--
+-- Configure a connection.
 sqlite3_db_config__3 :: Ptr C.Sqlite3 -> CInt -> CInt -> Ptr CInt -> IO CInt
 sqlite3_db_config__3 =
   C.sqlite3_db_config__3
@@ -1061,7 +1111,7 @@ sqlite3_db_readonly ::
   Ptr C.Sqlite3 ->
   -- | Database name (UTF-8).
   CString ->
-  -- | -1 (not attached), 0 (not read-only), or 1 (read-only).
+  -- | @-1@ (not attached), @0@ (not read-only), or @1@ (read-only).
   IO CInt
 sqlite3_db_readonly =
   C.sqlite3_db_readonly
@@ -1079,7 +1129,7 @@ sqlite3_db_release_memory =
 
 -- | https://www.sqlite.org/c3ref/db_status.html
 --
--- Get a status of a connection.
+-- Get a connection status value.
 sqlite3_db_status ::
   -- | Connection.
   Ptr C.Sqlite3 ->
@@ -1189,7 +1239,7 @@ sqlite3_exec (Sqlite3 connection) sql maybeCallback =
 sqlite3_extended_result_codes ::
   -- | Connection.
   Ptr C.Sqlite3 ->
-  -- | 0 or 1.
+  -- | @0@ or @1@.
   CInt ->
   -- | Result code.
   IO CInt
@@ -1225,7 +1275,7 @@ sqlite3_errmsg (Sqlite3 connection) = do
 sqlite3_error_offset ::
   -- | Connection.
   Ptr C.Sqlite3 ->
-  -- | Byte offset, or -1 if not applicable.
+  -- | Byte offset, or @-1@ if not applicable.
   IO CInt
 sqlite3_error_offset =
   C.sqlite3_error_offset
@@ -1350,7 +1400,7 @@ sqlite3_free_filename =
 sqlite3_get_autocommit ::
   -- | Connection.
   Ptr C.Sqlite3 ->
-  -- | 0 or 1.
+  -- | @0@ or @1@.
   IO CInt
 sqlite3_get_autocommit =
   C.sqlite3_get_autocommit
@@ -1406,7 +1456,7 @@ sqlite3_keyword_check ::
   Ptr CChar ->
   -- | Size of string, in bytes.
   CInt ->
-  -- | 0 or 1.
+  -- | @0@ or @1@.
   CInt
 sqlite3_keyword_check =
   C.sqlite3_keyword_check
@@ -1526,7 +1576,7 @@ sqlite3_malloc64 =
 --
 -- Get the highest value of 'sqlite3_memory_used'.
 sqlite3_memory_highwater ::
-  -- | Reset highest value? (0 or 1).
+  -- | Reset highest value? (@0@ or @1@).
   CInt ->
   -- | Highest value (prior to this reset, if this is a reset).
   IO Int64
@@ -1728,10 +1778,17 @@ sqlite3_prepare_v3 =
 --   C.sqlite3_preupdate_old
 
 -- | https://www.sqlite.org/c3ref/progress_handler.html
+--
+-- Register a callback that is invoked periodically during long-running queries.
 sqlite3_progress_handler ::
+  -- | Connection.
   Ptr C.Sqlite3 ->
+  -- | Approximate number of virtual machine instructions that are evaluated between successive invocations of the
+  -- callback.
   CInt ->
+  -- | Callback.
   FunPtr (Ptr a -> IO CInt) ->
+  -- | Application data.
   Ptr a ->
   IO ()
 sqlite3_progress_handler =
@@ -1853,7 +1910,7 @@ sqlite3_result_error ::
   Ptr C.Sqlite3_context ->
   -- | Error message (UTF-8).
   CString ->
-  -- | Size of error message, in bytes, or -1 to use the entire message.
+  -- | Size of error message, in bytes, or @-1@ to use the entire message.
   CInt ->
   IO ()
 sqlite3_result_error =
@@ -2158,18 +2215,29 @@ sqlite3_snapshot_get =
   C.sqlite3_snapshot_get
 
 -- | https://www.sqlite.org/c3ref/snapshot_open.html
+--
+-- Begin a read transaction on a snapshot.
 sqlite3_snapshot_open ::
+  -- | Connection.
   Ptr C.Sqlite3 ->
+  -- | Database name (UTF-8).
   CString ->
+  -- | Snapshot.
   Ptr C.Sqlite3_snapshot ->
+  -- | Result code.
   IO CInt
 sqlite3_snapshot_open =
   C.sqlite3_snapshot_open
 
 -- | https://www.sqlite.org/c3ref/snapshot_recover.html
+--
+-- Recover snapshots from a WAL file.
 sqlite3_snapshot_recover ::
+  -- | Connection.
   Ptr C.Sqlite3 ->
+  -- | Database name (UTF-8).
   CString ->
+  -- | Result code.
   IO CInt
 sqlite3_snapshot_recover =
   C.sqlite3_snapshot_recover
@@ -2186,6 +2254,8 @@ sqlite3_soft_heap_limit64 =
   C.sqlite3_soft_heap_limit64
 
 -- | https://www.sqlite.org/c3ref/libversion.html
+--
+-- The date, time, and hash of the library check-in.
 sqlite3_sourceid :: CString
 sqlite3_sourceid =
   C.sqlite3_sourceid
@@ -2202,21 +2272,35 @@ sqlite3_sql =
   C.sqlite3_sql
 
 -- | https://www.sqlite.org/c3ref/status.html
+--
+-- Get a library status value.
 sqlite3_status ::
+  -- | Status code.
   CInt ->
+  -- | /Out/: current value.
   Ptr CInt ->
+  -- | /Out/: highest value.
   Ptr CInt ->
+  -- | Reset highest value? (@0@ or @1@).
   CInt ->
+  -- | Result code.
   IO CInt
 sqlite3_status =
   C.sqlite3_status
 
 -- | https://www.sqlite.org/c3ref/status.html
+--
+-- Get a library status value.
 sqlite3_status64 ::
+  -- | Status code.
   CInt ->
+  -- | /Out/: current value.
   Ptr Int64 ->
+  -- | /Out/: highest value.
   Ptr Int64 ->
+  -- | Reset highest value? (@0@ or @1@).
   CInt ->
+  -- | Result code.
   IO CInt
 sqlite3_status64 =
   C.sqlite3_status64
@@ -2233,22 +2317,34 @@ sqlite3_step (Sqlite3_stmt statement) =
   C.sqlite3_step statement
 
 -- | https://www.sqlite.org/c3ref/stmt_busy.html
+--
+-- Get whether a statement is in-progress.
 sqlite3_stmt_busy ::
+  -- | Statement.
   Ptr C.Sqlite3_stmt ->
+  -- | @0@ or @1@.
   IO CInt
 sqlite3_stmt_busy =
   C.sqlite3_stmt_busy
 
 -- | https://www.sqlite.org/c3ref/stmt_isexplain.html
+--
+-- Get whether a statement is an @EXPLAIN@.
 sqlite3_stmt_isexplain ::
+  -- | Statement.
   Ptr C.Sqlite3_stmt ->
+  -- | @0@ (not @EXPLAIN@), @1@ (@EXPLAIN@), or @2@ (@EXPLAIN QUERY PLAN@).
   IO CInt
 sqlite3_stmt_isexplain =
   C.sqlite3_stmt_isexplain
 
 -- | https://www.sqlite.org/c3ref/stmt_readonly.html
+--
+-- Get whether a statement is read-only.
 sqlite3_stmt_readonly ::
+  -- | Statement.
   Ptr C.Sqlite3_stmt ->
+  -- | @0@ or @1@.
   IO CInt
 sqlite3_stmt_readonly =
   C.sqlite3_stmt_readonly
@@ -2271,10 +2367,16 @@ sqlite3_stmt_readonly =
 --   C.sqlite3_stmt_scanstatus_reset
 
 -- | https://www.sqlite.org/c3ref/stmt_status.html
+--
+-- Get a statement status value.
 sqlite3_stmt_status ::
+  -- | Statement.
   Ptr C.Sqlite3_stmt ->
+  -- | Status code.
   CInt ->
+  -- | Reset value? (@0@ or @1@).
   CInt ->
+  -- | Value.
   IO CInt
 sqlite3_stmt_status =
   C.sqlite3_stmt_status
@@ -2287,7 +2389,7 @@ sqlite3_strglob ::
   CString ->
   -- | String (UTF-8).
   CString ->
-  -- | 0 if matches.
+  -- | @0@ if matches.
   CInt
 sqlite3_strglob =
   C.sqlite3_strglob
@@ -2312,7 +2414,7 @@ sqlite3_strlike ::
   CString ->
   -- | Escape character.
   CUInt ->
-  -- | 0 if matches.
+  -- | @0@ if matches.
   CInt
 sqlite3_strlike =
   C.sqlite3_strlike
@@ -2415,7 +2517,7 @@ sqlite3_uri_boolean ::
   CString ->
   -- | Default value.
   CInt ->
-  -- | Query parameter value (0 or 1).
+  -- | Query parameter value (@0@ or @1@).
   IO CInt
 sqlite3_uri_boolean =
   C.sqlite3_uri_boolean
@@ -2529,7 +2631,7 @@ sqlite3_value_free =
 sqlite3_value_frombind ::
   -- | Value.
   Ptr C.Sqlite3_value ->
-  -- | 0 or 1.
+  -- | @0@ or @1@.
   IO CInt
 sqlite3_value_frombind =
   C.sqlite3_value_frombind
@@ -2562,7 +2664,7 @@ sqlite3_value_int64 =
 sqlite3_value_nochange ::
   -- | Value.
   Ptr C.Sqlite3_value ->
-  -- 0 or 1.
+  -- | @0@ or @1@.
   IO CInt
 sqlite3_value_nochange =
   C.sqlite3_value_nochange
@@ -2646,7 +2748,7 @@ sqlite3_vfs_find =
 sqlite3_vfs_register ::
   -- | VFS.
   Ptr C.Sqlite3_vfs ->
-  -- | Make default? (0 or 1).
+  -- | Make default? (@0@ or @1@).
   CInt ->
   -- | Result code.
   IO CInt
@@ -2677,10 +2779,16 @@ sqlite3_vtab_collation ::
 sqlite3_vtab_collation =
   C.sqlite3_vtab_collation
 
+-- https://www.sqlite.org/c3ref/vtab_config.html
+--
+-- Configure a virtual table.
 sqlite3_vtab_config__1 :: Ptr C.Sqlite3 -> CInt -> CInt -> IO CInt
 sqlite3_vtab_config__1 =
   C.sqlite3_vtab_config__1
 
+-- https://www.sqlite.org/c3ref/vtab_config.html
+--
+-- Configure a virtual table.
 sqlite3_vtab_config__2 :: Ptr C.Sqlite3 -> CInt -> IO CInt
 sqlite3_vtab_config__2 =
   C.sqlite3_vtab_config__2
@@ -2691,7 +2799,7 @@ sqlite3_vtab_config__2 =
 sqlite3_vtab_distinct ::
   -- | Index info (first argument to @xBestIndex@).
   Ptr C.Sqlite3_index_info ->
-  -- | 0, 1, 2, or 3.
+  -- | @0@, @1@, @2@, or @3@.
   IO CInt
 sqlite3_vtab_distinct =
   C.sqlite3_vtab_distinct
@@ -2704,9 +2812,9 @@ sqlite3_vtab_in ::
   Ptr C.Sqlite3_index_info ->
   -- | @aConstraint[]@ index.
   CInt ->
-  -- | -1, 0, or 1.
+  -- | @-1@, @0@, or @1@.
   CInt ->
-  -- | 0 or 1.
+  -- | @0@ or @1@.
   IO CInt
 sqlite3_vtab_in =
   C.sqlite3_vtab_in
@@ -2743,7 +2851,7 @@ sqlite3_vtab_in_next =
 sqlite3_vtab_nochange ::
   -- | Function context.
   Ptr C.Sqlite3_context ->
-  -- | 0 or 1.
+  -- | @0@ or @1@.
   IO CInt
 sqlite3_vtab_nochange =
   C.sqlite3_vtab_nochange

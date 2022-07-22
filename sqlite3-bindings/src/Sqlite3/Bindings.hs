@@ -54,7 +54,6 @@ module Sqlite3.Bindings
     sqlite3_compileoption_get,
     sqlite3_compileoption_used,
     sqlite3_complete,
-    -- $sqlite-configuration
     sqlite3_config__1,
     sqlite3_config__2,
     sqlite3_config__3,
@@ -80,7 +79,6 @@ module Sqlite3.Bindings
     sqlite3_data_count,
     sqlite3_database_file_object,
     sqlite3_db_cacheflush,
-    -- $connections-configuration
     sqlite3_db_config__1,
     sqlite3_db_config__2,
     sqlite3_db_config__3,
@@ -228,7 +226,6 @@ module Sqlite3.Bindings
     sqlite3_vfs_register,
     sqlite3_vfs_unregister,
     sqlite3_vtab_collation,
-    -- $vtab-configuration
     sqlite3_vtab_config__1,
     sqlite3_vtab_config__2,
     sqlite3_vtab_distinct,
@@ -720,21 +717,3 @@ where
 import Sqlite3.Bindings.Internal.Constants
 import Sqlite3.Bindings.Internal.Functions
 import Sqlite3.Bindings.Internal.Objects
-
--- $sqlite-configuration
---
--- https://www.sqlite.org/c3ref/config.html
---
--- Configure SQLite.
-
--- $connections-configuration
---
--- https://www.sqlite.org/c3ref/db_config.html
---
--- Configure a connection.
-
--- $vtab-configuration
---
--- https://www.sqlite.org/c3ref/vtab_config.html
---
--- Configure a virtual table.

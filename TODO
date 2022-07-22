@@ -2,6 +2,7 @@
 - Expose compile-time options as flags
   - https://www.sqlite.org/compile.html
 - Figure out versioning scheme
+  - thinking: sqlite major version + pvp, e.g. 39.
 - Make low-level haskellified wrapper (called `sqlite3`)?
 - auto extension xEntryPoint fiasco
 - make sure all pure funcs don't have IO
@@ -17,3 +18,9 @@
 - sqlite-bindings: exec callback: cache column names
 - sqlite extensions e.g. carray?
 - delete malloc(64), realloc(64)? (and free?)
+
+question: do we want to support providing your own system sqlite (not bundled)?
+  - seems like we do, but it might be more annoying to write this package. more cabal flags and less guarantees, etc.
+
+question: are cabal flags the right mechanism for optional apis?
+  - downside: libraries that build on top need to duplicate these flags if they want to build on the optional apis
