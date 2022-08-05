@@ -15,13 +15,14 @@ import Data.Word (Word64)
 import Foreign.C (CChar (..), CDouble (..), CInt (..), CString, CUChar (..), CUInt (..))
 import Foreign.ForeignPtr (withForeignPtr)
 import Foreign.Marshal.Alloc (alloca)
-import Foreign.Ptr (FunPtr, Ptr, castFunPtrToPtr, freeHaskellFunPtr, minusPtr, nullFunPtr, nullPtr, plusPtr)
+import Foreign.Ptr (FunPtr, Ptr, castFunPtrToPtr, castPtr, freeHaskellFunPtr, minusPtr, nullFunPtr, nullPtr, plusPtr)
+import Foreign.StablePtr
 import Foreign.Storable (Storable (peek))
 import qualified Sqlite3.Bindings.C as C
 import Sqlite3.Bindings.Internal.Constants
 import Sqlite3.Bindings.Internal.Objects
 import Sqlite3.Bindings.Internal.Utils (boolToCInt, carrayToArray, cintToInt, cstringLenToText, cstringToText, cuintToWord, doubleToCDouble, intToCInt, textToCString, textToCStringLen, wordToCUInt)
-import System.IO.Unsafe (unsafeDupablePerformIO)
+import System.IO.Unsafe (unsafeDupablePerformIO, unsafePerformIO)
 
 sqlite3_auto_extension = undefined
 
@@ -40,7 +41,7 @@ sqlite3_autovacuum_pages (Sqlite3 connection) = \case
   Just callback ->
     mask_ do
       c_callback <-
-        makeCallback1 \_ c_name numPages numFreePages pageSize -> do
+        makeCallback2 \_ c_name numPages numFreePages pageSize -> do
           name <- cstringToText c_name
           wordToCUInt <$> callback name (cuintToWord numPages) (cuintToWord numFreePages) (cuintToWord pageSize)
       C.sqlite3_autovacuum_pages connection c_callback (castFunPtrToPtr c_callback) hs_free_fun_ptr
@@ -232,19 +233,20 @@ sqlite3_bind_parameter_name (Sqlite3_stmt statement) index = do
 -- Bind null to a parameter, and associate it with a pointer.
 sqlite3_bind_pointer ::
   -- | Statement.
-  Ptr C.Sqlite3_stmt ->
+  Sqlite3_stmt ->
   -- | Parameter index (1-based).
-  CInt ->
+  Int ->
   -- | Pointer.
-  Ptr a ->
+  a ->
   -- | Pointer type.
-  CString ->
-  -- | Pointer destructor.
-  FunPtr (Ptr a -> IO ()) ->
+  Text ->
   -- | Result code.
   IO CInt
-sqlite3_bind_pointer =
-  C.sqlite3_bind_pointer
+sqlite3_bind_pointer (Sqlite3_stmt statement) index value typ =
+  mask_ do
+    pointer <- newStablePtr value
+    textToCString typ \c_typ ->
+      C.sqlite3_bind_pointer statement (intToCInt index) (castStablePtrToPtr pointer) c_typ freeStablePtrFunPtr
 
 -- | https://www.sqlite.org/c3ref/bind_blob.html
 --
@@ -1213,7 +1215,7 @@ sqlite3_exec (Sqlite3 connection) sql maybeCallback =
     Nothing -> go nullFunPtr
     Just callback ->
       bracket
-        ( makeCallback0 \_ numCols c_values c_names -> do
+        ( makeCallback1 \_ numCols c_values c_names -> do
             let convert = carrayToArray cstringToText numCols
             values <- convert c_values
             names <- convert c_names
@@ -3000,15 +3002,27 @@ sqlite3_wal_hook =
 
 --
 
+-- A top-level FunPtr to 'freeStablePtr'
+freeStablePtrFunPtr :: FunPtr (Ptr a -> IO ())
+freeStablePtrFunPtr =
+  unsafePerformIO (makeCallback0 \ptr -> freeStablePtr (castPtrToStablePtr (castPtr ptr)))
+{-# NOINLINE freeStablePtrFunPtr #-}
+
+-- FIXME should this be safe?
 foreign import capi unsafe "HsFFI.h &hs_free_fun_ptr"
   hs_free_fun_ptr :: FunPtr (Ptr a -> IO ())
 
 foreign import ccall "wrapper"
   makeCallback0 ::
+    (Ptr a -> IO ()) ->
+    IO (FunPtr (Ptr a -> IO ()))
+
+foreign import ccall "wrapper"
+  makeCallback1 ::
     (Ptr a -> CInt -> Ptr CString -> Ptr CString -> IO CInt) ->
     IO (FunPtr (Ptr a -> CInt -> Ptr CString -> Ptr CString -> IO CInt))
 
 foreign import ccall "wrapper"
-  makeCallback1 ::
+  makeCallback2 ::
     (Ptr a -> CString -> CUInt -> CUInt -> CUInt -> IO CUInt) ->
     IO (FunPtr (Ptr a -> CString -> CUInt -> CUInt -> CUInt -> IO CUInt))

@@ -1,7 +1,7 @@
 cabal-version: 2.2
 
 name: sqlite3-bindings
-version: 0
+version: 39.0.0.0
 
 extra-source-files:
   README.md

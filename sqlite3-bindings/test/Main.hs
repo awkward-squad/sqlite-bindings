@@ -74,6 +74,7 @@ test_sqlite3_bind = do
       check (bind_int statement 1 0)
       check (bind_int64 statement 1 0)
       check (bind_null statement 1)
+      check (bind_pointer statement 1 () "foo")
       check (bind_text statement 1 "")
       check (bind_text statement 1 "foo")
       check (bind_zeroblob statement 1 0)
@@ -205,6 +206,11 @@ bind_int64 statement index n = do
 bind_null :: Sqlite3_stmt -> Int -> IO (Either Text ())
 bind_null statement index = do
   code <- sqlite3_bind_null statement index
+  pure (inspect code ())
+
+bind_pointer :: Sqlite3_stmt -> Int -> a -> Text -> IO (Either Text ())
+bind_pointer statement index pointer typ = do
+  code <- sqlite3_bind_pointer statement index pointer typ
   pure (inspect code ())
 
 bind_text :: Sqlite3_stmt -> Int -> Text -> IO (Either Text ())

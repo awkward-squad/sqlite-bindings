@@ -100,7 +100,7 @@ foreign import ccall safe
 -- | https://www.sqlite.org/c3ref/bind_blob.html
 --
 -- Bind a blob to a parameter.
-foreign import ccall unsafe
+foreign import ccall safe
   sqlite3_bind_blob ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
@@ -118,7 +118,7 @@ foreign import ccall unsafe
 -- | https://www.sqlite.org/c3ref/bind_blob.html
 --
 -- Bind a blob to a parameter.
-foreign import ccall unsafe
+foreign import ccall safe
   sqlite3_bind_blob64 ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
@@ -136,7 +136,7 @@ foreign import ccall unsafe
 -- | https://www.sqlite.org/c3ref/bind_blob.html
 --
 -- Bind a double to a parameter.
-foreign import ccall unsafe
+foreign import ccall safe
   sqlite3_bind_double ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
@@ -150,7 +150,7 @@ foreign import ccall unsafe
 -- | https://www.sqlite.org/c3ref/bind_blob.html
 --
 -- Bind an integer to a parameter.
-foreign import ccall unsafe
+foreign import ccall safe
   sqlite3_bind_int ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
@@ -164,7 +164,7 @@ foreign import ccall unsafe
 -- | https://www.sqlite.org/c3ref/bind_blob.html
 --
 -- Bind an integer to a parameter.
-foreign import ccall unsafe
+foreign import ccall safe
   sqlite3_bind_int64 ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
@@ -178,7 +178,7 @@ foreign import ccall unsafe
 -- | https://www.sqlite.org/c3ref/bind_blob.html
 --
 -- Bind null to a parameter.
-foreign import ccall unsafe
+foreign import ccall safe
   sqlite3_bind_null ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
@@ -224,7 +224,7 @@ foreign import ccall unsafe
 -- | https://www.sqlite.org/c3ref/bind_blob.html
 --
 -- Bind null to a parameter, and associate it with a pointer.
-foreign import ccall unsafe
+foreign import ccall safe
   sqlite3_bind_pointer ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
@@ -242,7 +242,7 @@ foreign import ccall unsafe
 -- | https://www.sqlite.org/c3ref/bind_blob.html
 --
 -- Bind a string to a parameter.
-foreign import ccall unsafe
+foreign import ccall safe
   sqlite3_bind_text ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
@@ -260,7 +260,7 @@ foreign import ccall unsafe
 -- | https://www.sqlite.org/c3ref/bind_blob.html
 --
 -- Bind a string to a parameter.
-foreign import ccall unsafe
+foreign import ccall safe
   sqlite3_bind_text64 ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
@@ -280,7 +280,7 @@ foreign import ccall unsafe
 -- | https://www.sqlite.org/c3ref/bind_blob.html
 --
 -- Bind a value to a parameter.
-foreign import ccall unsafe
+foreign import ccall safe
   sqlite3_bind_value ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
@@ -294,7 +294,7 @@ foreign import ccall unsafe
 -- | https://www.sqlite.org/c3ref/bind_blob.html
 --
 -- Bind a blob of zeroes to a parameter.
-foreign import ccall unsafe
+foreign import ccall safe
   sqlite3_bind_zeroblob ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
@@ -308,7 +308,7 @@ foreign import ccall unsafe
 -- | https://www.sqlite.org/c3ref/bind_blob.html
 --
 -- Bind a blob of zeroes to a parameter.
-foreign import ccall unsafe
+foreign import ccall safe
   sqlite3_bind_zeroblob64 ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
