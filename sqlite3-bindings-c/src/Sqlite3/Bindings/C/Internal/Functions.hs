@@ -436,7 +436,8 @@ foreign import ccall unsafe
 
 -- | https://www.sqlite.org/c3ref/changes.html
 --
--- Get the number of rows modified, inserted, or deleted by the most recent @UPDATE@, @INSERT@, or @DELETE@ statement.
+-- Get the number of rows modified, inserted, or deleted by the most recent @UPDATE@, @INSERT@, or @DELETE@ statement on
+-- a connection.
 foreign import ccall unsafe
   sqlite3_changes ::
     -- | Connection.
@@ -446,7 +447,8 @@ foreign import ccall unsafe
 
 -- | https://www.sqlite.org/c3ref/changes.html
 --
--- Get the number of rows modified, inserted, or deleted by the most recent @UPDATE@, @INSERT@, or @DELETE@ statement.
+-- Get the number of rows modified, inserted, or deleted by the most recent @UPDATE@, @INSERT@, or @DELETE@ statement on
+-- a connection.
 foreign import ccall unsafe
   sqlite3_changes64 ::
     -- | Connection.
@@ -467,7 +469,7 @@ foreign import ccall unsafe
 -- | https://www.sqlite.org/c3ref/close.html
 --
 -- Close a database connection.
-foreign import ccall unsafe
+foreign import ccall safe
   sqlite3_close ::
     -- | Connection.
     Ptr Sqlite3 ->
@@ -479,7 +481,7 @@ foreign import ccall unsafe
 -- Attempt to close a database connection, but if it has any unfinalized statements, open blob handlers, or unfinished
 -- backups, mark the connection as unusable and make arrangements to deallocate it after all statements are finalized,
 -- blob handlers are closed, and backups are finished.
-foreign import ccall unsafe
+foreign import ccall safe
   sqlite3_close_v2 ::
     -- | Connection.
     Ptr Sqlite3 ->
@@ -710,67 +712,67 @@ foreign import ccall unsafe
     -- | @0@ (incomplete), @1@ (complete), or @SQLITE_NOMEM@ (memory allocation failure).
     CInt
 
--- https://www.sqlite.org/c3ref/config.html
+-- | https://www.sqlite.org/c3ref/config.html
 --
 -- Configure the library.
 foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__1 :: CInt -> IO CInt
 
--- https://www.sqlite.org/c3ref/config.html
+-- | https://www.sqlite.org/c3ref/config.html
 --
 -- Configure the library.
 foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__2 :: CInt -> Ptr Sqlite3_mem_methods -> IO CInt
 
--- https://www.sqlite.org/c3ref/config.html
+-- | https://www.sqlite.org/c3ref/config.html
 --
 -- Configure the library.
 foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__3 :: CInt -> Ptr a -> CInt -> CInt -> IO CInt
 
--- https://www.sqlite.org/c3ref/config.html
+-- | https://www.sqlite.org/c3ref/config.html
 --
 -- Configure the library.
 foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__4 :: CInt -> CInt -> IO CInt
 
--- https://www.sqlite.org/c3ref/config.html
+-- | https://www.sqlite.org/c3ref/config.html
 --
 -- Configure the library.
 foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__5 :: CInt -> Ptr Sqlite3_mutex_methods -> IO CInt
 
--- https://www.sqlite.org/c3ref/config.html
+-- | https://www.sqlite.org/c3ref/config.html
 --
 -- Configure the library.
 foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__6 :: CInt -> CInt -> CInt -> IO CInt
 
--- https://www.sqlite.org/c3ref/config.html
+-- | https://www.sqlite.org/c3ref/config.html
 --
 -- Configure the library.
 foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__7 :: CInt -> FunPtr (Ptr a -> CInt -> CString -> IO ()) -> Ptr a -> IO CInt
 
--- https://www.sqlite.org/c3ref/config.html
+-- | https://www.sqlite.org/c3ref/config.html
 --
 -- Configure the library.
 foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__8 :: CInt -> Ptr Sqlite3_pcache_methods2 -> IO CInt
 
--- https://www.sqlite.org/c3ref/config.html
+-- | https://www.sqlite.org/c3ref/config.html
 --
 -- Configure the library.
 foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__9 :: CInt -> FunPtr (Ptr a -> Ptr Sqlite3 -> CString -> CInt -> IO ()) -> Ptr a -> IO CInt
 
--- https://www.sqlite.org/c3ref/config.html
+-- | https://www.sqlite.org/c3ref/config.html
 --
 -- Configure the library.
 foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__10 :: CInt -> Int64 -> Int64 -> IO CInt
 
--- https://www.sqlite.org/c3ref/config.html
+-- | https://www.sqlite.org/c3ref/config.html
 --
 -- Configure the library.
 foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__11 :: CInt -> Ptr CInt -> IO CInt
 
--- https://www.sqlite.org/c3ref/config.html
+-- | https://www.sqlite.org/c3ref/config.html
 --
 -- Configure the library.
 foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__12 :: CInt -> CUInt -> IO CInt
 
--- https://www.sqlite.org/c3ref/config.html
+-- | https://www.sqlite.org/c3ref/config.html
 --
 -- Configure the library.
 foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__13 :: CInt -> Int64 -> IO CInt
@@ -983,17 +985,17 @@ foreign import ccall safe
     -- | Result code.
     IO CInt
 
--- https://www.sqlite.org/c3ref/db_config.html
+-- | https://www.sqlite.org/c3ref/db_config.html
 --
 -- Configure a connection.
 foreign import capi unsafe "sqlite3.h sqlite3_db_config" sqlite3_db_config__1 :: Ptr Sqlite3 -> CInt -> CString -> IO CInt
 
--- https://www.sqlite.org/c3ref/db_config.html
+-- | https://www.sqlite.org/c3ref/db_config.html
 --
 -- Configure a connection.
 foreign import capi unsafe "sqlite3.h sqlite3_db_config" sqlite3_db_config__2 :: Ptr Sqlite3 -> CInt -> Ptr a -> CInt -> CInt -> IO CInt
 
--- https://www.sqlite.org/c3ref/db_config.html
+-- | https://www.sqlite.org/c3ref/db_config.html
 --
 -- Configure a connection.
 foreign import capi unsafe "sqlite3.h sqlite3_db_config" sqlite3_db_config__3 :: Ptr Sqlite3 -> CInt -> CInt -> Ptr CInt -> IO CInt
@@ -1266,7 +1268,7 @@ foreign import ccall unsafe
 -- | https://www.sqlite.org/c3ref/finalize.html
 --
 -- Release a statement.
-foreign import ccall unsafe
+foreign import ccall safe
   sqlite3_finalize ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
@@ -1551,6 +1553,8 @@ foreign import ccall unsafe
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/prepare.html
+--
+-- Compile a statement.
 foreign import ccall safe
   sqlite3_prepare_v2 ::
     -- | Connection.
@@ -1567,6 +1571,8 @@ foreign import ccall safe
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/prepare.html
+--
+-- Compile a statement.
 foreign import ccall safe
   sqlite3_prepare_v3 ::
     -- | Connection.
@@ -1685,7 +1691,7 @@ foreign import ccall unsafe
 -- | https://www.sqlite.org/c3ref/reset.html
 --
 -- Reset a statement to its initial state. Does not clear parameter bindings.
-foreign import ccall unsafe
+foreign import ccall safe
   sqlite3_reset ::
     -- | Statement.
     Ptr Sqlite3_stmt ->
@@ -1998,7 +2004,7 @@ foreign import ccall unsafe
     Ptr Sqlite3_snapshot ->
     -- | Second snapshot.
     Ptr Sqlite3_snapshot ->
-    -- | Negative if first snapshot is older, 0 if the snapshots are equal, or positive if the first snapshot is newer.
+    -- | Negative if first snapshot is older, @0@ if the snapshots are equal, or positive if the first snapshot is newer.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/snapshot_free.html
@@ -2194,9 +2200,13 @@ foreign import ccall unsafe
 -- Compare two strings, case-independent (ascii-only case folding).
 foreign import ccall unsafe
   sqlite3_stricmp ::
+    -- | First string.
     CString ->
+    -- | Second string.
     CString ->
-    IO CInt
+    -- | Negative if first string is less than the second string, @0@ if the strings are equal, or positive if the first
+    -- string is greater than the second string.
+    CInt
 
 -- | https://www.sqlite.org/c3ref/strlike.html
 --
@@ -2217,55 +2227,106 @@ foreign import ccall unsafe
 -- Compare two strings, case-independent (ascii-only case folding), up to a certain length.
 foreign import ccall unsafe
   sqlite3_strnicmp ::
+    -- | First string.
     CString ->
+    -- | Second string.
     CString ->
+    -- | Length, in bytes.
     CInt ->
-    IO CInt
+    -- | Negative if first string is less than the second string, @0@ if the strings are equal, or positive if the first
+    -- string is greater than the second string.
+    CInt
 
 -- | https://www.sqlite.org/c3ref/system_errno.html
+--
+-- Get the system result code of the most recent failure on a connection.
 foreign import ccall unsafe
-  sqlite3_system_errno :: Ptr Sqlite3 -> IO CInt
+  sqlite3_system_errno ::
+    -- | Connection.
+    Ptr Sqlite3 ->
+    -- | Result code.
+    IO CInt
 
 -- | https://www.sqlite.org/c3ref/table_column_metadata.html
+--
+-- Get column metadata.
 foreign import ccall unsafe
   sqlite3_table_column_metadata ::
+    -- | Connection.
     Ptr Sqlite3 ->
+    -- | Database name (UTF-8).
     CString ->
+    -- | Table name (UTF-8).
     CString ->
+    -- | Column name (UTF-8).
     CString ->
+    -- | /Out/: type.
     Ptr CString ->
+    -- | /Out/: default collating sequence name.
     Ptr CString ->
+    -- | /Out/: @1@ if @NOT NULL@.
     Ptr CInt ->
+    -- | /Out/: @1@ if part of the primary key.
     Ptr CInt ->
+    -- | /Out/: @1@ if @AUTOINCREMENT@.
     Ptr CInt ->
+    -- | Result code.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/threadsafe.html
+--
+-- Get whether the library is thread-safe.
 foreign import ccall unsafe
   sqlite3_threadsafe :: CInt
 
 -- | https://www.sqlite.org/c3ref/total_changes.html
+--
+-- Get the total number of rows modified, inserted, and deleted by @UPDATE@, @INSERT@, and @DELETE@ statements made on a
+-- connection.
 foreign import ccall unsafe
-  sqlite3_total_changes :: Ptr Sqlite3 -> IO CInt
+  sqlite3_total_changes ::
+    -- | Connection.
+    Ptr Sqlite3 ->
+    -- | Number of rows.
+    IO CInt
 
 -- | https://www.sqlite.org/c3ref/total_changes.html
+--
+-- Get the total number of rows modified, inserted, and deleted by @UPDATE@, @INSERT@, and @DELETE@ statements made on a
+-- connection.
 foreign import ccall unsafe
-  sqlite3_total_changes64 :: Ptr Sqlite3 -> IO Int64
+  sqlite3_total_changes64 ::
+    -- | Connection.
+    Ptr Sqlite3 ->
+    -- | Number of rows.
+    IO Int64
 
 -- | https://www.sqlite.org/c3ref/trace_v2.html
+--
+-- Register a callback that is invoked at various times.
 foreign import ccall unsafe
   sqlite3_trace_v2 ::
+    -- | Connection.
     Ptr Sqlite3 ->
+    -- | Property mask.
     CUInt ->
+    -- | Callback.
     FunPtr (CUInt -> Ptr a -> Ptr b -> Ptr c -> IO CInt) ->
+    -- | Context pointer.
     Ptr a ->
+    -- | Result code.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/txn_state.html
+--
+-- Get the transaction state of a database.
 foreign import ccall unsafe
   sqlite3_txn_state ::
+    -- | Connection.
     Ptr Sqlite3 ->
+    -- | Database name (UTF-8).
     CString ->
+    -- | @SQLITE_TXN_NONE@, @SQLITE_TXN_READ@, @SQLITE_TXN_WRITE@, or @-1@ if the database does not exist.
     IO CInt
 
 -- | https://www.sqlite.org/c3ref/unlock_notify.html
@@ -2532,12 +2593,12 @@ foreign import ccall unsafe
     -- | Collating sequence name (UTF-8).
     IO CString
 
--- https://www.sqlite.org/c3ref/vtab_config.html
+-- | https://www.sqlite.org/c3ref/vtab_config.html
 --
 -- Configure a virtual table.
 foreign import capi unsafe "sqlite3.h sqlite3_vtab_config" sqlite3_vtab_config__1 :: Ptr Sqlite3 -> CInt -> CInt -> IO CInt
 
--- https://www.sqlite.org/c3ref/vtab_config.html
+-- | https://www.sqlite.org/c3ref/vtab_config.html
 --
 -- Configure a virtual table.
 foreign import capi unsafe "sqlite3.h sqlite3_vtab_config" sqlite3_vtab_config__2 :: Ptr Sqlite3 -> CInt -> IO CInt

@@ -425,7 +425,8 @@ sqlite3_cancel_auto_extension = undefined
 
 -- | https://www.sqlite.org/c3ref/changes.html
 --
--- Get the number of rows modified, inserted, or deleted by the most recent @UPDATE@, @INSERT@, or @DELETE@ statement.
+-- Get the number of rows modified, inserted, or deleted by the most recent @UPDATE@, @INSERT@, or @DELETE@ statement on
+-- a connection.
 sqlite3_changes ::
   -- | Connection.
   Ptr C.Sqlite3 ->
@@ -436,7 +437,8 @@ sqlite3_changes =
 
 -- | https://www.sqlite.org/c3ref/changes.html
 --
--- Get the number of rows modified, inserted, or deleted by the most recent @UPDATE@, @INSERT@, or @DELETE@ statement.
+-- Get the number of rows modified, inserted, or deleted by the most recent @UPDATE@, @INSERT@, or @DELETE@ statement on
+-- a connection.
 sqlite3_changes64 ::
   -- | Connection.
   Ptr C.Sqlite3 ->
@@ -723,91 +725,91 @@ sqlite3_complete ::
 sqlite3_complete =
   C.sqlite3_complete
 
--- https://www.sqlite.org/c3ref/config.html
+-- | https://www.sqlite.org/c3ref/config.html
 --
 -- Configure the library.
 sqlite3_config__1 :: CInt -> IO CInt
 sqlite3_config__1 =
   C.sqlite3_config__1
 
--- https://www.sqlite.org/c3ref/config.html
+-- | https://www.sqlite.org/c3ref/config.html
 --
 -- Configure the library.
 sqlite3_config__2 :: CInt -> Ptr C.Sqlite3_mem_methods -> IO CInt
 sqlite3_config__2 =
   C.sqlite3_config__2
 
--- https://www.sqlite.org/c3ref/config.html
+-- | https://www.sqlite.org/c3ref/config.html
 --
 -- Configure the library.
 sqlite3_config__3 :: CInt -> Ptr a -> CInt -> CInt -> IO CInt
 sqlite3_config__3 =
   C.sqlite3_config__3
 
--- https://www.sqlite.org/c3ref/config.html
+-- | https://www.sqlite.org/c3ref/config.html
 --
 -- Configure the library.
 sqlite3_config__4 :: CInt -> CInt -> IO CInt
 sqlite3_config__4 =
   C.sqlite3_config__4
 
--- https://www.sqlite.org/c3ref/config.html
+-- | https://www.sqlite.org/c3ref/config.html
 --
 -- Configure the library.
 sqlite3_config__5 :: CInt -> Ptr C.Sqlite3_mutex_methods -> IO CInt
 sqlite3_config__5 =
   C.sqlite3_config__5
 
--- https://www.sqlite.org/c3ref/config.html
+-- | https://www.sqlite.org/c3ref/config.html
 --
 -- Configure the library.
 sqlite3_config__6 :: CInt -> CInt -> CInt -> IO CInt
 sqlite3_config__6 =
   C.sqlite3_config__6
 
--- https://www.sqlite.org/c3ref/config.html
+-- | https://www.sqlite.org/c3ref/config.html
 --
 -- Configure the library.
 sqlite3_config__7 :: CInt -> FunPtr (Ptr a -> CInt -> CString -> IO ()) -> Ptr a -> IO CInt
 sqlite3_config__7 =
   C.sqlite3_config__7
 
--- https://www.sqlite.org/c3ref/config.html
+-- | https://www.sqlite.org/c3ref/config.html
 --
 -- Configure the library.
 sqlite3_config__8 :: CInt -> Ptr C.Sqlite3_pcache_methods2 -> IO CInt
 sqlite3_config__8 =
   C.sqlite3_config__8
 
--- https://www.sqlite.org/c3ref/config.html
+-- | https://www.sqlite.org/c3ref/config.html
 --
 -- Configure the library.
 sqlite3_config__9 :: CInt -> FunPtr (Ptr a -> Ptr C.Sqlite3 -> CString -> CInt -> IO ()) -> Ptr a -> IO CInt
 sqlite3_config__9 =
   C.sqlite3_config__9
 
--- https://www.sqlite.org/c3ref/config.html
+-- | https://www.sqlite.org/c3ref/config.html
 --
 -- Configure the library.
 sqlite3_config__10 :: CInt -> Int64 -> Int64 -> IO CInt
 sqlite3_config__10 =
   C.sqlite3_config__10
 
--- https://www.sqlite.org/c3ref/config.html
+-- | https://www.sqlite.org/c3ref/config.html
 --
 -- Configure the library.
 sqlite3_config__11 :: CInt -> Ptr CInt -> IO CInt
 sqlite3_config__11 =
   C.sqlite3_config__11
 
--- https://www.sqlite.org/c3ref/config.html
+-- | https://www.sqlite.org/c3ref/config.html
 --
 -- Configure the library.
 sqlite3_config__12 :: CInt -> CUInt -> IO CInt
 sqlite3_config__12 =
   C.sqlite3_config__12
 
--- https://www.sqlite.org/c3ref/config.html
+-- | https://www.sqlite.org/c3ref/config.html
 --
 -- Configure the library.
 sqlite3_config__13 :: CInt -> Int64 -> IO CInt
@@ -1034,21 +1036,21 @@ sqlite3_db_cacheflush ::
 sqlite3_db_cacheflush =
   C.sqlite3_db_cacheflush
 
--- https://www.sqlite.org/c3ref/db_config.html
+-- | https://www.sqlite.org/c3ref/db_config.html
 --
 -- Configure a connection.
 sqlite3_db_config__1 :: Ptr C.Sqlite3 -> CInt -> CString -> IO CInt
 sqlite3_db_config__1 =
   C.sqlite3_db_config__1
 
--- https://www.sqlite.org/c3ref/db_config.html
+-- | https://www.sqlite.org/c3ref/db_config.html
 --
 -- Configure a connection.
 sqlite3_db_config__2 :: Ptr C.Sqlite3 -> CInt -> Ptr a -> CInt -> CInt -> IO CInt
 sqlite3_db_config__2 =
   C.sqlite3_db_config__2
 
--- https://www.sqlite.org/c3ref/db_config.html
+-- | https://www.sqlite.org/c3ref/db_config.html
 --
 -- Configure a connection.
 sqlite3_db_config__3 :: Ptr C.Sqlite3 -> CInt -> CInt -> Ptr CInt -> IO CInt
@@ -1689,6 +1691,8 @@ sqlite3_overload_function =
   C.sqlite3_overload_function
 
 -- | https://www.sqlite.org/c3ref/prepare.html
+--
+-- Compile a statement.
 sqlite3_prepare_v2 ::
   -- | Connection.
   Sqlite3 ->
@@ -1711,6 +1715,8 @@ sqlite3_prepare_v2 (Sqlite3 connection) sql =
         pure (if statement == nullPtr then Nothing else Just (Sqlite3_stmt statement), unusedSql, code)
 
 -- | https://www.sqlite.org/c3ref/prepare.html
+--
+-- Compile a statement.
 sqlite3_prepare_v3 ::
   -- | Connection.
   Ptr C.Sqlite3 ->
@@ -2184,7 +2190,7 @@ sqlite3_snapshot_cmp ::
   Ptr C.Sqlite3_snapshot ->
   -- | Second snapshot.
   Ptr C.Sqlite3_snapshot ->
-  -- | Negative if first snapshot is older, 0 if the snapshots are equal, or positive if the first snapshot is newer.
+  -- | Negative if first snapshot is older, @0@ if the snapshots are equal, or positive if the first snapshot is newer.
   IO CInt
 sqlite3_snapshot_cmp =
   C.sqlite3_snapshot_cmp
@@ -2398,9 +2404,13 @@ sqlite3_strglob =
 --
 -- Compare two strings, case-independent (ascii-only case folding).
 sqlite3_stricmp ::
+  -- | First string.
   CString ->
+  -- | Second string.
   CString ->
-  IO CInt
+  -- | Negative if first string is less than the second string, @0@ if the strings are equal, or positive if the first
+  -- string is greater than the second string.
+  CInt
 sqlite3_stricmp =
   C.sqlite3_stricmp
 
@@ -2423,68 +2433,113 @@ sqlite3_strlike =
 --
 -- Compare two strings, case-independent (ascii-only case folding), up to a certain length.
 sqlite3_strnicmp ::
+  -- | First string.
   CString ->
+  -- | Second string.
   CString ->
+  -- | Length, in bytes.
   CInt ->
-  IO CInt
+  -- | Negative if first string is less than the second string, @0@ if the strings are equal, or positive if the first
+  -- string is greater than the second string.
+  CInt
 sqlite3_strnicmp =
   C.sqlite3_strnicmp
 
 -- | https://www.sqlite.org/c3ref/system_errno.html
+--
+-- Get the system result code of the most recent failure on a connection.
 sqlite3_system_errno ::
+  -- | Connection.
   Ptr C.Sqlite3 ->
+  -- | Result code.
   IO CInt
 sqlite3_system_errno =
   C.sqlite3_system_errno
 
 -- | https://www.sqlite.org/c3ref/table_column_metadata.html
+--
+-- Get column metadata.
 sqlite3_table_column_metadata ::
+  -- | Connection.
   Ptr C.Sqlite3 ->
+  -- | Database name (UTF-8).
   CString ->
+  -- | Table name (UTF-8).
   CString ->
+  -- | Column name (UTF-8).
   CString ->
+  -- | /Out/: type.
   Ptr CString ->
+  -- | /Out/: default collating sequence name.
   Ptr CString ->
+  -- | /Out/: @1@ if @NOT NULL@.
   Ptr CInt ->
+  -- | /Out/: @1@ if part of the primary key.
   Ptr CInt ->
+  -- | /Out/: @1@ if @AUTOINCREMENT@.
   Ptr CInt ->
+  -- | Result code.
   IO CInt
 sqlite3_table_column_metadata =
   C.sqlite3_table_column_metadata
 
 -- | https://www.sqlite.org/c3ref/threadsafe.html
+--
+-- Get whether the library is thread-safe.
 sqlite3_threadsafe :: CInt
 sqlite3_threadsafe =
   C.sqlite3_threadsafe
 
 -- | https://www.sqlite.org/c3ref/total_changes.html
+--
+-- Get the total number of rows modified, inserted, and deleted by @UPDATE@, @INSERT@, and @DELETE@ statements made on a
+-- connection.
 sqlite3_total_changes ::
+  -- | Connection.
   Ptr C.Sqlite3 ->
+  -- | Number of rows.
   IO CInt
 sqlite3_total_changes =
   C.sqlite3_total_changes
 
 -- | https://www.sqlite.org/c3ref/total_changes.html
+--
+-- Get the total number of rows modified, inserted, and deleted by @UPDATE@, @INSERT@, and @DELETE@ statements made on a
+-- connection.
 sqlite3_total_changes64 ::
+  -- | Connection.
   Ptr C.Sqlite3 ->
+  -- | Number of rows.
   IO Int64
 sqlite3_total_changes64 =
   C.sqlite3_total_changes64
 
 -- | https://www.sqlite.org/c3ref/trace_v2.html
+--
+-- Register a callback that is invoked at various times.
 sqlite3_trace_v2 ::
+  -- | Connection.
   Ptr C.Sqlite3 ->
+  -- | Property mask.
   CUInt ->
+  -- | Callback.
   FunPtr (CUInt -> Ptr a -> Ptr b -> Ptr c -> IO CInt) ->
+  -- | Context pointer.
   Ptr a ->
+  -- | Result code.
   IO CInt
 sqlite3_trace_v2 =
   C.sqlite3_trace_v2
 
 -- | https://www.sqlite.org/c3ref/txn_state.html
+--
+-- Get the transaction state of a database.
 sqlite3_txn_state ::
+  -- | Connection.
   Ptr C.Sqlite3 ->
+  -- | Database name (UTF-8).
   CString ->
+  -- | @SQLITE_TXN_NONE@, @SQLITE_TXN_READ@, @SQLITE_TXN_WRITE@, or @-1@ if the database does not exist.
   IO CInt
 sqlite3_txn_state =
   C.sqlite3_txn_state
