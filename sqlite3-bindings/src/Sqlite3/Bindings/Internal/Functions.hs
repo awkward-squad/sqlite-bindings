@@ -2498,11 +2498,11 @@ sqlite3_threadsafe =
 -- connection.
 sqlite3_total_changes ::
   -- | Connection.
-  Ptr C.Sqlite3 ->
+  Sqlite3 ->
   -- | Number of rows.
-  IO CInt
-sqlite3_total_changes =
-  C.sqlite3_total_changes
+  IO Int
+sqlite3_total_changes (Sqlite3 connection) =
+  cintToInt <$> C.sqlite3_total_changes connection
 
 -- | https://www.sqlite.org/c3ref/total_changes.html
 --

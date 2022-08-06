@@ -18,19 +18,19 @@ main :: IO ()
 main = do
   withSqliteLibrary do
     (defaultMain . testGroup "tests")
-      [ testCase "sqlite3_autovacuum_pages" test_sqlite3_autovacuum_pages,
-        testCase "sqlite3_backup_*" test_sqlite3_backup,
-        testCase "sqlite3_bind_*" test_sqlite3_bind,
-        testCase "sqlite3_blob_*" test_sqlite3_blob,
-        testCase "sqlite3_busy_handler" test_sqlite3_busy_handler,
-        testCase "sqlite3_busy_timeout" test_sqlite3_busy_timeout,
-        testCase "sqlite3_changes" test_sqlite3_changes,
-        testCase "sqlite3_last_insert_rowid" test_sqlite3_last_insert_rowid,
-        testCase "sqlite3_open / sqlite3_close" test_sqlite3_open
+      [ testCase "autovacuum_pages" test_autovacuum_pages,
+        testCase "backup_*" test_backup,
+        testCase "bind_*" test_bind,
+        testCase "blob_*" test_blob,
+        testCase "busy_handler" test_busy_handler,
+        testCase "busy_timeout" test_busy_timeout,
+        testCase "changes / total_changes" test_changes,
+        testCase "last_insert_rowid" test_last_insert_rowid,
+        testCase "open / close" test_open
       ]
 
-test_sqlite3_autovacuum_pages :: IO ()
-test_sqlite3_autovacuum_pages = do
+test_autovacuum_pages :: IO ()
+test_autovacuum_pages = do
   withConnection ":memory:" \conn -> do
     countRef <- newIORef (0 :: Int)
     exec conn "pragma auto_vacuum = full" >>= check
@@ -42,8 +42,8 @@ test_sqlite3_autovacuum_pages = do
     count <- readIORef countRef
     assertEqual "" 1 count
 
-test_sqlite3_backup :: IO ()
-test_sqlite3_backup = do
+test_backup :: IO ()
+test_backup = do
   withConnection ":memory:" \conn1 ->
     withConnection ":memory:" \conn2 ->
       withBackup (conn1, "main") (conn2, "main") \backup -> do
@@ -66,8 +66,8 @@ test_sqlite3_backup = do
         sqlite3_backup_remaining backup >>= assertEqual "" 0
 
 -- TODO sqlite3_bind_value
-test_sqlite3_bind :: IO ()
-test_sqlite3_bind = do
+test_bind :: IO ()
+test_bind = do
   withConnection ":memory:" \conn -> do
     withStatement conn "select ?" \(statement, _) -> do
       sqlite3_bind_parameter_count statement >>= assertEqual "" 1
@@ -98,8 +98,8 @@ test_sqlite3_bind = do
       sqlite3_bind_parameter_name statement 3 >>= assertEqual "" (Just "@bar")
       sqlite3_bind_parameter_name statement 4 >>= assertEqual "" (Just "$baz")
 
-test_sqlite3_blob :: IO ()
-test_sqlite3_blob = do
+test_blob :: IO ()
+test_blob = do
   withConnection ":memory:" \conn -> do
     exec conn "create table foo (bar)" >>= check
     exec conn "insert into foo values (x'01020304')" >>= check
@@ -120,8 +120,8 @@ test_sqlite3_blob = do
       blob_reopen blob rowid2 >>= check
       blob_read blob 4 0 >>= assertEqual "" (Right (ByteString.pack [5, 6, 7, 8]))
 
-test_sqlite3_busy_handler :: IO ()
-test_sqlite3_busy_handler = do
+test_busy_handler :: IO ()
+test_busy_handler = do
   Temporary.withSystemTempDirectory "sqlite3-bindings" \dir -> do
     let name = Text.pack dir <> "/database.sqlite3"
     withConnection name \conn1 -> do
@@ -139,29 +139,34 @@ test_sqlite3_busy_handler = do
               False -> assertFailure "didn't invoke busy handler"
               True -> pure ()
 
-test_sqlite3_busy_timeout :: IO ()
-test_sqlite3_busy_timeout = do
+test_busy_timeout :: IO ()
+test_busy_timeout = do
   withConnection ":memory:" \conn -> do
     busy_timeout conn 0 >>= check
     busy_timeout conn 1 >>= check
     busy_timeout conn (-1) >>= check
 
-test_sqlite3_changes :: IO ()
-test_sqlite3_changes = do
+test_changes :: IO ()
+test_changes = do
   withConnection ":memory:" \conn -> do
     sqlite3_changes conn >>= assertEqual "" 0
+    sqlite3_total_changes conn >>= assertEqual "" 0
     exec conn "create table foo (bar)" >>= check
     exec conn "insert into foo values (1), (2)" >>= check
     sqlite3_changes conn >>= assertEqual "" 2
+    sqlite3_total_changes conn >>= assertEqual "" 2
     exec conn "update foo set bar = 3 where bar = 1" >>= check
     sqlite3_changes conn >>= assertEqual "" 1
+    sqlite3_total_changes conn >>= assertEqual "" 3
     exec conn "delete from foo" >>= check
     sqlite3_changes conn >>= assertEqual "" 2
+    sqlite3_total_changes conn >>= assertEqual "" 5
     exec conn "delete from foo" >>= check
     sqlite3_changes conn >>= assertEqual "" 0
+    sqlite3_total_changes conn >>= assertEqual "" 5
 
-test_sqlite3_last_insert_rowid :: IO ()
-test_sqlite3_last_insert_rowid = do
+test_last_insert_rowid :: IO ()
+test_last_insert_rowid = do
   withConnection ":memory:" \conn -> do
     sqlite3_last_insert_rowid conn >>= assertEqual "" 0
     exec conn "create table foo (bar)" >>= check
@@ -172,8 +177,8 @@ test_sqlite3_last_insert_rowid = do
     exec conn "insert into bar values (2)" >>= check
     sqlite3_last_insert_rowid conn >>= assertEqual "" 1
 
-test_sqlite3_open :: IO ()
-test_sqlite3_open = do
+test_open :: IO ()
+test_open = do
   withConnection ":memory:" \_ -> pure ()
   withConnection "" \_ -> pure ()
 
