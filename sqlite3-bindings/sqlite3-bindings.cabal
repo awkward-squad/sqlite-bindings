@@ -39,6 +39,7 @@ library
 test-suite tests
   import: component
   build-depends:
+    array,
     base,
     bytestring,
     sqlite3-bindings,

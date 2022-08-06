@@ -1,6 +1,8 @@
 module Main where
 
 import Control.Exception (SomeException, bracket, catch, mask, throwIO, uninterruptibleMask_)
+import Data.Array (Array)
+import qualified Data.Array as Array
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as ByteString
 import Data.Functor
@@ -26,6 +28,7 @@ main = do
         testCase "busy_timeout" test_busy_timeout,
         testCase "changes / changes64 / total_changes / total_changes64" test_changes,
         testCase "clear_bindings" test_clear_bindings,
+        testCase "create_collation" test_create_collation,
         testCase "last_insert_rowid" test_last_insert_rowid,
         testCase "open / close" test_open
       ]
@@ -185,6 +188,34 @@ test_clear_bindings = do
       clear_bindings statement >>= check
       bind_int statement 1 0 >>= check
       clear_bindings statement >>= check
+
+test_create_collation :: IO ()
+test_create_collation = do
+  withConnection ":memory:" \conn -> do
+    create_collation conn "dayofweek" (Just compareDayOfWeek) >>= check
+    exec conn "create table foo (bar collate dayofweek)" >>= check
+    exec conn "insert into foo values ('wednesday'), ('sunday'), ('oink'), ('monday')" >>= check
+    rows <- execReturn conn "select bar from foo order by bar collate dayofweek" >>= check
+    assertEqual "" [["monday"], ["wednesday"], ["sunday"], ["oink"]] rows
+  where
+    compareDayOfWeek :: Text -> Text -> Ordering
+    compareDayOfWeek s1 s2 =
+      case (dayOfWeek s1, dayOfWeek s2) of
+        (Just n1, Just n2) -> compare n1 n2
+        (Just _, Nothing) -> LT
+        (Nothing, Just _) -> GT
+        (Nothing, Nothing) -> compare s1 s2
+      where
+        dayOfWeek :: Text -> Maybe Int
+        dayOfWeek = \case
+          "monday" -> Just 0
+          "tuesday" -> Just 1
+          "wednesday" -> Just 2
+          "thursday" -> Just 3
+          "friday" -> Just 4
+          "saturday" -> Just 5
+          "sunday" -> Just 6
+          _ -> Nothing
 
 test_last_insert_rowid :: IO ()
 test_last_insert_rowid = do
@@ -355,10 +386,28 @@ close conn = do
   code <- sqlite3_close conn
   pure (inspect code ())
 
--- TODO take callback
+create_collation :: Sqlite3 -> Text -> Maybe (Text -> Text -> Ordering) -> IO (Either Text ())
+create_collation conn name collation = do
+  code <- sqlite3_create_collation conn name collation
+  pure (inspect code ())
+
 exec :: Sqlite3 -> Text -> IO (Either Text ())
-exec conn sql = do
-  (maybeErrorMsg, code) <- sqlite3_exec conn sql Nothing
+exec conn sql =
+  exec_ conn sql Nothing
+
+-- A convenient wrapper around 'exec' that accumulates rows in a list.
+execReturn :: Sqlite3 -> Text -> IO (Either Text [[Text]])
+execReturn conn sql = do
+  rowsRef <- newIORef []
+  exec_ conn sql (Just \cols _ -> modifyIORef' rowsRef (cols :) >> pure 0) >>= \case
+    Left err -> pure (Left err)
+    Right () -> do
+      rows <- readIORef rowsRef
+      pure (Right (reverse (map Array.elems rows)))
+
+exec_ :: Sqlite3 -> Text -> Maybe (Array Int Text -> Array Int Text -> IO Int) -> IO (Either Text ())
+exec_ conn sql callback = do
+  (maybeErrorMsg, code) <- sqlite3_exec conn sql callback
   pure case inspect code () of
     Left errorMsg -> Left (errorMsg <> maybe Text.empty ("; " <>) maybeErrorMsg)
     Right () -> Right ()

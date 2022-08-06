@@ -56,11 +56,11 @@ doubleToCDouble =
 
 cstringToText :: CString -> IO Text
 cstringToText string =
-  Text.decodeUtf8 <$> ByteString.packCString string
+  Text.fromPtr0 (castPtr string)
 
-cstringLenToText :: Ptr CChar -> Int -> IO Text
+cstringLenToText :: Ptr CChar -> Text.I8 -> IO Text
 cstringLenToText c_string len =
-  Text.decodeUtf8 <$> ByteString.unsafePackCStringLen (c_string, len)
+  Text.fromPtr (castPtr c_string) len
 
 textToCString :: Text -> (CString -> IO a) -> IO a
 textToCString text@(Text _ _ len) action =

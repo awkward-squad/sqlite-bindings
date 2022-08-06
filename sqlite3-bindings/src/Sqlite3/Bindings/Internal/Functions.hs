@@ -3,6 +3,7 @@
 module Sqlite3.Bindings.Internal.Functions where
 
 import Control.Exception (mask_)
+import Control.Monad (when)
 import Data.Array (Array)
 import Data.Bits ((.|.))
 import Data.ByteString (ByteString)
@@ -54,7 +55,7 @@ sqlite3_autovacuum_pages (Sqlite3 connection) = \case
   Just callback ->
     mask_ do
       c_callback <-
-        makeCallback3 \_ c_name numPages numFreePages pageSize -> do
+        makeCallback4 \_ c_name numPages numFreePages pageSize -> do
           name <- cstringToText c_name
           wordToCUInt <$> callback name (cuintToWord numPages) (cuintToWord numFreePages) (cuintToWord pageSize)
       C.sqlite3_autovacuum_pages connection c_callback (castFunPtrToPtr c_callback) hs_free_fun_ptr
@@ -67,8 +68,8 @@ sqlite3_backup_finish ::
   Sqlite3_backup ->
   -- | Result code.
   IO CInt
-sqlite3_backup_finish (Sqlite3_backup backup) =
-  C.sqlite3_backup_finish backup
+sqlite3_backup_finish =
+  coerce C.sqlite3_backup_finish
 
 -- | https://www.sqlite.org/c3ref/backup_finish.html
 --
@@ -315,8 +316,8 @@ sqlite3_blob_bytes ::
   Sqlite3_blob ->
   -- | Size of blob, in bytes.
   IO CInt
-sqlite3_blob_bytes (Sqlite3_blob blob) =
-  C.sqlite3_blob_bytes blob
+sqlite3_blob_bytes =
+  coerce C.sqlite3_blob_bytes
 
 -- | https://www.sqlite.org/c3ref/blob_close.html
 --
@@ -326,8 +327,8 @@ sqlite3_blob_close ::
   Sqlite3_blob ->
   -- | Result code.
   IO CInt
-sqlite3_blob_close (Sqlite3_blob blob) =
-  C.sqlite3_blob_close blob
+sqlite3_blob_close =
+  coerce C.sqlite3_blob_close
 
 -- | https://www.sqlite.org/c3ref/blob_open.html
 --
@@ -387,8 +388,8 @@ sqlite3_blob_reopen ::
   Int64 ->
   -- | Result code.
   IO CInt
-sqlite3_blob_reopen (Sqlite3_blob blob) =
-  C.sqlite3_blob_reopen blob
+sqlite3_blob_reopen =
+  coerce C.sqlite3_blob_reopen
 
 -- | https://www.sqlite.org/c3ref/blob_write.html
 --
@@ -469,8 +470,8 @@ sqlite3_clear_bindings ::
   Sqlite3_stmt ->
   -- | Result code.
   IO CInt
-sqlite3_clear_bindings (Sqlite3_stmt statement) =
-  C.sqlite3_clear_bindings statement
+sqlite3_clear_bindings =
+  coerce C.sqlite3_clear_bindings
 
 -- | https://www.sqlite.org/c3ref/close.html
 --
@@ -480,8 +481,8 @@ sqlite3_close ::
   Sqlite3 ->
   -- | Result code.
   IO CInt
-sqlite3_close (Sqlite3 connection) =
-  C.sqlite3_close connection
+sqlite3_close =
+  coerce C.sqlite3_close
 
 -- | https://www.sqlite.org/c3ref/close.html
 --
@@ -493,8 +494,8 @@ sqlite3_close_v2 ::
   Sqlite3 ->
   -- | Result code.
   IO CInt
-sqlite3_close_v2 (Sqlite3 connection) =
-  C.sqlite3_close_v2 connection
+sqlite3_close_v2 =
+  coerce C.sqlite3_close_v2
 
 -- | https://www.sqlite.org/c3ref/collation_needed.html
 --
@@ -846,40 +847,31 @@ sqlite3_context_db_handle =
 -- Create a collating sequence.
 sqlite3_create_collation ::
   -- | Connection.
-  Ptr C.Sqlite3 ->
-  -- | Collating sequence name (UTF-8).
-  CString ->
-  -- | Encoding.
-  CInt ->
-  -- | Application data.
-  Ptr a ->
+  Sqlite3 ->
+  -- | Collating sequence name.
+  Text ->
   -- | Collating sequence.
-  FunPtr (Ptr a -> CInt -> Ptr b -> CInt -> Ptr b -> IO CInt) ->
+  Maybe (Text -> Text -> Ordering) ->
   -- | Result code.
   IO CInt
-sqlite3_create_collation =
-  C.sqlite3_create_collation
-
--- | https://www.sqlite.org/c3ref/create_collation.html
---
--- Create a collating sequence.
-sqlite3_create_collation_v2 ::
-  -- | Connection.
-  Ptr C.Sqlite3 ->
-  -- | Collating sequence name (UTF-8).
-  CString ->
-  -- | Encoding.
-  CInt ->
-  -- | Application data.
-  Ptr a ->
-  -- | Collating sequence.
-  FunPtr (Ptr a -> CInt -> Ptr b -> CInt -> Ptr b -> IO CInt) ->
-  -- | Application data destructor.
-  FunPtr (Ptr a -> IO ()) ->
-  -- | Result code.
-  IO CInt
-sqlite3_create_collation_v2 =
-  C.sqlite3_create_collation_v2
+sqlite3_create_collation (Sqlite3 connection) name maybeComparison =
+  textToCString name \c_name -> do
+    let createCollation = C.sqlite3_create_collation_v2 connection c_name _SQLITE_UTF8
+    case maybeComparison of
+      Nothing -> createCollation nullPtr nullFunPtr nullFunPtr
+      Just comparison ->
+        mask_ do
+          c_comparison <-
+            makeCallback2 \_ lx cx ly cy -> do
+              x <- cstringLenToText cx (fromIntegral lx)
+              y <- cstringLenToText cy (fromIntegral ly)
+              pure case comparison x y of
+                LT -> -1
+                EQ -> 0
+                GT -> 1
+          code <- createCollation (castFunPtrToPtr c_comparison) c_comparison hs_free_fun_ptr
+          when (code /= _SQLITE_OK) (freeHaskellFunPtr c_comparison)
+          pure code
 
 -- | https://www.sqlite.org/c3ref/create_filename.html
 --
@@ -1219,7 +1211,7 @@ sqlite3_exec ::
   -- | SQL.
   Text ->
   -- | Callback.
-  Maybe (Array Int Text -> Array Int Text -> IO CInt) ->
+  Maybe (Array Int Text -> Array Int Text -> IO Int) ->
   -- | Error message, result code.
   IO (Maybe Text, CInt)
 sqlite3_exec (Sqlite3 connection) sql maybeCallback =
@@ -1228,11 +1220,11 @@ sqlite3_exec (Sqlite3 connection) sql maybeCallback =
       Nothing -> go nullFunPtr
       Just callback -> do
         c_callback <-
-          makeCallback2 \_ numCols c_values c_names -> do
+          makeCallback3 \_ numCols c_values c_names -> do
             let convert = carrayToArray cstringToText numCols
             values <- convert c_values
             names <- convert c_names
-            callback values names
+            intToCInt <$> callback values names
         result <- go c_callback
         freeHaskellFunPtr c_callback
         pure result
@@ -1271,8 +1263,8 @@ sqlite3_errcode ::
   Sqlite3 ->
   -- | Result code.
   IO CInt
-sqlite3_errcode (Sqlite3 connection) =
-  C.sqlite3_errcode connection
+sqlite3_errcode =
+  coerce C.sqlite3_errcode
 
 -- | https://www.sqlite.org/c3ref/errcode.html
 --
@@ -1388,8 +1380,8 @@ sqlite3_finalize ::
   Sqlite3_stmt ->
   -- | Result code.
   IO CInt
-sqlite3_finalize (Sqlite3_stmt statement) =
-  C.sqlite3_finalize statement
+sqlite3_finalize =
+  coerce C.sqlite3_finalize
 
 -- | https://www.sqlite.org/c3ref/free.html
 --
@@ -1508,8 +1500,8 @@ sqlite3_last_insert_rowid ::
   Sqlite3 ->
   -- | Rowid.
   IO Int64
-sqlite3_last_insert_rowid (Sqlite3 connection) =
-  C.sqlite3_last_insert_rowid connection
+sqlite3_last_insert_rowid =
+  coerce C.sqlite3_last_insert_rowid
 
 -- | https://www.sqlite.org/c3ref/libversion.html
 --
@@ -1725,7 +1717,7 @@ sqlite3_prepare_v2 (Sqlite3 connection) sql =
         let unusedSqlLen = (c_sql `plusPtr` c_sql_len) `minusPtr` c_unused_sql
         unusedSql <-
           if unusedSqlLen > 0
-            then cstringLenToText c_unused_sql unusedSqlLen
+            then cstringLenToText c_unused_sql (fromIntegral unusedSqlLen)
             else pure Text.empty
         pure (if statement == nullPtr then Nothing else Just (Sqlite3_stmt statement), unusedSql, code)
 
@@ -1873,8 +1865,8 @@ sqlite3_reset ::
   Sqlite3_stmt ->
   -- | Result code.
   IO CInt
-sqlite3_reset (Sqlite3_stmt statement) =
-  C.sqlite3_reset statement
+sqlite3_reset =
+  coerce C.sqlite3_reset
 
 -- | https://www.sqlite.org/c3ref/reset_auto_extension.html
 sqlite3_reset_auto_extension = undefined
@@ -2334,8 +2326,8 @@ sqlite3_step ::
   Sqlite3_stmt ->
   -- | Result code.
   IO CInt
-sqlite3_step (Sqlite3_stmt statement) =
-  C.sqlite3_step statement
+sqlite3_step =
+  coerce C.sqlite3_step
 
 -- | https://www.sqlite.org/c3ref/stmt_busy.html
 --
@@ -3021,8 +3013,7 @@ freeStablePtrFunPtr =
   unsafePerformIO (makeCallback0 \ptr -> freeStablePtr (castPtrToStablePtr (castPtr ptr)))
 {-# NOINLINE freeStablePtrFunPtr #-}
 
--- FIXME should this be safe?
-foreign import capi unsafe "HsFFI.h &hs_free_fun_ptr"
+foreign import capi "HsFFI.h &hs_free_fun_ptr"
   hs_free_fun_ptr :: FunPtr (Ptr a -> IO ())
 
 foreign import ccall "wrapper"
@@ -3037,10 +3028,15 @@ foreign import ccall "wrapper"
 
 foreign import ccall "wrapper"
   makeCallback2 ::
+    (Ptr a -> CInt -> Ptr b -> CInt -> Ptr b -> IO CInt) ->
+    IO (FunPtr (Ptr a -> CInt -> Ptr b -> CInt -> Ptr b -> IO CInt))
+
+foreign import ccall "wrapper"
+  makeCallback3 ::
     (Ptr a -> CInt -> Ptr CString -> Ptr CString -> IO CInt) ->
     IO (FunPtr (Ptr a -> CInt -> Ptr CString -> Ptr CString -> IO CInt))
 
 foreign import ccall "wrapper"
-  makeCallback3 ::
+  makeCallback4 ::
     (Ptr a -> CString -> CUInt -> CUInt -> CUInt -> IO CUInt) ->
     IO (FunPtr (Ptr a -> CString -> CUInt -> CUInt -> CUInt -> IO CUInt))

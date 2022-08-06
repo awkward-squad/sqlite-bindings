@@ -69,7 +69,6 @@ module Sqlite3.Bindings
     sqlite3_config__13,
     sqlite3_context_db_handle,
     sqlite3_create_collation,
-    sqlite3_create_collation_v2,
     sqlite3_create_filename,
     sqlite3_create_function,
     sqlite3_create_function_v2,

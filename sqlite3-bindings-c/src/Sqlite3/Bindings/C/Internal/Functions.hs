@@ -790,7 +790,7 @@ foreign import ccall unsafe
 -- | https://www.sqlite.org/c3ref/create_collation.html
 --
 -- Create a collating sequence.
-foreign import ccall unsafe
+foreign import ccall safe
   sqlite3_create_collation ::
     -- | Connection.
     Ptr Sqlite3 ->
@@ -808,7 +808,7 @@ foreign import ccall unsafe
 -- | https://www.sqlite.org/c3ref/create_collation.html
 --
 -- Create a collating sequence.
-foreign import ccall unsafe
+foreign import ccall safe
   sqlite3_create_collation_v2 ::
     -- | Connection.
     Ptr Sqlite3 ->
