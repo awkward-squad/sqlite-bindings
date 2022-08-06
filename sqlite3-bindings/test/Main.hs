@@ -37,7 +37,8 @@ main = do
         testCase "compileoption_get" test_compileoption_get,
         testCase "create_collation" test_create_collation,
         testCase "last_insert_rowid" test_last_insert_rowid,
-        testCase "open / close" test_open
+        testCase "open / close" test_open,
+        testCase "rollback_hook" test_rollback_hook
       ]
 
 test_autovacuum_pages :: IO ()
@@ -221,12 +222,7 @@ test_column = do
       sqlite3_column_text statement 4 >>= assertEqual "" Text.empty
       sqlite3_column_blob statement 3 >>= assertEqual "" (ByteString.pack [1, 2])
       sqlite3_column_blob statement 4 >>= assertEqual "" ByteString.empty
-
       _ <- sqlite3_column_value statement 0
-      _ <- sqlite3_column_value statement 1
-      _ <- sqlite3_column_value statement 2
-      _ <- sqlite3_column_value statement 3
-      _ <- sqlite3_column_value statement 4
       pure ()
 
 test_column_decltype :: IO ()
@@ -339,6 +335,22 @@ test_open :: IO ()
 test_open = do
   withConnection ":memory:" \_ -> pure ()
   withConnection "" \_ -> pure ()
+
+test_rollback_hook :: IO ()
+test_rollback_hook = do
+  ref <- newIORef (0 :: Int)
+  withConnection ":memory:" \conn -> do
+    sqlite3_rollback_hook conn (writeIORef ref 1 >> pure 0)
+    exec conn "create table foo (bar)" >>= check
+    exec conn "begin" >>= check
+    exec conn "insert into foo (bar) values (1)" >>= check
+    exec conn "rollback" >>= check
+    readIORef ref >>= assertEqual "" 1
+    sqlite3_rollback_hook conn (writeIORef ref 2 >> pure 0)
+    exec conn "begin" >>= check
+    exec conn "insert into foo (bar) values (1)" >>= check
+    exec conn "rollback" >>= check
+    readIORef ref >>= assertEqual "" 2
 
 ------------------------------------------------------------------------------------------------------------------------
 -- Exception-safe acquire/release actions

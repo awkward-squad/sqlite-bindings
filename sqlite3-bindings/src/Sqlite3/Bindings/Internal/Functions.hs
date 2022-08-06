@@ -485,6 +485,7 @@ sqlite3_close ::
   IO CInt
 sqlite3_close (Sqlite3 connection) = do
   freeCommitHook connection
+  freeRollbackHook connection
   C.sqlite3_close connection
 
 -- | https://www.sqlite.org/c3ref/close.html
@@ -499,6 +500,7 @@ sqlite3_close_v2 ::
   IO CInt
 sqlite3_close_v2 (Sqlite3 connection) = do
   freeCommitHook connection
+  freeRollbackHook connection
   C.sqlite3_close_v2 connection
 
 -- | https://www.sqlite.org/c3ref/collation_needed.html
@@ -2121,15 +2123,15 @@ sqlite3_result_zeroblob64 =
 -- Register a callback that is invoked whenever a transaction is committed.
 sqlite3_rollback_hook ::
   -- | Connection.
-  Ptr C.Sqlite3 ->
+  Sqlite3 ->
   -- | Rollback hook.
-  FunPtr (Ptr a -> IO CInt) ->
-  -- | Application data.
-  Ptr a ->
-  -- | Previous application data.
-  IO (Ptr b)
-sqlite3_rollback_hook =
-  C.sqlite3_rollback_hook
+  IO Int ->
+  IO ()
+sqlite3_rollback_hook (Sqlite3 connection) hook =
+  mask_ do
+    c_hook <- makeCallback1 \_ -> intToCInt <$> hook
+    oldHook <- C.sqlite3_rollback_hook connection c_hook (castFunPtrToPtr c_hook)
+    freeAsFunPtrIfNonNull oldHook
 
 -- | https://www.sqlite.org/c3ref/serialize.html
 --
@@ -3029,15 +3031,21 @@ sqlite3_wal_hook =
 
 --
 
+freeAsFunPtrIfNonNull :: Ptr a -> IO ()
+freeAsFunPtrIfNonNull ptr =
+  when (ptr /= nullPtr) (freeHaskellFunPtr (castPtrToFunPtr ptr))
+
 -- | Free the commit hook of a connection, if any.
 freeCommitHook :: Ptr C.Sqlite3 -> IO ()
 freeCommitHook connection = do
   hook <- C.sqlite3_commit_hook connection nullFunPtr nullPtr
   freeAsFunPtrIfNonNull hook
 
-freeAsFunPtrIfNonNull :: Ptr a -> IO ()
-freeAsFunPtrIfNonNull ptr =
-  when (ptr /= nullPtr) (freeHaskellFunPtr (castPtrToFunPtr ptr))
+-- | Free the rollback hook of a connection, if any.
+freeRollbackHook :: Ptr C.Sqlite3 -> IO ()
+freeRollbackHook connection = do
+  hook <- C.sqlite3_rollback_hook connection nullFunPtr nullPtr
+  freeAsFunPtrIfNonNull hook
 
 -- A top-level FunPtr to 'freeStablePtr'
 freeStablePtrFunPtr :: FunPtr (Ptr a -> IO ())
