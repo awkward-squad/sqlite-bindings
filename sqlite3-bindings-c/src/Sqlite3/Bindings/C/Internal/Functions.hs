@@ -687,7 +687,7 @@ foreign import ccall unsafe
 -- Get a compile-time option name.
 foreign import ccall unsafe
   sqlite3_compileoption_get ::
-    -- | Option index.
+    -- | Option index (0-based).
     CInt ->
     -- | Option name (UTF-8).
     CString

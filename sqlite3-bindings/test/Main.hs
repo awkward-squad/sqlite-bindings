@@ -33,6 +33,7 @@ main = do
         testCase "column_database_name / column_origin_name / column_name / column_table_name" test_column_name,
         testCase "column_decltype" test_column_decltype,
         testCase "column_type" test_column_type,
+        testCase "compileoption_get" test_compileoption_get,
         testCase "create_collation" test_create_collation,
         testCase "last_insert_rowid" test_last_insert_rowid,
         testCase "open / close" test_open
@@ -242,19 +243,6 @@ test_column_decltype = do
     withStatement conn "select bar2 from foo2" \(statement, _) -> do
       sqlite3_column_decltype statement 0 >>= assertEqual "" (Just "oink")
 
-test_column_type :: IO ()
-test_column_type = do
-  withConnection ":memory:" \conn -> do
-    exec conn "create table foo (a, b, c, d, e)" >>= check
-    exec conn "insert into foo (a, b, c, d, e) values (1, 2.0, 'foo', x'0102', null)" >>= check
-    withStatement conn "select a, b, c, d, e from foo" \(statement, _) -> do
-      sqlite3_step statement >>= assertEqual "" _SQLITE_ROW
-      sqlite3_column_type statement 0 >>= assertEqual "" SQLITE_INTEGER
-      sqlite3_column_type statement 1 >>= assertEqual "" SQLITE_FLOAT
-      sqlite3_column_type statement 2 >>= assertEqual "" SQLITE_TEXT
-      sqlite3_column_type statement 3 >>= assertEqual "" SQLITE_BLOB
-      sqlite3_column_type statement 4 >>= assertEqual "" SQLITE_NULL
-
 test_column_name :: IO ()
 test_column_name = do
   withConnection ":memory:" \conn -> do
@@ -270,6 +258,26 @@ test_column_name = do
       sqlite3_column_name statement 0 >>= assertEqual "" (Just "baz")
       sqlite3_column_origin_name statement 0 >>= assertEqual "" (Just "bar")
       sqlite3_column_table_name statement 0 >>= assertEqual "" (Just "foo")
+
+test_column_type :: IO ()
+test_column_type = do
+  withConnection ":memory:" \conn -> do
+    exec conn "create table foo (a, b, c, d, e)" >>= check
+    exec conn "insert into foo (a, b, c, d, e) values (1, 2.0, 'foo', x'0102', null)" >>= check
+    withStatement conn "select a, b, c, d, e from foo" \(statement, _) -> do
+      sqlite3_step statement >>= assertEqual "" _SQLITE_ROW
+      sqlite3_column_type statement 0 >>= assertEqual "" SQLITE_INTEGER
+      sqlite3_column_type statement 1 >>= assertEqual "" SQLITE_FLOAT
+      sqlite3_column_type statement 2 >>= assertEqual "" SQLITE_TEXT
+      sqlite3_column_type statement 3 >>= assertEqual "" SQLITE_BLOB
+      sqlite3_column_type statement 4 >>= assertEqual "" SQLITE_NULL
+
+test_compileoption_get :: IO ()
+test_compileoption_get = do
+  case sqlite3_compileoption_get 0 of
+    Nothing -> pure ()
+    Just !_ -> pure ()
+  assertEqual "" Nothing (sqlite3_compileoption_get (-1))
 
 test_create_collation :: IO ()
 test_create_collation = do

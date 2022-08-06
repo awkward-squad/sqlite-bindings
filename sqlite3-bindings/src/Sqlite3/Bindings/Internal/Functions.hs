@@ -730,12 +730,15 @@ sqlite3_commit_hook (Sqlite3 connection) hook = do
 --
 -- Get a compile-time option name.
 sqlite3_compileoption_get ::
-  -- | Option index.
-  CInt ->
-  -- | Option name (UTF-8).
-  CString
-sqlite3_compileoption_get =
-  C.sqlite3_compileoption_get
+  -- | Option index (0-based).
+  Int ->
+  -- | Option name.
+  Maybe Text
+sqlite3_compileoption_get index =
+  unsafeDupablePerformIO (if c_name == nullPtr then pure Nothing else Just <$> cstringToText c_name)
+  where
+    c_name =
+      C.sqlite3_compileoption_get (intToCInt index)
 
 -- | https://www.sqlite.org/c3ref/compileoption_get.html
 --
