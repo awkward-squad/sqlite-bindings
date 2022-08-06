@@ -2,12 +2,13 @@
 
 module Sqlite3.Bindings.Internal.Functions where
 
-import Control.Exception (bracket, mask_)
+import Control.Exception (mask_)
 import Data.Array (Array)
 import Data.Bits ((.|.))
 import Data.ByteString (ByteString)
 import qualified Data.ByteString.Internal as ByteString
 import qualified Data.ByteString.Unsafe as ByteString
+import Data.Coerce (coerce)
 import Data.Int (Int64)
 import Data.Text (Text)
 import qualified Data.Text as Text
@@ -21,7 +22,19 @@ import Foreign.Storable (Storable (peek))
 import qualified Sqlite3.Bindings.C as C
 import Sqlite3.Bindings.Internal.Constants
 import Sqlite3.Bindings.Internal.Objects
-import Sqlite3.Bindings.Internal.Utils (boolToCInt, carrayToArray, cintToInt, cstringLenToText, cstringToText, cuintToWord, doubleToCDouble, intToCInt, textToCString, textToCStringLen, wordToCUInt)
+import Sqlite3.Bindings.Internal.Utils
+  ( boolToCInt,
+    carrayToArray,
+    cintToInt,
+    cstringLenToText,
+    cstringToText,
+    cuintToWord,
+    doubleToCDouble,
+    intToCInt,
+    textToCString,
+    textToCStringLen,
+    wordToCUInt,
+  )
 import System.IO.Unsafe (unsafeDupablePerformIO, unsafePerformIO)
 
 sqlite3_auto_extension = undefined
@@ -442,11 +455,11 @@ sqlite3_changes (Sqlite3 connection) =
 -- a connection.
 sqlite3_changes64 ::
   -- | Connection.
-  Ptr C.Sqlite3 ->
+  Sqlite3 ->
   -- | Number of rows.
   IO Int64
 sqlite3_changes64 =
-  C.sqlite3_changes64
+  coerce C.sqlite3_changes64
 
 -- | https://www.sqlite.org/c3ref/clear_bindings.html
 --
@@ -2510,11 +2523,11 @@ sqlite3_total_changes (Sqlite3 connection) =
 -- connection.
 sqlite3_total_changes64 ::
   -- | Connection.
-  Ptr C.Sqlite3 ->
+  Sqlite3 ->
   -- | Number of rows.
   IO Int64
 sqlite3_total_changes64 =
-  C.sqlite3_total_changes64
+  coerce C.sqlite3_total_changes64
 
 -- | https://www.sqlite.org/c3ref/trace_v2.html
 --

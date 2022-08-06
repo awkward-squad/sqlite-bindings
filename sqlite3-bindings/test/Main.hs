@@ -24,7 +24,7 @@ main = do
         testCase "blob_*" test_blob,
         testCase "busy_handler" test_busy_handler,
         testCase "busy_timeout" test_busy_timeout,
-        testCase "changes / total_changes" test_changes,
+        testCase "changes / changes64 / total_changes / total_changes64" test_changes,
         testCase "last_insert_rowid" test_last_insert_rowid,
         testCase "open / close" test_open
       ]
@@ -150,20 +150,30 @@ test_changes :: IO ()
 test_changes = do
   withConnection ":memory:" \conn -> do
     sqlite3_changes conn >>= assertEqual "" 0
+    sqlite3_changes64 conn >>= assertEqual "" 0
     sqlite3_total_changes conn >>= assertEqual "" 0
+    sqlite3_total_changes64 conn >>= assertEqual "" 0
     exec conn "create table foo (bar)" >>= check
     exec conn "insert into foo values (1), (2)" >>= check
     sqlite3_changes conn >>= assertEqual "" 2
+    sqlite3_changes64 conn >>= assertEqual "" 2
     sqlite3_total_changes conn >>= assertEqual "" 2
+    sqlite3_total_changes64 conn >>= assertEqual "" 2
     exec conn "update foo set bar = 3 where bar = 1" >>= check
     sqlite3_changes conn >>= assertEqual "" 1
+    sqlite3_changes64 conn >>= assertEqual "" 1
     sqlite3_total_changes conn >>= assertEqual "" 3
+    sqlite3_total_changes64 conn >>= assertEqual "" 3
     exec conn "delete from foo" >>= check
     sqlite3_changes conn >>= assertEqual "" 2
+    sqlite3_changes64 conn >>= assertEqual "" 2
     sqlite3_total_changes conn >>= assertEqual "" 5
+    sqlite3_total_changes64 conn >>= assertEqual "" 5
     exec conn "delete from foo" >>= check
     sqlite3_changes conn >>= assertEqual "" 0
+    sqlite3_changes64 conn >>= assertEqual "" 0
     sqlite3_total_changes conn >>= assertEqual "" 5
+    sqlite3_total_changes64 conn >>= assertEqual "" 5
 
 test_last_insert_rowid :: IO ()
 test_last_insert_rowid = do
