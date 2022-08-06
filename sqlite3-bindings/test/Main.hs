@@ -28,6 +28,7 @@ main = do
         testCase "busy_timeout" test_busy_timeout,
         testCase "changes / changes64 / total_changes / total_changes64" test_changes,
         testCase "clear_bindings" test_clear_bindings,
+        testCase "collation_needed" test_collation_needed,
         testCase "create_collation" test_create_collation,
         testCase "last_insert_rowid" test_last_insert_rowid,
         testCase "open / close" test_open
@@ -132,16 +133,12 @@ test_busy_handler = do
       withConnection name \conn2 -> do
         exec conn1 "begin immediate transaction" >>= check
         invoked <- newIORef False
-        bracket
-          (busy_handler conn2 (\_ -> writeIORef invoked True >> pure False))
-          (\(_, destructor) -> destructor)
-          \(code, _) -> do
-            check code
-            exec conn2 "begin immediate transaction"
-              >>= assertEqual "" (Left "database is locked (5); database is locked")
-            readIORef invoked >>= \case
-              False -> assertFailure "didn't invoke busy handler"
-              True -> pure ()
+        withBusyHandler conn2 (\_ -> writeIORef invoked True >> pure False) do
+          exec conn2 "begin immediate transaction"
+            >>= assertEqual "" (Left "database is locked (5); database is locked")
+          readIORef invoked >>= \case
+            False -> assertFailure "didn't invoke busy handler"
+            True -> pure ()
 
 test_busy_timeout :: IO ()
 test_busy_timeout = do
@@ -189,6 +186,18 @@ test_clear_bindings = do
       bind_int statement 1 0 >>= check
       clear_bindings statement >>= check
 
+test_collation_needed :: IO ()
+test_collation_needed = do
+  withConnection ":memory:" \conn -> do
+    let collationNeeded :: Text -> IO ()
+        collationNeeded = \case
+          "foo" -> do
+            _ <- create_collation conn "foo" (Just \s1 s2 -> pure (compare s1 s2))
+            pure ()
+          _ -> pure ()
+    withCollationNeeded conn collationNeeded do
+      exec conn "create table foo (bar collate foo)" >>= check
+
 test_create_collation :: IO ()
 test_create_collation = do
   withConnection ":memory:" \conn -> do
@@ -198,9 +207,9 @@ test_create_collation = do
     rows <- execReturn conn "select bar from foo order by bar collate dayofweek" >>= check
     assertEqual "" [["monday"], ["wednesday"], ["sunday"], ["oink"]] rows
   where
-    compareDayOfWeek :: Text -> Text -> Ordering
+    compareDayOfWeek :: Text -> Text -> IO Ordering
     compareDayOfWeek s1 s2 =
-      case (dayOfWeek s1, dayOfWeek s2) of
+      pure case (dayOfWeek s1, dayOfWeek s2) of
         (Just n1, Just n2) -> compare n1 n2
         (Just _, Nothing) -> LT
         (Nothing, Just _) -> GT
@@ -249,6 +258,14 @@ withBlob :: Sqlite3 -> Text -> Text -> Text -> Int64 -> Bool -> (Sqlite3_blob ->
 withBlob conn database table column rowid mode =
   brackety (blob_open conn database table column rowid mode) blob_close
 
+withBusyHandler :: Sqlite3 -> (Int -> IO Bool) -> IO a -> IO a
+withBusyHandler conn callback =
+  brackety2 (busy_handler conn callback)
+
+withCollationNeeded :: Sqlite3 -> (Text -> IO ()) -> IO a -> IO a
+withCollationNeeded conn callback =
+  brackety2 (collation_needed conn callback)
+
 withSqliteLibrary :: IO a -> IO a
 withSqliteLibrary action =
   brackety initialize (\() -> shutdown) \() -> action
@@ -268,6 +285,12 @@ brackety acquire release action =
         throwIO exception
     cleanup >>= check
     pure result
+
+brackety2 :: IO (Either Text (), IO ()) -> IO a -> IO a
+brackety2 acquire action =
+  bracket acquire (\(_, release) -> release) \(value, _) -> do
+    check value
+    action
 
 ------------------------------------------------------------------------------------------------------------------------
 -- API wrappers that return Either Text
@@ -386,7 +409,12 @@ close conn = do
   code <- sqlite3_close conn
   pure (inspect code ())
 
-create_collation :: Sqlite3 -> Text -> Maybe (Text -> Text -> Ordering) -> IO (Either Text ())
+collation_needed :: Sqlite3 -> (Text -> IO ()) -> IO (Either Text (), IO ())
+collation_needed conn callback = do
+  (code, destructor) <- sqlite3_collation_needed conn callback
+  pure (inspect code (), destructor)
+
+create_collation :: Sqlite3 -> Text -> Maybe (Text -> Text -> IO Ordering) -> IO (Either Text ())
 create_collation conn name collation = do
   code <- sqlite3_create_collation conn name collation
   pure (inspect code ())

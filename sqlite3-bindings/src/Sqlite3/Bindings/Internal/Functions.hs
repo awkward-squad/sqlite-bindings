@@ -10,6 +10,7 @@ import Data.ByteString (ByteString)
 import qualified Data.ByteString.Internal as ByteString
 import qualified Data.ByteString.Unsafe as ByteString
 import Data.Coerce (coerce)
+import Data.Functor ((<&>))
 import Data.Int (Int64)
 import Data.Text (Text)
 import qualified Data.Text as Text
@@ -502,15 +503,17 @@ sqlite3_close_v2 =
 -- Register a callback that is invoked when a collating sequence is needed.
 sqlite3_collation_needed ::
   -- | Connection.
-  Ptr C.Sqlite3 ->
-  -- | Application data.
-  Ptr a ->
+  Sqlite3 ->
   -- | Callback.
-  FunPtr (Ptr a -> Ptr C.Sqlite3 -> CInt -> CString -> IO ()) ->
-  -- | Result code.
-  IO CInt
-sqlite3_collation_needed =
-  C.sqlite3_collation_needed
+  (Text -> IO ()) ->
+  -- | Result code, callback destructor.
+  IO (CInt, IO ())
+sqlite3_collation_needed (Sqlite3 connection) callback = do
+  c_callback <- makeCallback5 \_ _ _ c_name -> do
+    name <- cstringToText c_name
+    callback name
+  code <- C.sqlite3_collation_needed connection nullPtr c_callback
+  pure (code, freeHaskellFunPtr c_callback)
 
 -- | https://www.sqlite.org/c3ref/column_blob.html
 --
@@ -851,7 +854,7 @@ sqlite3_create_collation ::
   -- | Collating sequence name.
   Text ->
   -- | Collating sequence.
-  Maybe (Text -> Text -> Ordering) ->
+  Maybe (Text -> Text -> IO Ordering) ->
   -- | Result code.
   IO CInt
 sqlite3_create_collation (Sqlite3 connection) name maybeComparison =
@@ -865,7 +868,7 @@ sqlite3_create_collation (Sqlite3 connection) name maybeComparison =
             makeCallback2 \_ lx cx ly cy -> do
               x <- cstringLenToText cx (fromIntegral lx)
               y <- cstringLenToText cy (fromIntegral ly)
-              pure case comparison x y of
+              comparison x y <&> \case
                 LT -> -1
                 EQ -> 0
                 GT -> 1
@@ -3040,3 +3043,8 @@ foreign import ccall "wrapper"
   makeCallback4 ::
     (Ptr a -> CString -> CUInt -> CUInt -> CUInt -> IO CUInt) ->
     IO (FunPtr (Ptr a -> CString -> CUInt -> CUInt -> CUInt -> IO CUInt))
+
+foreign import ccall "wrapper"
+  makeCallback5 ::
+    (Ptr a -> Ptr C.Sqlite3 -> CInt -> CString -> IO ()) ->
+    IO (FunPtr (Ptr a -> Ptr C.Sqlite3 -> CInt -> CString -> IO ()))
