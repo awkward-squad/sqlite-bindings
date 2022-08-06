@@ -718,11 +718,11 @@ sqlite3_commit_hook ::
   -- | Connection.
   Sqlite3 ->
   -- | Commit hook.
-  IO CInt ->
+  IO Int ->
   IO ()
 sqlite3_commit_hook (Sqlite3 connection) hook = do
   mask_ do
-    c_hook <- makeCallback1 \_ -> hook
+    c_hook <- makeCallback1 \_ -> intToCInt <$> hook
     oldHook <- C.sqlite3_commit_hook connection c_hook (castFunPtrToPtr c_hook)
     freeAsFunPtrIfNonNull oldHook
 

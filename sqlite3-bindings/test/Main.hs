@@ -33,11 +33,11 @@ main = do
         testCase "column_database_name / column_origin_name / column_name / column_table_name" test_column_name,
         testCase "column_decltype" test_column_decltype,
         testCase "column_type" test_column_type,
+        testCase "commit_hook" test_commit_hook,
         testCase "compileoption_get" test_compileoption_get,
         testCase "create_collation" test_create_collation,
         testCase "last_insert_rowid" test_last_insert_rowid,
         testCase "open / close" test_open
-        -- TODO sqlite3_commit_hook
       ]
 
 test_autovacuum_pages :: IO ()
@@ -271,6 +271,22 @@ test_column_type = do
       sqlite3_column_type statement 2 >>= assertEqual "" SQLITE_TEXT
       sqlite3_column_type statement 3 >>= assertEqual "" SQLITE_BLOB
       sqlite3_column_type statement 4 >>= assertEqual "" SQLITE_NULL
+
+test_commit_hook :: IO ()
+test_commit_hook = do
+  ref <- newIORef (0 :: Int)
+  withConnection ":memory:" \conn -> do
+    sqlite3_commit_hook conn (writeIORef ref 1 >> pure 0)
+    exec conn "create table foo (bar)" >>= check
+    exec conn "begin" >>= check
+    exec conn "insert into foo (bar) values (1)" >>= check
+    exec conn "commit" >>= check
+    readIORef ref >>= assertEqual "" 1
+    sqlite3_commit_hook conn (writeIORef ref 2 >> pure 0)
+    exec conn "begin" >>= check
+    exec conn "insert into foo (bar) values (1)" >>= check
+    exec conn "commit" >>= check
+    readIORef ref >>= assertEqual "" 2
 
 test_compileoption_get :: IO ()
 test_compileoption_get = do
