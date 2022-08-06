@@ -25,6 +25,7 @@ main = do
         testCase "busy_handler" test_busy_handler,
         testCase "busy_timeout" test_busy_timeout,
         testCase "changes / changes64 / total_changes / total_changes64" test_changes,
+        testCase "clear_bindings" test_clear_bindings,
         testCase "last_insert_rowid" test_last_insert_rowid,
         testCase "open / close" test_open
       ]
@@ -174,6 +175,16 @@ test_changes = do
     sqlite3_changes64 conn >>= assertEqual "" 0
     sqlite3_total_changes conn >>= assertEqual "" 5
     sqlite3_total_changes64 conn >>= assertEqual "" 5
+
+test_clear_bindings :: IO ()
+test_clear_bindings = do
+  withConnection ":memory:" \conn -> do
+    withStatement conn "select 1" \(statement, _) -> do
+      clear_bindings statement >>= check
+    withStatement conn "select ?" \(statement, _) -> do
+      clear_bindings statement >>= check
+      bind_int statement 1 0 >>= check
+      clear_bindings statement >>= check
 
 test_last_insert_rowid :: IO ()
 test_last_insert_rowid = do
@@ -332,6 +343,11 @@ busy_handler conn callback = do
 busy_timeout :: Sqlite3 -> Int -> IO (Either Text ())
 busy_timeout conn milliseconds = do
   code <- sqlite3_busy_timeout conn milliseconds
+  pure (inspect code ())
+
+clear_bindings :: Sqlite3_stmt -> IO (Either Text ())
+clear_bindings statement = do
+  code <- sqlite3_clear_bindings statement
   pure (inspect code ())
 
 close :: Sqlite3 -> IO (Either Text ())
