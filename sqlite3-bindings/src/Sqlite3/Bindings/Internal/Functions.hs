@@ -430,11 +430,11 @@ sqlite3_cancel_auto_extension = undefined
 -- a connection.
 sqlite3_changes ::
   -- | Connection.
-  Ptr C.Sqlite3 ->
+  Sqlite3 ->
   -- | Number of rows.
-  IO CInt
-sqlite3_changes =
-  C.sqlite3_changes
+  IO Int
+sqlite3_changes (Sqlite3 connection) =
+  cintToInt <$> C.sqlite3_changes connection
 
 -- | https://www.sqlite.org/c3ref/changes.html
 --

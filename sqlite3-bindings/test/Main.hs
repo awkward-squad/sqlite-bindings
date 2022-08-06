@@ -24,6 +24,7 @@ main = do
         testCase "sqlite3_blob_*" test_sqlite3_blob,
         testCase "sqlite3_busy_handler" test_sqlite3_busy_handler,
         testCase "sqlite3_busy_timeout" test_sqlite3_busy_timeout,
+        testCase "sqlite3_changes" test_sqlite3_changes,
         testCase "sqlite3_last_insert_rowid" test_sqlite3_last_insert_rowid,
         testCase "sqlite3_open / sqlite3_close" test_sqlite3_open
       ]
@@ -144,6 +145,20 @@ test_sqlite3_busy_timeout = do
     busy_timeout conn 0 >>= check
     busy_timeout conn 1 >>= check
     busy_timeout conn (-1) >>= check
+
+test_sqlite3_changes :: IO ()
+test_sqlite3_changes = do
+  withConnection ":memory:" \conn -> do
+    sqlite3_changes conn >>= assertEqual "" 0
+    exec conn "create table foo (bar)" >>= check
+    exec conn "insert into foo values (1), (2)" >>= check
+    sqlite3_changes conn >>= assertEqual "" 2
+    exec conn "update foo set bar = 3 where bar = 1" >>= check
+    sqlite3_changes conn >>= assertEqual "" 1
+    exec conn "delete from foo" >>= check
+    sqlite3_changes conn >>= assertEqual "" 2
+    exec conn "delete from foo" >>= check
+    sqlite3_changes conn >>= assertEqual "" 0
 
 test_sqlite3_last_insert_rowid :: IO ()
 test_sqlite3_last_insert_rowid = do
