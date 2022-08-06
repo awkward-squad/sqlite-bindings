@@ -18,7 +18,7 @@ import Data.Word (Word64)
 import Foreign.C (CChar (..), CDouble (..), CInt (..), CString, CUChar (..), CUInt (..))
 import Foreign.ForeignPtr (withForeignPtr)
 import Foreign.Marshal.Alloc (alloca)
-import Foreign.Ptr (FunPtr, Ptr, castFunPtrToPtr, castPtr, freeHaskellFunPtr, minusPtr, nullFunPtr, nullPtr, plusPtr)
+import Foreign.Ptr (FunPtr, Ptr, castFunPtrToPtr, castPtr, castPtrToFunPtr, freeHaskellFunPtr, minusPtr, nullFunPtr, nullPtr, plusPtr)
 import Foreign.StablePtr
 import Foreign.Storable (Storable (peek))
 import qualified Sqlite3.Bindings.C as C
@@ -57,7 +57,7 @@ sqlite3_autovacuum_pages (Sqlite3 connection) = \case
   Just callback ->
     mask_ do
       c_callback <-
-        makeCallback4 \_ c_name numPages numFreePages pageSize -> do
+        makeCallback5 \_ c_name numPages numFreePages pageSize -> do
           name <- cstringToText c_name
           wordToCUInt <$> callback name (cuintToWord numPages) (cuintToWord numFreePages) (cuintToWord pageSize)
       C.sqlite3_autovacuum_pages connection c_callback (castFunPtrToPtr c_callback) hs_free_fun_ptr
@@ -420,7 +420,7 @@ sqlite3_busy_handler ::
   -- | Result code, callback destructor.
   IO (CInt, IO ())
 sqlite3_busy_handler (Sqlite3 connection) callback = do
-  c_callback <- makeCallback1 \_ n -> boolToCInt <$> callback (cintToInt n)
+  c_callback <- makeCallback2 \_ n -> boolToCInt <$> callback (cintToInt n)
   code <- C.sqlite3_busy_handler connection c_callback nullPtr
   pure (code, freeHaskellFunPtr c_callback)
 
@@ -483,8 +483,9 @@ sqlite3_close ::
   Sqlite3 ->
   -- | Result code.
   IO CInt
-sqlite3_close =
-  coerce C.sqlite3_close
+sqlite3_close (Sqlite3 connection) = do
+  freeCommitHook connection
+  C.sqlite3_close connection
 
 -- | https://www.sqlite.org/c3ref/close.html
 --
@@ -496,8 +497,9 @@ sqlite3_close_v2 ::
   Sqlite3 ->
   -- | Result code.
   IO CInt
-sqlite3_close_v2 =
-  coerce C.sqlite3_close_v2
+sqlite3_close_v2 (Sqlite3 connection) = do
+  freeCommitHook connection
+  C.sqlite3_close_v2 connection
 
 -- | https://www.sqlite.org/c3ref/collation_needed.html
 --
@@ -510,7 +512,7 @@ sqlite3_collation_needed ::
   -- | Result code, callback destructor.
   IO (CInt, IO ())
 sqlite3_collation_needed (Sqlite3 connection) callback = do
-  c_callback <- makeCallback5 \_ _ _ c_name -> do
+  c_callback <- makeCallback6 \_ _ _ c_name -> do
     name <- cstringToText c_name
     callback name
   code <- C.sqlite3_collation_needed connection nullPtr c_callback
@@ -714,15 +716,15 @@ sqlite3_column_value (Sqlite3_stmt statement) index =
 -- Register a callback that is invoked whenever a transaction is committed.
 sqlite3_commit_hook ::
   -- | Connection.
-  Ptr C.Sqlite3 ->
+  Sqlite3 ->
   -- | Commit hook.
-  FunPtr (Ptr a -> IO CInt) ->
-  -- | Application data.
-  Ptr a ->
-  -- | Previous application data.
-  IO (Ptr b)
-sqlite3_commit_hook =
-  C.sqlite3_commit_hook
+  IO CInt ->
+  IO ()
+sqlite3_commit_hook (Sqlite3 connection) hook = do
+  mask_ do
+    c_hook <- makeCallback1 \_ -> hook
+    oldHook <- C.sqlite3_commit_hook connection c_hook (castFunPtrToPtr c_hook)
+    freeAsFunPtrIfNonNull oldHook
 
 -- | https://www.sqlite.org/c3ref/compileoption_get.html
 --
@@ -879,7 +881,7 @@ sqlite3_create_collation (Sqlite3 connection) name maybeComparison =
       Just comparison ->
         mask_ do
           c_comparison <-
-            makeCallback2 \_ lx cx ly cy -> do
+            makeCallback3 \_ lx cx ly cy -> do
               x <- cstringLenToText cx (fromIntegral @CInt @Text.I8 lx)
               y <- cstringLenToText cy (fromIntegral @CInt @Text.I8 ly)
               pure case comparison x y of
@@ -1237,7 +1239,7 @@ sqlite3_exec (Sqlite3 connection) sql maybeCallback =
       Nothing -> go nullFunPtr
       Just callback -> do
         c_callback <-
-          makeCallback3 \_ numCols c_values c_names -> do
+          makeCallback4 \_ numCols c_values c_names -> do
             let convert = carrayToArray cstringToText numCols
             values <- convert c_values
             names <- convert c_names
@@ -3024,6 +3026,16 @@ sqlite3_wal_hook =
 
 --
 
+-- | Free the commit hook of a connection, if any.
+freeCommitHook :: Ptr C.Sqlite3 -> IO ()
+freeCommitHook connection = do
+  hook <- C.sqlite3_commit_hook connection nullFunPtr nullPtr
+  freeAsFunPtrIfNonNull hook
+
+freeAsFunPtrIfNonNull :: Ptr a -> IO ()
+freeAsFunPtrIfNonNull ptr =
+  when (ptr /= nullPtr) (freeHaskellFunPtr (castPtrToFunPtr ptr))
+
 -- A top-level FunPtr to 'freeStablePtr'
 freeStablePtrFunPtr :: FunPtr (Ptr a -> IO ())
 freeStablePtrFunPtr =
@@ -3040,25 +3052,30 @@ foreign import ccall "wrapper"
 
 foreign import ccall "wrapper"
   makeCallback1 ::
+    (Ptr a -> IO CInt) ->
+    IO (FunPtr (Ptr a -> IO CInt))
+
+foreign import ccall "wrapper"
+  makeCallback2 ::
     (Ptr a -> CInt -> IO CInt) ->
     IO (FunPtr (Ptr a -> CInt -> IO CInt))
 
 foreign import ccall "wrapper"
-  makeCallback2 ::
+  makeCallback3 ::
     (Ptr a -> CInt -> Ptr b -> CInt -> Ptr b -> IO CInt) ->
     IO (FunPtr (Ptr a -> CInt -> Ptr b -> CInt -> Ptr b -> IO CInt))
 
 foreign import ccall "wrapper"
-  makeCallback3 ::
+  makeCallback4 ::
     (Ptr a -> CInt -> Ptr CString -> Ptr CString -> IO CInt) ->
     IO (FunPtr (Ptr a -> CInt -> Ptr CString -> Ptr CString -> IO CInt))
 
 foreign import ccall "wrapper"
-  makeCallback4 ::
+  makeCallback5 ::
     (Ptr a -> CString -> CUInt -> CUInt -> CUInt -> IO CUInt) ->
     IO (FunPtr (Ptr a -> CString -> CUInt -> CUInt -> CUInt -> IO CUInt))
 
 foreign import ccall "wrapper"
-  makeCallback5 ::
+  makeCallback6 ::
     (Ptr a -> Ptr C.Sqlite3 -> CInt -> CString -> IO ()) ->
     IO (FunPtr (Ptr a -> Ptr C.Sqlite3 -> CInt -> CString -> IO ()))

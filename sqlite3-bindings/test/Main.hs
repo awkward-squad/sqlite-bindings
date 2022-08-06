@@ -36,6 +36,7 @@ main = do
         testCase "create_collation" test_create_collation,
         testCase "last_insert_rowid" test_last_insert_rowid,
         testCase "open / close" test_open
+        -- TODO sqlite3_commit_hook
       ]
 
 test_autovacuum_pages :: IO ()
