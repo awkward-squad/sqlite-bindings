@@ -4,6 +4,7 @@ module Sqlite3.Bindings.Internal.Utils
     intToCInt,
     cuintToWord,
     wordToCUInt,
+    cdoubleToDouble,
     doubleToCDouble,
     cstringToText,
     cstringLenToText,
@@ -16,10 +17,7 @@ where
 import Control.Monad (when)
 import Data.Array (Array)
 import qualified Data.Array.IO as Array.IO
-import qualified Data.ByteString as ByteString
-import qualified Data.ByteString.Unsafe as ByteString
 import Data.Text (Text)
-import qualified Data.Text.Encoding as Text
 import qualified Data.Text.Foreign as Text
 import Data.Text.Internal (Text (Text))
 import Data.Word (Word8)
@@ -49,6 +47,10 @@ cuintToWord =
 wordToCUInt :: Word -> CUInt
 wordToCUInt =
   fromIntegral
+
+cdoubleToDouble :: CDouble -> Double
+cdoubleToDouble =
+  realToFrac
 
 doubleToCDouble :: Double -> CDouble
 doubleToCDouble =

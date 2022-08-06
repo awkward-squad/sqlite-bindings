@@ -658,7 +658,7 @@ foreign import ccall unsafe
 
 -- | https://www.sqlite.org/c3ref/column_blob.html
 --
--- Get the value of a result column.
+-- Get the unprotected value of a result column.
 foreign import ccall unsafe
   sqlite3_column_value ::
     -- | Statement.

@@ -1,5 +1,11 @@
 module Sqlite3.Bindings.Internal.Constants
-  ( SQLITE_OPEN_FLAGS (..),
+  ( SQLITE_DATATYPE (..),
+    pattern SQLITE_INTEGER,
+    pattern SQLITE_FLOAT,
+    pattern SQLITE_TEXT,
+    pattern SQLITE_BLOB,
+    pattern SQLITE_NULL,
+    SQLITE_OPEN_FLAGS (..),
     pattern SQLITE_OPEN_EXRESCODE,
     pattern SQLITE_OPEN_FULLMUTEX,
     pattern SQLITE_OPEN_MEMORY,
@@ -450,6 +456,57 @@ import Data.Coerce (coerce)
 import Foreign.C (CInt (..))
 import qualified Sqlite3.Bindings.C as C
 
+-- | https://www.sqlite.org/c3ref/c_blob.html
+newtype SQLITE_DATATYPE
+  = SQLITE_DATATYPE CInt
+  deriving stock (Eq)
+
+instance Show SQLITE_DATATYPE where
+  show = \case
+    SQLITE_INTEGER -> "SQLITE_INTEGER"
+    SQLITE_FLOAT -> "SQLITE_FLOAT"
+    SQLITE_TEXT -> "SQLITE_TEXT"
+    SQLITE_BLOB -> "SQLITE_BLOB"
+    SQLITE_NULL -> "SQLITE_NULL"
+
+pattern SQLITE_INTEGER :: SQLITE_DATATYPE
+pattern SQLITE_INTEGER <-
+  ((== SQLITE_DATATYPE C._SQLITE_INTEGER) -> True)
+  where
+    SQLITE_INTEGER = SQLITE_DATATYPE C._SQLITE_INTEGER
+
+pattern SQLITE_FLOAT :: SQLITE_DATATYPE
+pattern SQLITE_FLOAT <-
+  ((== SQLITE_DATATYPE C._SQLITE_FLOAT) -> True)
+  where
+    SQLITE_FLOAT = SQLITE_DATATYPE C._SQLITE_FLOAT
+
+pattern SQLITE_TEXT :: SQLITE_DATATYPE
+pattern SQLITE_TEXT <-
+  ((== SQLITE_DATATYPE C._SQLITE_TEXT) -> True)
+  where
+    SQLITE_TEXT = SQLITE_DATATYPE C._SQLITE_TEXT
+
+pattern SQLITE_BLOB :: SQLITE_DATATYPE
+pattern SQLITE_BLOB <-
+  ((== SQLITE_DATATYPE C._SQLITE_BLOB) -> True)
+  where
+    SQLITE_BLOB = SQLITE_DATATYPE C._SQLITE_BLOB
+
+pattern SQLITE_NULL :: SQLITE_DATATYPE
+pattern SQLITE_NULL <-
+  ((== SQLITE_DATATYPE C._SQLITE_NULL) -> True)
+  where
+    SQLITE_NULL = SQLITE_DATATYPE C._SQLITE_NULL
+
+{-# COMPLETE
+  SQLITE_INTEGER,
+  SQLITE_FLOAT,
+  SQLITE_TEXT,
+  SQLITE_BLOB,
+  SQLITE_NULL
+  #-}
+
 -- | https://www.sqlite.org/c3ref/c_open_autoproxy.html
 newtype SQLITE_OPEN_FLAGS
   = SQLITE_OPEN_FLAGS CInt
@@ -512,6 +569,12 @@ pattern SQLITE_OPEN_URI <-
 newtype SQLITE_OPEN_MODE
   = SQLITE_OPEN_MODE CInt
   deriving stock (Eq)
+
+instance Show SQLITE_OPEN_MODE where
+  show = \case
+    SQLITE_OPEN_READONLY -> "SQLITE_OPEN_READONLY"
+    SQLITE_OPEN_READWRITE -> "SQLITE_OPEN_READWRITE"
+    SQLITE_OPEN_CREATE -> "SQLITE_OPEN_CREATE"
 
 pattern SQLITE_OPEN_READONLY :: SQLITE_OPEN_MODE
 pattern SQLITE_OPEN_READONLY <-

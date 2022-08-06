@@ -29,6 +29,10 @@ main = do
         testCase "changes / changes64 / total_changes / total_changes64" test_changes,
         testCase "clear_bindings" test_clear_bindings,
         testCase "collation_needed" test_collation_needed,
+        testCase "column_*" test_column,
+        testCase "column_database_name / column_origin_name / column_name / column_table_name" test_column_name,
+        testCase "column_decltype" test_column_decltype,
+        testCase "column_type" test_column_type,
         testCase "create_collation" test_create_collation,
         testCase "last_insert_rowid" test_last_insert_rowid,
         testCase "open / close" test_open
@@ -197,6 +201,74 @@ test_collation_needed = do
           _ -> pure ()
     withCollationNeeded conn collationNeeded do
       exec conn "create table foo (bar collate foo)" >>= check
+
+test_column :: IO ()
+test_column = do
+  withConnection ":memory:" \conn ->
+    withStatement conn "select 1, 2.0, 'foo', x'0102', null" \(statement, _) -> do
+      sqlite3_step statement >>= assertEqual "" _SQLITE_ROW
+      sqlite3_column_count statement >>= assertEqual "" 5
+
+      sqlite3_column_int statement 0 >>= assertEqual "" 1
+      sqlite3_column_int statement 4 >>= assertEqual "" 0
+      sqlite3_column_int64 statement 0 >>= assertEqual "" 1
+      sqlite3_column_int64 statement 4 >>= assertEqual "" 0
+      sqlite3_column_double statement 1 >>= assertEqual "" 2.0
+      sqlite3_column_double statement 4 >>= assertEqual "" 0.0
+      sqlite3_column_text statement 2 >>= assertEqual "" "foo"
+      sqlite3_column_text statement 4 >>= assertEqual "" Text.empty
+      sqlite3_column_blob statement 3 >>= assertEqual "" (ByteString.pack [1, 2])
+      sqlite3_column_blob statement 4 >>= assertEqual "" ByteString.empty
+
+      _ <- sqlite3_column_value statement 0
+      _ <- sqlite3_column_value statement 1
+      _ <- sqlite3_column_value statement 2
+      _ <- sqlite3_column_value statement 3
+      _ <- sqlite3_column_value statement 4
+      pure ()
+
+test_column_decltype :: IO ()
+test_column_decltype = do
+  withConnection ":memory:" \conn -> do
+    withStatement conn "select 1" \(statement, _) -> do
+      sqlite3_column_decltype statement 0 >>= assertEqual "" Nothing
+
+    exec conn "create table foo (bar)" >>= check
+    withStatement conn "select bar from foo" \(statement, _) -> do
+      sqlite3_column_decltype statement 0 >>= assertEqual "" Nothing
+
+    exec conn "create table foo2 (bar2 oink)" >>= check
+    withStatement conn "select bar2 from foo2" \(statement, _) -> do
+      sqlite3_column_decltype statement 0 >>= assertEqual "" (Just "oink")
+
+test_column_type :: IO ()
+test_column_type = do
+  withConnection ":memory:" \conn -> do
+    exec conn "create table foo (a, b, c, d, e)" >>= check
+    exec conn "insert into foo (a, b, c, d, e) values (1, 2.0, 'foo', x'0102', null)" >>= check
+    withStatement conn "select a, b, c, d, e from foo" \(statement, _) -> do
+      sqlite3_step statement >>= assertEqual "" _SQLITE_ROW
+      sqlite3_column_type statement 0 >>= assertEqual "" SQLITE_INTEGER
+      sqlite3_column_type statement 1 >>= assertEqual "" SQLITE_FLOAT
+      sqlite3_column_type statement 2 >>= assertEqual "" SQLITE_TEXT
+      sqlite3_column_type statement 3 >>= assertEqual "" SQLITE_BLOB
+      sqlite3_column_type statement 4 >>= assertEqual "" SQLITE_NULL
+
+test_column_name :: IO ()
+test_column_name = do
+  withConnection ":memory:" \conn -> do
+    withStatement conn "select 1" \(statement, _) -> do
+      sqlite3_column_database_name statement 0 >>= assertEqual "" Nothing
+      sqlite3_column_name statement 0 >>= assertEqual "" (Just "1")
+      sqlite3_column_origin_name statement 0 >>= assertEqual "" Nothing
+      sqlite3_column_table_name statement 0 >>= assertEqual "" Nothing
+
+    exec conn "create table foo (bar)" >>= check
+    withStatement conn "select bar as baz from foo" \(statement, _) -> do
+      sqlite3_column_database_name statement 0 >>= assertEqual "" (Just "main")
+      sqlite3_column_name statement 0 >>= assertEqual "" (Just "baz")
+      sqlite3_column_origin_name statement 0 >>= assertEqual "" (Just "bar")
+      sqlite3_column_table_name statement 0 >>= assertEqual "" (Just "foo")
 
 test_create_collation :: IO ()
 test_create_collation = do

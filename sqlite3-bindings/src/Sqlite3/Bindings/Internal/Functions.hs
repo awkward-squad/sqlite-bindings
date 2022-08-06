@@ -14,6 +14,7 @@ import Data.Functor ((<&>))
 import Data.Int (Int64)
 import Data.Text (Text)
 import qualified Data.Text as Text
+import qualified Data.Text.Foreign as Text (I8)
 import Data.Word (Word64)
 import Foreign.C (CChar (..), CDouble (..), CInt (..), CString, CUChar (..), CUInt (..))
 import Foreign.ForeignPtr (withForeignPtr)
@@ -27,6 +28,7 @@ import Sqlite3.Bindings.Internal.Objects
 import Sqlite3.Bindings.Internal.Utils
   ( boolToCInt,
     carrayToArray,
+    cdoubleToDouble,
     cintToInt,
     cstringLenToText,
     cstringToText,
@@ -520,180 +522,193 @@ sqlite3_collation_needed (Sqlite3 connection) callback = do
 -- Get the blob of a result column.
 sqlite3_column_blob ::
   -- | Statement.
-  Ptr C.Sqlite3_stmt ->
+  Sqlite3_stmt ->
   -- | Column index (0-based).
-  CInt ->
+  Int ->
   -- | Blob.
-  IO (Ptr a)
-sqlite3_column_blob =
-  C.sqlite3_column_blob
+  IO ByteString
+sqlite3_column_blob statement@(Sqlite3_stmt c_statement) index = do
+  -- Documentation recommends calling blob first, then bytes
+  blob <- C.sqlite3_column_blob c_statement (intToCInt index)
+  sqlite3_column_bytes statement index >>= \case
+    0 -> pure ByteString.empty
+    len -> ByteString.unsafePackCStringLen (blob, len)
 
 -- | https://www.sqlite.org/c3ref/column_blob.html
 --
 -- Get the size of a blob or string result column, in bytes.
 sqlite3_column_bytes ::
   -- | Statement.
-  Ptr C.Sqlite3_stmt ->
+  Sqlite3_stmt ->
   -- | Column index (0-based).
-  CInt ->
+  Int ->
   -- | Size, in bytes.
-  IO CInt
-sqlite3_column_bytes =
-  C.sqlite3_column_bytes
+  IO Int
+sqlite3_column_bytes (Sqlite3_stmt statement) index =
+  cintToInt <$> C.sqlite3_column_bytes statement (intToCInt index)
 
 -- | https://www.sqlite.org/c3ref/column_count.html
 --
 -- Get the number of columns in a result set.
 sqlite3_column_count ::
   -- | Statement.
-  Ptr C.Sqlite3_stmt ->
+  Sqlite3_stmt ->
   -- | Number of columns.
-  IO CInt
-sqlite3_column_count =
-  C.sqlite3_column_count
+  IO Int
+sqlite3_column_count (Sqlite3_stmt statement) =
+  cintToInt <$> C.sqlite3_column_count statement
 
 -- | https://www.sqlite.org/c3ref/column_database_name.html
 --
 -- Get the original database name for a result column.
 sqlite3_column_database_name ::
   -- | Statement.
-  Ptr C.Sqlite3_stmt ->
+  Sqlite3_stmt ->
   -- | Column index (0-based).
-  CInt ->
+  Int ->
   -- | Database name.
-  IO CString
-sqlite3_column_database_name =
-  C.sqlite3_column_database_name
+  IO (Maybe Text)
+sqlite3_column_database_name (Sqlite3_stmt statement) index = do
+  c_name <- C.sqlite3_column_database_name statement (intToCInt index)
+  if c_name == nullPtr then pure Nothing else Just <$> cstringToText c_name
 
 -- | https://www.sqlite.org/c3ref/column_decltype.html
 --
 -- Get the declared type of a result column.
 sqlite3_column_decltype ::
   -- | Statement.
-  Ptr C.Sqlite3_stmt ->
+  Sqlite3_stmt ->
   -- | Column index (0-based).
-  CInt ->
-  -- | Type (UTF-8).
-  IO CString
-sqlite3_column_decltype =
-  C.sqlite3_column_decltype
+  Int ->
+  -- | Type.
+  IO (Maybe Text)
+sqlite3_column_decltype (Sqlite3_stmt statement) index = do
+  c_name <- C.sqlite3_column_decltype statement (intToCInt index)
+  if c_name == nullPtr then pure Nothing else Just <$> cstringToText c_name
 
 -- | https://www.sqlite.org/c3ref/column_blob.html
 --
 -- Get the double of a result column.
 sqlite3_column_double ::
   -- | Statement.
-  Ptr C.Sqlite3_stmt ->
+  Sqlite3_stmt ->
   -- | Column index (0-based).
-  CInt ->
+  Int ->
   -- | Double.
-  IO CDouble
-sqlite3_column_double =
-  C.sqlite3_column_double
+  IO Double
+sqlite3_column_double (Sqlite3_stmt statement) index =
+  cdoubleToDouble <$> C.sqlite3_column_double statement (intToCInt index)
 
 -- | https://www.sqlite.org/c3ref/column_blob.html
 --
 -- Get the integer of a result column.
 sqlite3_column_int ::
   -- | Statement.
-  Ptr C.Sqlite3_stmt ->
+  Sqlite3_stmt ->
   -- | Column index (0-based).
-  CInt ->
+  Int ->
   -- | Integer.
-  IO CInt
-sqlite3_column_int =
-  C.sqlite3_column_int
+  IO Int
+sqlite3_column_int (Sqlite3_stmt statement) index =
+  cintToInt <$> C.sqlite3_column_int statement (intToCInt index)
 
 -- | https://www.sqlite.org/c3ref/column_blob.html
 --
 -- Get the integer of a result column.
 sqlite3_column_int64 ::
   -- | Statement.
-  Ptr C.Sqlite3_stmt ->
+  Sqlite3_stmt ->
   -- | Column index (0-based).
-  CInt ->
+  Int ->
   -- | Integer.
   IO Int64
-sqlite3_column_int64 =
-  C.sqlite3_column_int64
+sqlite3_column_int64 (Sqlite3_stmt statement) index =
+  C.sqlite3_column_int64 statement (intToCInt index)
 
 -- | https://www.sqlite.org/c3ref/column_name.html
 --
 -- Get the column name of a result column.
 sqlite3_column_name ::
   -- | Statement.
-  Ptr C.Sqlite3_stmt ->
+  Sqlite3_stmt ->
   -- | Column index (0-based).
-  CInt ->
+  Int ->
   -- | Column name.
-  IO CString
-sqlite3_column_name =
-  C.sqlite3_column_name
+  IO (Maybe Text)
+sqlite3_column_name (Sqlite3_stmt statement) index = do
+  c_name <- C.sqlite3_column_name statement (intToCInt index)
+  if c_name == nullPtr then pure Nothing else Just <$> cstringToText c_name
 
 -- | https://www.sqlite.org/c3ref/column_database_name.html
 --
 -- Get the original column name of a result column.
 sqlite3_column_origin_name ::
   -- | Statement.
-  Ptr C.Sqlite3_stmt ->
+  Sqlite3_stmt ->
   -- | Column index (0-based).
-  CInt ->
+  Int ->
   -- | Column name.
-  IO CString
-sqlite3_column_origin_name =
-  C.sqlite3_column_origin_name
+  IO (Maybe Text)
+sqlite3_column_origin_name (Sqlite3_stmt statement) index = do
+  c_name <- C.sqlite3_column_origin_name statement (intToCInt index)
+  if c_name == nullPtr then pure Nothing else Just <$> cstringToText c_name
 
 -- | https://www.sqlite.org/c3ref/column_database_name.html
 --
 -- Get the original table name for a result column.
 sqlite3_column_table_name ::
   -- | Statement.
-  Ptr C.Sqlite3_stmt ->
+  Sqlite3_stmt ->
   -- | Column index (0-based).
-  CInt ->
+  Int ->
   -- | Table name.
-  IO CString
-sqlite3_column_table_name =
-  C.sqlite3_column_table_name
+  IO (Maybe Text)
+sqlite3_column_table_name (Sqlite3_stmt statement) index = do
+  c_name <- C.sqlite3_column_table_name statement (intToCInt index)
+  if c_name == nullPtr then pure Nothing else Just <$> cstringToText c_name
 
 -- | https://www.sqlite.org/c3ref/column_blob.html
 --
 -- Get the string of a result column.
 sqlite3_column_text ::
   -- | Statement.
-  Ptr C.Sqlite3_stmt ->
+  Sqlite3_stmt ->
   -- | Column index (0-based).
-  CInt ->
-  -- | String (UTF-8).
-  IO (Ptr CUChar)
-sqlite3_column_text =
-  C.sqlite3_column_text
+  Int ->
+  -- | String.
+  IO Text
+sqlite3_column_text statement@(Sqlite3_stmt c_statement) index = do
+  -- Documentation recommends calling text first, then bytes
+  string <- C.sqlite3_column_text c_statement (intToCInt index)
+  sqlite3_column_bytes statement index >>= \case
+    0 -> pure Text.empty
+    len -> cstringLenToText (castPtr @CUChar @CChar string) (fromIntegral @Int @Text.I8 len)
 
 -- | https://www.sqlite.org/c3ref/column_blob.html
 --
 -- Get the type of a result column.
 sqlite3_column_type ::
   -- | Statement.
-  Ptr C.Sqlite3_stmt ->
+  Sqlite3_stmt ->
   -- | Column index (0-based).
-  CInt ->
+  Int ->
   -- | Type.
-  IO CInt
-sqlite3_column_type =
-  C.sqlite3_column_type
+  IO SQLITE_DATATYPE
+sqlite3_column_type (Sqlite3_stmt statement) index =
+  coerce (C.sqlite3_column_type statement (intToCInt index))
 
 -- | https://www.sqlite.org/c3ref/column_blob.html
 --
--- Get the value of a result column.
+-- Get the unprotected value of a result column.
 sqlite3_column_value ::
   -- | Statement.
-  Ptr C.Sqlite3_stmt ->
+  Sqlite3_stmt ->
   -- | Column index (0-based).
-  CInt ->
+  Int ->
   -- | Value.
-  IO (Ptr C.Sqlite3_value)
-sqlite3_column_value =
-  C.sqlite3_column_value
+  IO Sqlite3_value
+sqlite3_column_value (Sqlite3_stmt statement) index =
+  coerce (C.sqlite3_column_value statement (intToCInt index))
 
 -- | https://www.sqlite.org/c3ref/commit_hook.html
 --
@@ -866,8 +881,8 @@ sqlite3_create_collation (Sqlite3 connection) name maybeComparison =
         mask_ do
           c_comparison <-
             makeCallback2 \_ lx cx ly cy -> do
-              x <- cstringLenToText cx (fromIntegral lx)
-              y <- cstringLenToText cy (fromIntegral ly)
+              x <- cstringLenToText cx (fromIntegral @CInt @Text.I8 lx)
+              y <- cstringLenToText cy (fromIntegral @CInt @Text.I8 ly)
               comparison x y <&> \case
                 LT -> -1
                 EQ -> 0
@@ -1720,7 +1735,7 @@ sqlite3_prepare_v2 (Sqlite3 connection) sql =
         let unusedSqlLen = (c_sql `plusPtr` c_sql_len) `minusPtr` c_unused_sql
         unusedSql <-
           if unusedSqlLen > 0
-            then cstringLenToText c_unused_sql (fromIntegral unusedSqlLen)
+            then cstringLenToText c_unused_sql (fromIntegral @Int @Text.I8 unusedSqlLen)
             else pure Text.empty
         pure (if statement == nullPtr then Nothing else Just (Sqlite3_stmt statement), unusedSql, code)
 
