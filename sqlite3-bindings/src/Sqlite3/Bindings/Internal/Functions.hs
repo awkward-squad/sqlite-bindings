@@ -2,7 +2,7 @@
 
 module Sqlite3.Bindings.Internal.Functions where
 
-import Control.Exception (bracket, mask_)
+import Control.Exception (mask_)
 import Data.Array (Array)
 import Data.Bits ((.|.))
 import Data.ByteString (ByteString)
@@ -273,10 +273,10 @@ sqlite3_bind_value ::
   -- | Parameter index (1-based).
   Int ->
   -- | Value.
-  Ptr C.Sqlite3_value ->
+  Sqlite3_value ->
   -- | Result code.
   IO CInt
-sqlite3_bind_value (Sqlite3_stmt statement) index value =
+sqlite3_bind_value (Sqlite3_stmt statement) index (Sqlite3_value value) =
   C.sqlite3_bind_value statement (intToCInt index) value
 
 -- | https://www.sqlite.org/c3ref/bind_blob.html
@@ -299,11 +299,11 @@ sqlite3_bind_zeroblob (Sqlite3_stmt statement) index n =
 -- Get the size of a blob, in bytes.
 sqlite3_blob_bytes ::
   -- | Blob.
-  Ptr C.Sqlite3_blob ->
+  Sqlite3_blob ->
   -- | Size of blob, in bytes.
   IO CInt
-sqlite3_blob_bytes =
-  C.sqlite3_blob_bytes
+sqlite3_blob_bytes (Sqlite3_blob blob) =
+  C.sqlite3_blob_bytes blob
 
 -- | https://www.sqlite.org/c3ref/blob_close.html
 --
@@ -369,30 +369,29 @@ sqlite3_blob_read (Sqlite3_blob blob) len offset = do
 -- Point an open blob at a different blob in the same table.
 sqlite3_blob_reopen ::
   -- | Blob.
-  Ptr C.Sqlite3_blob ->
+  Sqlite3_blob ->
   -- | Rowid.
   Int64 ->
   -- | Result code.
   IO CInt
-sqlite3_blob_reopen =
-  C.sqlite3_blob_reopen
+sqlite3_blob_reopen (Sqlite3_blob blob) =
+  C.sqlite3_blob_reopen blob
 
 -- | https://www.sqlite.org/c3ref/blob_write.html
 --
 -- Write data to a blob.
 sqlite3_blob_write ::
   -- | Blob.
-  Ptr C.Sqlite3_blob ->
-  -- | Buffer of data to write.
-  Ptr a ->
-  -- | Size of buffer to write.
-  CInt ->
+  Sqlite3_blob ->
+  -- | Data.
+  ByteString ->
   -- | Byte offset into blob to write to.
-  CInt ->
+  Int ->
   -- | Result code.
   IO CInt
-sqlite3_blob_write =
-  C.sqlite3_blob_write
+sqlite3_blob_write (Sqlite3_blob blob) bytes offset =
+  ByteString.unsafeUseAsCStringLen bytes \(ptr, len) ->
+    C.sqlite3_blob_write blob ptr (intToCInt len) (intToCInt offset)
 
 -- | https://www.sqlite.org/c3ref/busy_handler.html
 --
@@ -1211,18 +1210,19 @@ sqlite3_exec ::
   -- | Error message, result code.
   IO (Maybe Text, CInt)
 sqlite3_exec (Sqlite3 connection) sql maybeCallback =
-  case maybeCallback of
-    Nothing -> go nullFunPtr
-    Just callback ->
-      bracket
-        ( makeCallback1 \_ numCols c_values c_names -> do
+  mask_ do
+    case maybeCallback of
+      Nothing -> go nullFunPtr
+      Just callback -> do
+        callback1 <-
+          makeCallback1 \_ numCols c_values c_names -> do
             let convert = carrayToArray cstringToText numCols
             values <- convert c_values
             names <- convert c_names
             callback values names
-        )
-        freeHaskellFunPtr
-        go
+        result <- go callback1
+        freeHaskellFunPtr callback1
+        pure result
   where
     go :: FunPtr (Ptr a -> CInt -> Ptr CString -> Ptr CString -> IO CInt) -> IO (Maybe Text, CInt)
     go c_callback =

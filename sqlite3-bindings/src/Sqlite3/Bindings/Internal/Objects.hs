@@ -18,7 +18,7 @@ module Sqlite3.Bindings.Internal.Objects
     C.Sqlite3_snapshot,
     Sqlite3_stmt (..),
     C.Sqlite3_temp_directory,
-    C.Sqlite3_value,
+    Sqlite3_value (..),
     C.Sqlite3_vfs (..),
     C.Sqlite3_vtab,
     C.Sqlite3_vtab_cursor,
@@ -43,3 +43,7 @@ newtype Sqlite3_blob
 -- | https://www.sqlite.org/c3ref/stmt.html
 newtype Sqlite3_stmt
   = Sqlite3_stmt (Ptr C.Sqlite3_stmt)
+
+-- | https://www.sqlite.org/c3ref/value.html
+newtype Sqlite3_value
+  = Sqlite3_value (Ptr C.Sqlite3_value)

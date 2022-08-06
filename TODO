@@ -17,6 +17,8 @@
 - sqlite-bindings: exec callback: cache column names
 - sqlite extensions e.g. carray?
 - mention initialize/shutdown in description
+- things like `sqlite3_bind_int` might trigger a Haskell destructor of a previous bind with `sqlite3_bind_pointer` - so
+  check all these for safety
 
 question: do we want to support providing your own system sqlite (not bundled)?
   - seems like we do, but it might be more annoying to write this package. more cabal flags and less guarantees, etc.

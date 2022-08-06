@@ -99,13 +99,22 @@ test_sqlite3_blob = do
   withConnection ":memory:" \conn -> do
     check (exec conn "create table foo (bar)")
     check (exec conn "insert into foo values (x'01020304')")
-    rowid <- sqlite3_last_insert_rowid conn
-    withBlob conn "main" "foo" "bar" rowid True \blob -> do
+    rowid1 <- sqlite3_last_insert_rowid conn
+    check (exec conn "insert into foo values (x'05060708')")
+    rowid2 <- sqlite3_last_insert_rowid conn
+    withBlob conn "main" "foo" "bar" rowid1 True \blob -> do
       blob_read blob 0 0 >>= assertEqual "" (Right ByteString.empty)
       blob_read blob 2 0 >>= assertEqual "" (Right (ByteString.pack [1, 2]))
       blob_read blob 2 2 >>= assertEqual "" (Right (ByteString.pack [3, 4]))
       blob_read blob 5 0 >>= assertEqual "" (Left "SQL logic error (1)")
       blob_read blob 0 5 >>= assertEqual "" (Left "SQL logic error (1)")
+
+      check (blob_write blob (ByteString.pack [5, 6]) 0)
+      blob_read blob 4 0 >>= assertEqual "" (Right (ByteString.pack [5, 6, 3, 4]))
+      blob_write blob (ByteString.pack [1, 2, 3, 4, 5]) 0 >>= assertEqual "" (Left "SQL logic error (1)")
+
+      check (blob_reopen blob rowid2)
+      blob_read blob 4 0 >>= assertEqual "" (Right (ByteString.pack [5, 6, 7, 8]))
 
 test_sqlite3_last_insert_rowid :: IO ()
 test_sqlite3_last_insert_rowid = do
@@ -245,6 +254,16 @@ blob_read blob len offset =
   sqlite3_blob_read blob len offset <&> \case
     Left code -> inspect code undefined
     Right bytes -> Right bytes
+
+blob_reopen :: Sqlite3_blob -> Int64 -> IO (Either Text ())
+blob_reopen blob rowid = do
+  code <- sqlite3_blob_reopen blob rowid
+  pure (inspect code ())
+
+blob_write :: Sqlite3_blob -> ByteString -> Int -> IO (Either Text ())
+blob_write blob bytes offset = do
+  code <- sqlite3_blob_write blob bytes offset
+  pure (inspect code ())
 
 close :: Sqlite3 -> IO (Either Text ())
 close conn = do
