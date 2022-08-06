@@ -1,6 +1,6 @@
 module Main where
 
-import Control.Exception (SomeException, catch, mask, throwIO, uninterruptibleMask_)
+import Control.Exception (SomeException, bracket, catch, mask, throwIO, uninterruptibleMask_)
 import Data.ByteString (ByteString)
 import qualified Data.ByteString as ByteString
 import Data.Functor
@@ -10,6 +10,7 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 import Foreign.C.Types (CInt)
 import Sqlite3.Bindings
+import qualified System.IO.Temp as Temporary
 import Test.Tasty
 import Test.Tasty.HUnit
 
@@ -21,6 +22,7 @@ main = do
         testCase "sqlite3_backup_*" test_sqlite3_backup,
         testCase "sqlite3_bind_*" test_sqlite3_bind,
         testCase "sqlite3_blob_*" test_sqlite3_blob,
+        testCase "sqlite3_busy_handler" test_sqlite3_busy_handler,
         testCase "sqlite3_last_insert_rowid" test_sqlite3_last_insert_rowid,
         testCase "sqlite3_open / sqlite3_close" test_sqlite3_open
       ]
@@ -29,12 +31,12 @@ test_sqlite3_autovacuum_pages :: IO ()
 test_sqlite3_autovacuum_pages = do
   withConnection ":memory:" \conn -> do
     countRef <- newIORef (0 :: Int)
-    check (exec conn "pragma auto_vacuum = full")
-    check (exec conn "create table foo(bar)")
-    check (autovacuum_pages conn (Just \_ _ n _ -> modifyIORef' countRef (+ 1) $> n))
-    check (exec conn "insert into foo values (1)")
-    check (autovacuum_pages conn Nothing)
-    check (exec conn "insert into foo values (1)")
+    exec conn "pragma auto_vacuum = full" >>= check
+    exec conn "create table foo(bar)" >>= check
+    autovacuum_pages conn (Just \_ _ n _ -> modifyIORef' countRef (+ 1) $> n) >>= check
+    exec conn "insert into foo values (1)" >>= check
+    autovacuum_pages conn Nothing >>= check
+    exec conn "insert into foo values (1)" >>= check
     count <- readIORef countRef
     assertEqual "" 1 count
 
@@ -48,8 +50,8 @@ test_sqlite3_backup = do
 
   withConnection ":memory:" \conn1 ->
     withConnection ":memory:" \conn2 -> do
-      check (exec conn1 "create table foo (bar)")
-      check (exec conn1 "insert into foo values (1)")
+      exec conn1 "create table foo (bar)" >>= check
+      exec conn1 "insert into foo values (1)" >>= check
       withBackup (conn1, "main") (conn2, "main") \backup -> do
         sqlite3_backup_pagecount backup >>= assertEqual "" 0
         sqlite3_backup_remaining backup >>= assertEqual "" 0
@@ -61,24 +63,24 @@ test_sqlite3_backup = do
         backup_step backup 1 >>= assertEqual "" (Left "no more rows available (101)")
         sqlite3_backup_remaining backup >>= assertEqual "" 0
 
--- TODO sqlite3_bind_pointer, sqlite3_bind_value
+-- TODO sqlite3_bind_value
 test_sqlite3_bind :: IO ()
 test_sqlite3_bind = do
   withConnection ":memory:" \conn -> do
     withStatement conn "select ?" \(statement, _) -> do
       sqlite3_bind_parameter_count statement >>= assertEqual "" 1
 
-      check (bind_blob statement 1 ByteString.empty)
-      check (bind_blob statement 1 (ByteString.pack [0]))
-      check (bind_double statement 1 0)
-      check (bind_int statement 1 0)
-      check (bind_int64 statement 1 0)
-      check (bind_null statement 1)
-      check (bind_pointer statement 1 () "foo")
-      check (bind_text statement 1 "")
-      check (bind_text statement 1 "foo")
-      check (bind_zeroblob statement 1 0)
-      check (bind_zeroblob statement 1 1)
+      bind_blob statement 1 ByteString.empty >>= check
+      bind_blob statement 1 (ByteString.pack [0]) >>= check
+      bind_double statement 1 0 >>= check
+      bind_int statement 1 0 >>= check
+      bind_int64 statement 1 0 >>= check
+      bind_null statement 1 >>= check
+      bind_pointer statement 1 () "foo" >>= check
+      bind_text statement 1 "" >>= check
+      bind_text statement 1 "foo" >>= check
+      bind_zeroblob statement 1 0 >>= check
+      bind_zeroblob statement 1 1 >>= check
 
       bind_int statement 0 0 >>= assertEqual "" (Left "column index out of range (25)")
       bind_int statement 2 0 >>= assertEqual "" (Left "column index out of range (25)")
@@ -97,10 +99,10 @@ test_sqlite3_bind = do
 test_sqlite3_blob :: IO ()
 test_sqlite3_blob = do
   withConnection ":memory:" \conn -> do
-    check (exec conn "create table foo (bar)")
-    check (exec conn "insert into foo values (x'01020304')")
+    exec conn "create table foo (bar)" >>= check
+    exec conn "insert into foo values (x'01020304')" >>= check
     rowid1 <- sqlite3_last_insert_rowid conn
-    check (exec conn "insert into foo values (x'05060708')")
+    exec conn "insert into foo values (x'05060708')" >>= check
     rowid2 <- sqlite3_last_insert_rowid conn
     withBlob conn "main" "foo" "bar" rowid1 True \blob -> do
       blob_read blob 0 0 >>= assertEqual "" (Right ByteString.empty)
@@ -109,23 +111,42 @@ test_sqlite3_blob = do
       blob_read blob 5 0 >>= assertEqual "" (Left "SQL logic error (1)")
       blob_read blob 0 5 >>= assertEqual "" (Left "SQL logic error (1)")
 
-      check (blob_write blob (ByteString.pack [5, 6]) 0)
+      blob_write blob (ByteString.pack [5, 6]) 0 >>= check
       blob_read blob 4 0 >>= assertEqual "" (Right (ByteString.pack [5, 6, 3, 4]))
       blob_write blob (ByteString.pack [1, 2, 3, 4, 5]) 0 >>= assertEqual "" (Left "SQL logic error (1)")
 
-      check (blob_reopen blob rowid2)
+      blob_reopen blob rowid2 >>= check
       blob_read blob 4 0 >>= assertEqual "" (Right (ByteString.pack [5, 6, 7, 8]))
+
+test_sqlite3_busy_handler :: IO ()
+test_sqlite3_busy_handler = do
+  Temporary.withSystemTempDirectory "sqlite3-bindings" \dir -> do
+    let name = Text.pack dir <> "/database.sqlite3"
+    withConnection name \conn1 -> do
+      withConnection name \conn2 -> do
+        exec conn1 "begin immediate transaction" >>= check
+        invoked <- newIORef False
+        bracket
+          (busy_handler conn2 (\_ -> writeIORef invoked True >> pure False))
+          (\(_, destructor) -> destructor)
+          \(code, _) -> do
+            check code
+            exec conn2 "begin immediate transaction"
+              >>= assertEqual "" (Left "database is locked (5); database is locked")
+            readIORef invoked >>= \case
+              False -> assertFailure "didn't invoke busy handler"
+              True -> pure ()
 
 test_sqlite3_last_insert_rowid :: IO ()
 test_sqlite3_last_insert_rowid = do
   withConnection ":memory:" \conn -> do
     sqlite3_last_insert_rowid conn >>= assertEqual "" 0
-    check (exec conn "create table foo (bar)")
-    check (exec conn "insert into foo values (1)")
+    exec conn "create table foo (bar)" >>= check
+    exec conn "insert into foo values (1)" >>= check
     sqlite3_last_insert_rowid conn >>= assertEqual "" 1
-    check (exec conn "create table bar (baz primary key) without rowid")
-    check (exec conn "insert into bar values (1)")
-    check (exec conn "insert into bar values (2)")
+    exec conn "create table bar (baz primary key) without rowid" >>= check
+    exec conn "insert into bar values (1)" >>= check
+    exec conn "insert into bar values (2)" >>= check
     sqlite3_last_insert_rowid conn >>= assertEqual "" 1
 
 test_sqlite3_open :: IO ()
@@ -159,13 +180,13 @@ withStatement conn sql =
 brackety :: IO (Either Text a) -> (a -> IO (Either Text ())) -> (a -> IO b) -> IO b
 brackety acquire release action =
   mask \restore -> do
-    value <- check (restore acquire)
+    value <- restore acquire >>= check
     let cleanup = uninterruptibleMask_ (release value)
     result <-
       restore (action value) `catch` \(exception :: SomeException) -> do
         void cleanup
         throwIO exception
-    check cleanup
+    cleanup >>= check
     pure result
 
 ------------------------------------------------------------------------------------------------------------------------
@@ -265,6 +286,11 @@ blob_write blob bytes offset = do
   code <- sqlite3_blob_write blob bytes offset
   pure (inspect code ())
 
+busy_handler :: Sqlite3 -> (Int -> IO Bool) -> IO (Either Text (), IO ())
+busy_handler conn callback = do
+  (code, destructor) <- sqlite3_busy_handler conn callback
+  pure (inspect code (), destructor)
+
 close :: Sqlite3 -> IO (Either Text ())
 close conn = do
   code <- sqlite3_close conn
@@ -315,11 +341,10 @@ shutdown = do
 ------------------------------------------------------------------------------------------------------------------------
 -- Test helpers
 
-check :: IO (Either Text a) -> IO a
-check action =
-  action >>= \case
-    Left msg -> assertFailure (Text.unpack msg)
-    Right result -> pure result
+check :: Either Text a -> IO a
+check = \case
+  Left msg -> assertFailure (Text.unpack msg)
+  Right result -> pure result
 
 inspect :: CInt -> a -> Either Text a
 inspect code result =

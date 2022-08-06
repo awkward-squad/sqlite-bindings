@@ -1,3 +1,5 @@
 packages:
   sqlite3-bindings,
   sqlite3-bindings-c
+
+test-show-details: direct

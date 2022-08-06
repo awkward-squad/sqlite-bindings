@@ -2,7 +2,7 @@
 
 module Sqlite3.Bindings.Internal.Functions where
 
-import Control.Exception (mask_)
+import Control.Exception (bracket, mask_)
 import Data.Array (Array)
 import Data.Bits ((.|.))
 import Data.ByteString (ByteString)
@@ -41,7 +41,7 @@ sqlite3_autovacuum_pages (Sqlite3 connection) = \case
   Just callback ->
     mask_ do
       c_callback <-
-        makeCallback2 \_ c_name numPages numFreePages pageSize -> do
+        makeCallback3 \_ c_name numPages numFreePages pageSize -> do
           name <- cstringToText c_name
           wordToCUInt <$> callback name (cuintToWord numPages) (cuintToWord numFreePages) (cuintToWord pageSize)
       C.sqlite3_autovacuum_pages connection c_callback (castFunPtrToPtr c_callback) hs_free_fun_ptr
@@ -398,15 +398,15 @@ sqlite3_blob_write (Sqlite3_blob blob) bytes offset =
 -- Register a callback that may be invoked when @SQLITE_BUSY@ would otherwise be returned from a function.
 sqlite3_busy_handler ::
   -- | Connection.
-  Ptr C.Sqlite3 ->
+  Sqlite3 ->
   -- | Callback.
-  FunPtr (Ptr a -> CInt -> IO CInt) ->
-  -- | Application data.
-  Ptr a ->
-  -- | Result code.
-  IO CInt
-sqlite3_busy_handler =
-  C.sqlite3_busy_handler
+  (Int -> IO Bool) ->
+  -- | Result code, callback destructor.
+  IO (CInt, IO ())
+sqlite3_busy_handler (Sqlite3 connection) callback = do
+  c_callback <- makeCallback1 \_ n -> boolToCInt <$> callback (cintToInt n)
+  code <- C.sqlite3_busy_handler connection c_callback nullPtr
+  pure (code, freeHaskellFunPtr c_callback)
 
 -- | https://www.sqlite.org/c3ref/busy_timeout.html
 --
@@ -1214,14 +1214,14 @@ sqlite3_exec (Sqlite3 connection) sql maybeCallback =
     case maybeCallback of
       Nothing -> go nullFunPtr
       Just callback -> do
-        callback1 <-
-          makeCallback1 \_ numCols c_values c_names -> do
+        c_callback <-
+          makeCallback2 \_ numCols c_values c_names -> do
             let convert = carrayToArray cstringToText numCols
             values <- convert c_values
             names <- convert c_names
             callback values names
-        result <- go callback1
-        freeHaskellFunPtr callback1
+        result <- go c_callback
+        freeHaskellFunPtr c_callback
         pure result
   where
     go :: FunPtr (Ptr a -> CInt -> Ptr CString -> Ptr CString -> IO CInt) -> IO (Maybe Text, CInt)
@@ -3019,10 +3019,15 @@ foreign import ccall "wrapper"
 
 foreign import ccall "wrapper"
   makeCallback1 ::
+    (Ptr a -> CInt -> IO CInt) ->
+    IO (FunPtr (Ptr a -> CInt -> IO CInt))
+
+foreign import ccall "wrapper"
+  makeCallback2 ::
     (Ptr a -> CInt -> Ptr CString -> Ptr CString -> IO CInt) ->
     IO (FunPtr (Ptr a -> CInt -> Ptr CString -> Ptr CString -> IO CInt))
 
 foreign import ccall "wrapper"
-  makeCallback2 ::
+  makeCallback3 ::
     (Ptr a -> CString -> CUInt -> CUInt -> CUInt -> IO CUInt) ->
     IO (FunPtr (Ptr a -> CString -> CUInt -> CUInt -> CUInt -> IO CUInt))
