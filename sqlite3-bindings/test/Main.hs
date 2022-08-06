@@ -196,7 +196,7 @@ test_collation_needed = do
     let collationNeeded :: Text -> IO ()
         collationNeeded = \case
           "foo" -> do
-            _ <- create_collation conn "foo" (Just \s1 s2 -> pure (compare s1 s2))
+            _ <- create_collation conn "foo" (Just compare)
             pure ()
           _ -> pure ()
     withCollationNeeded conn collationNeeded do
@@ -279,9 +279,9 @@ test_create_collation = do
     rows <- execReturn conn "select bar from foo order by bar collate dayofweek" >>= check
     assertEqual "" [["monday"], ["wednesday"], ["sunday"], ["oink"]] rows
   where
-    compareDayOfWeek :: Text -> Text -> IO Ordering
+    compareDayOfWeek :: Text -> Text -> Ordering
     compareDayOfWeek s1 s2 =
-      pure case (dayOfWeek s1, dayOfWeek s2) of
+      case (dayOfWeek s1, dayOfWeek s2) of
         (Just n1, Just n2) -> compare n1 n2
         (Just _, Nothing) -> LT
         (Nothing, Just _) -> GT
@@ -486,7 +486,7 @@ collation_needed conn callback = do
   (code, destructor) <- sqlite3_collation_needed conn callback
   pure (inspect code (), destructor)
 
-create_collation :: Sqlite3 -> Text -> Maybe (Text -> Text -> IO Ordering) -> IO (Either Text ())
+create_collation :: Sqlite3 -> Text -> Maybe (Text -> Text -> Ordering) -> IO (Either Text ())
 create_collation conn name collation = do
   code <- sqlite3_create_collation conn name collation
   pure (inspect code ())

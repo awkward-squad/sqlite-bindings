@@ -10,7 +10,6 @@ import Data.ByteString (ByteString)
 import qualified Data.ByteString.Internal as ByteString
 import qualified Data.ByteString.Unsafe as ByteString
 import Data.Coerce (coerce)
-import Data.Functor ((<&>))
 import Data.Int (Int64)
 import Data.Text (Text)
 import qualified Data.Text as Text
@@ -869,7 +868,7 @@ sqlite3_create_collation ::
   -- | Collating sequence name.
   Text ->
   -- | Collating sequence.
-  Maybe (Text -> Text -> IO Ordering) ->
+  Maybe (Text -> Text -> Ordering) ->
   -- | Result code.
   IO CInt
 sqlite3_create_collation (Sqlite3 connection) name maybeComparison =
@@ -883,7 +882,7 @@ sqlite3_create_collation (Sqlite3 connection) name maybeComparison =
             makeCallback2 \_ lx cx ly cy -> do
               x <- cstringLenToText cx (fromIntegral @CInt @Text.I8 lx)
               y <- cstringLenToText cy (fromIntegral @CInt @Text.I8 ly)
-              comparison x y <&> \case
+              pure case comparison x y of
                 LT -> -1
                 EQ -> 0
                 GT -> 1
