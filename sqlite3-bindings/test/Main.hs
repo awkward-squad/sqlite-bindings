@@ -23,6 +23,7 @@ main = do
         testCase "sqlite3_bind_*" test_sqlite3_bind,
         testCase "sqlite3_blob_*" test_sqlite3_blob,
         testCase "sqlite3_busy_handler" test_sqlite3_busy_handler,
+        testCase "sqlite3_busy_timeout" test_sqlite3_busy_timeout,
         testCase "sqlite3_last_insert_rowid" test_sqlite3_last_insert_rowid,
         testCase "sqlite3_open / sqlite3_close" test_sqlite3_open
       ]
@@ -136,6 +137,13 @@ test_sqlite3_busy_handler = do
             readIORef invoked >>= \case
               False -> assertFailure "didn't invoke busy handler"
               True -> pure ()
+
+test_sqlite3_busy_timeout :: IO ()
+test_sqlite3_busy_timeout = do
+  withConnection ":memory:" \conn -> do
+    busy_timeout conn 0 >>= check
+    busy_timeout conn 1 >>= check
+    busy_timeout conn (-1) >>= check
 
 test_sqlite3_last_insert_rowid :: IO ()
 test_sqlite3_last_insert_rowid = do
@@ -290,6 +298,11 @@ busy_handler :: Sqlite3 -> (Int -> IO Bool) -> IO (Either Text (), IO ())
 busy_handler conn callback = do
   (code, destructor) <- sqlite3_busy_handler conn callback
   pure (inspect code (), destructor)
+
+busy_timeout :: Sqlite3 -> Int -> IO (Either Text ())
+busy_timeout conn milliseconds = do
+  code <- sqlite3_busy_timeout conn milliseconds
+  pure (inspect code ())
 
 close :: Sqlite3 -> IO (Either Text ())
 close conn = do

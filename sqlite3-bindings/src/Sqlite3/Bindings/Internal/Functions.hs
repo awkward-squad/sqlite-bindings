@@ -413,13 +413,13 @@ sqlite3_busy_handler (Sqlite3 connection) callback = do
 -- Register a 'sqlite3_busy_handler' callback that sleeps.
 sqlite3_busy_timeout ::
   -- | Connection.
-  Ptr C.Sqlite3 ->
+  Sqlite3 ->
   -- | Number of millseconds.
-  CInt ->
+  Int ->
   -- | Result code.
   IO CInt
-sqlite3_busy_timeout =
-  C.sqlite3_busy_timeout
+sqlite3_busy_timeout (Sqlite3 connection) milliseconds =
+  C.sqlite3_busy_timeout connection (intToCInt milliseconds)
 
 -- | [__Cancel automatic extension loading__](https://www.sqlite.org/c3ref/cancel_auto_extension.html)
 sqlite3_cancel_auto_extension = undefined
