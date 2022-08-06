@@ -20,8 +20,12 @@ import qualified Data.ByteString as ByteString
 import qualified Data.ByteString.Unsafe as ByteString
 import Data.Text (Text)
 import qualified Data.Text.Encoding as Text
+import qualified Data.Text.Foreign as Text
+import Data.Text.Internal (Text (Text))
+import Data.Word (Word8)
 import Foreign.C (CChar, CDouble, CInt, CString, CUInt)
-import Foreign.Ptr (Ptr, plusPtr)
+import Foreign.Marshal.Alloc (allocaBytes)
+import Foreign.Ptr (Ptr, castPtr, plusPtr)
 import Foreign.Storable (Storable)
 import qualified Foreign.Storable as Storable
 
@@ -59,15 +63,17 @@ cstringLenToText c_string len =
   Text.decodeUtf8 <$> ByteString.unsafePackCStringLen (c_string, len)
 
 textToCString :: Text -> (CString -> IO a) -> IO a
-textToCString =
-  ByteString.useAsCString . Text.encodeUtf8
+textToCString text@(Text _ _ len) action =
+  allocaBytes (len + 1) \ptr -> do
+    Text.unsafeCopyToPtr text ptr
+    Storable.pokeByteOff ptr len (0 :: Word8)
+    action (castPtr ptr)
 
-textToCStringLen :: Text -> (Ptr CChar -> Int -> IO a) -> IO a
-textToCStringLen text action =
-  ByteString.unsafeUseAsCString bytes \c_string ->
-    action c_string (ByteString.length bytes)
-  where
-    bytes = Text.encodeUtf8 text
+textToCStringLen :: forall a. Text -> (Ptr CChar -> Int -> IO a) -> IO a
+textToCStringLen text@(Text _ _ len) action =
+  allocaBytes len \ptr -> do
+    Text.unsafeCopyToPtr text ptr
+    action (castPtr ptr) len
 
 carrayToArray :: forall a b. Storable a => (a -> IO b) -> CInt -> Ptr a -> IO (Array Int b)
 carrayToArray convert (cintToInt -> n) p0 = do
