@@ -728,6 +728,19 @@ sqlite3_config_heap ::
 sqlite3_config_heap =
   sqlite3_config__2 _SQLITE_CONFIG_HEAP
 
+-- | https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiglog
+--
+-- Register a callback that is invoked whenever an anomaly occurs.
+sqlite3_config_log ::
+  -- | Logging function.
+  FunPtr (Ptr a -> CInt -> CString -> IO ()) ->
+  -- | Application data.
+  Ptr a ->
+  -- | Result code.
+  IO CInt
+sqlite3_config_log =
+  sqlite3_config__5 _SQLITE_CONFIG_LOG
+
 -- | https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiglookaside
 --
 -- Set the default lookaside memory size.
@@ -786,12 +799,9 @@ sqlite3_config_serialized =
   sqlite3_config__1 _SQLITE_CONFIG_SERIALIZED
 
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigcoveringindexscan
--- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiggetpcache
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiggetpcache2
--- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiglog
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigmemdbmaxsize
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigmmapsize
--- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigpcache
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigpcache2
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigpcachehdrsz
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigpmasz

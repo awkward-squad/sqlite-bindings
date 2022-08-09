@@ -59,7 +59,7 @@ module Sqlite3.Bindings.C
     -- sqlite3_config_covering_index_scan,
     -- sqlite3_config_getpcache2,
     sqlite3_config_heap,
-    -- sqlite3_config_log,
+    sqlite3_config_log,
     sqlite3_config_lookaside,
     -- sqlite3_config_malloc,
     -- sqlite3_config_memdb_maxsize,

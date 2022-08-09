@@ -58,7 +58,7 @@ sqlite3_autovacuum_pages (Sqlite3 connection) = \case
   Just callback ->
     mask_ do
       c_callback <-
-        makeCallback5 \_ c_name numPages numFreePages pageSize -> do
+        makeCallback6 \_ c_name numPages numFreePages pageSize -> do
           name <- cstringToText c_name
           wordToCUInt <$> callback name (cuintToWord numPages) (cuintToWord numFreePages) (cuintToWord pageSize)
       C.sqlite3_autovacuum_pages connection c_callback (castFunPtrToPtr c_callback) hs_free_fun_ptr
@@ -515,9 +515,10 @@ sqlite3_collation_needed ::
   -- | Result code, callback destructor.
   IO (CInt, IO ())
 sqlite3_collation_needed (Sqlite3 connection) callback = do
-  c_callback <- makeCallback6 \_ _ _ c_name -> do
-    name <- cstringToText c_name
-    callback name
+  c_callback <-
+    makeCallback7 \_ _ _ c_name -> do
+      name <- cstringToText c_name
+      callback name
   code <- C.sqlite3_collation_needed connection nullPtr c_callback
   pure (code, freeHaskellFunPtr c_callback)
 
@@ -783,6 +784,26 @@ sqlite3_config_heap n1 n2 action =
     code <- C.sqlite3_config_heap ptr (intToCInt n1) (intToCInt n2)
     action code
 
+-- | https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiglog
+--
+-- Register a callback that is invoked whenever an anomaly occurs.
+sqlite3_config_log ::
+  -- | Logging function.
+  Maybe (Int -> Text -> IO ()) ->
+  -- | Result code, callback destructor.
+  IO (CInt, IO ())
+sqlite3_config_log = \case
+  Nothing -> do
+    code <- C.sqlite3_config_log nullFunPtr nullPtr
+    pure (code, pure ())
+  Just callback -> do
+    c_callback <-
+      makeCallback3 \_ code c_msg -> do
+        msg <- cstringToText c_msg
+        callback (cintToInt code) msg
+    code <- C.sqlite3_config_log c_callback nullPtr
+    pure (code, freeHaskellFunPtr c_callback)
+
 -- | https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiglookaside
 --
 -- Set the default lookaside memory size.
@@ -880,7 +901,7 @@ sqlite3_create_collation (Sqlite3 connection) name maybeComparison =
       Just comparison ->
         mask_ do
           c_comparison <-
-            makeCallback3 \_ lx cx ly cy -> do
+            makeCallback4 \_ lx cx ly cy -> do
               x <- cstringLenToText cx (fromIntegral @CInt @Text.I8 lx)
               y <- cstringLenToText cy (fromIntegral @CInt @Text.I8 ly)
               pure case comparison x y of
@@ -1238,7 +1259,7 @@ sqlite3_exec (Sqlite3 connection) sql maybeCallback =
       Nothing -> go nullFunPtr
       Just callback -> do
         c_callback <-
-          makeCallback4 \_ numCols c_values c_names -> do
+          makeCallback5 \_ numCols c_values c_names -> do
             let convert = carrayToArray cstringToText numCols
             values <- convert c_values
             names <- convert c_names
@@ -3067,20 +3088,25 @@ foreign import ccall "wrapper"
 
 foreign import ccall "wrapper"
   makeCallback3 ::
+    (Ptr a -> CInt -> CString -> IO ()) ->
+    IO (FunPtr (Ptr a -> CInt -> CString -> IO ()))
+
+foreign import ccall "wrapper"
+  makeCallback4 ::
     (Ptr a -> CInt -> Ptr b -> CInt -> Ptr b -> IO CInt) ->
     IO (FunPtr (Ptr a -> CInt -> Ptr b -> CInt -> Ptr b -> IO CInt))
 
 foreign import ccall "wrapper"
-  makeCallback4 ::
+  makeCallback5 ::
     (Ptr a -> CInt -> Ptr CString -> Ptr CString -> IO CInt) ->
     IO (FunPtr (Ptr a -> CInt -> Ptr CString -> Ptr CString -> IO CInt))
 
 foreign import ccall "wrapper"
-  makeCallback5 ::
+  makeCallback6 ::
     (Ptr a -> CString -> CUInt -> CUInt -> CUInt -> IO CUInt) ->
     IO (FunPtr (Ptr a -> CString -> CUInt -> CUInt -> CUInt -> IO CUInt))
 
 foreign import ccall "wrapper"
-  makeCallback6 ::
+  makeCallback7 ::
     (Ptr a -> Ptr C.Sqlite3 -> CInt -> CString -> IO ()) ->
     IO (FunPtr (Ptr a -> Ptr C.Sqlite3 -> CInt -> CString -> IO ()))
