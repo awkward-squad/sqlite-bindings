@@ -1,15 +1,31 @@
 module Sqlite3.Bindings.Internal.Utils
-  ( boolToCInt,
+  ( -- * Conversions
+
+    -- ** Bool/CInt
+    cintToBool,
+    boolToCInt,
+
+    -- ** Int/CInt
     cintToInt,
     intToCInt,
+
+    -- ** Word/CUInt
     cuintToWord,
     wordToCUInt,
+
+    -- ** Double/CDouble
     cdoubleToDouble,
     doubleToCDouble,
+
+    -- ** Text/CString
     cstringToText,
-    cstringLenToText,
     textToCString,
+
+    -- ** Text/CStringLen
+    cstringLenToText,
     textToCStringLen,
+
+    -- ** C array / Array
     carrayToArray,
   )
 where
@@ -26,6 +42,12 @@ import Foreign.Marshal.Alloc (allocaBytes)
 import Foreign.Ptr (Ptr, castPtr, plusPtr)
 import Foreign.Storable (Storable)
 import qualified Foreign.Storable as Storable
+
+cintToBool :: CInt -> Bool
+cintToBool = \case
+  0 -> False
+  _ -> True
+{-# INLINE cintToBool #-}
 
 boolToCInt :: Bool -> CInt
 boolToCInt = \case
@@ -68,11 +90,6 @@ cstringToText string =
   Text.fromPtr0 (castPtr string)
 {-# INLINE cstringToText #-}
 
-cstringLenToText :: Ptr CChar -> Text.I8 -> IO Text
-cstringLenToText c_string len =
-  Text.fromPtr (castPtr c_string) len
-{-# INLINE cstringLenToText #-}
-
 textToCString :: Text -> (CString -> IO a) -> IO a
 textToCString text@(Text _ _ len) action =
   allocaBytes (len + 1) \ptr -> do
@@ -80,6 +97,11 @@ textToCString text@(Text _ _ len) action =
     Storable.pokeByteOff ptr len (0 :: Word8)
     action (castPtr ptr)
 {-# INLINE textToCString #-}
+
+cstringLenToText :: Ptr CChar -> Text.I8 -> IO Text
+cstringLenToText c_string len =
+  Text.fromPtr (castPtr c_string) len
+{-# INLINE cstringLenToText #-}
 
 textToCStringLen :: forall a. Text -> (Ptr CChar -> Int -> IO a) -> IO a
 textToCStringLen text@(Text _ _ len) action =

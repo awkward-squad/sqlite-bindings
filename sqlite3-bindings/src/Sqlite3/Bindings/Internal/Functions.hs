@@ -28,6 +28,7 @@ import Sqlite3.Bindings.Internal.Utils
   ( boolToCInt,
     carrayToArray,
     cdoubleToDouble,
+    cintToBool,
     cintToInt,
     cstringLenToText,
     cstringToText,
@@ -259,9 +260,9 @@ sqlite3_bind_pointer ::
   -- | Result code.
   IO CInt
 sqlite3_bind_pointer (Sqlite3_stmt statement) index value typ =
-  mask_ do
-    pointer <- newStablePtr value
-    textToCString typ \c_typ ->
+  textToCString typ \c_typ ->
+    mask_ do
+      pointer <- newStablePtr value
       C.sqlite3_bind_pointer statement (intToCInt index) (castStablePtrToPtr pointer) c_typ freeStablePtrFunPtr
 
 -- | https://www.sqlite.org/c3ref/bind_blob.html
@@ -746,12 +747,14 @@ sqlite3_compileoption_get index =
 --
 -- Get whether an option was specified at compile-time.
 sqlite3_compileoption_used ::
-  -- | Option name (UTF-8).
-  CString ->
-  -- | @0@ or @1@.
-  CInt
-sqlite3_compileoption_used =
-  C.sqlite3_compileoption_used
+  -- | Option name.
+  Text ->
+  -- | Whether the option was specified at compile-time.
+  Bool
+sqlite3_compileoption_used name =
+  unsafeDupablePerformIO do
+    textToCString name \c_name ->
+      pure (cintToBool (C.sqlite3_compileoption_used c_name))
 
 -- | https://www.sqlite.org/c3ref/complete.html
 --
