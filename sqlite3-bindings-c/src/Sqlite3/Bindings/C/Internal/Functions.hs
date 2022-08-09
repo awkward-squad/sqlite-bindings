@@ -728,6 +728,17 @@ sqlite3_config_heap ::
 sqlite3_config_heap =
   sqlite3_config__2 _SQLITE_CONFIG_HEAP
 
+-- | https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigmemstatus
+--
+-- Set whether memory allocation statistics are collected.
+sqlite3_config_memstatus ::
+  -- @0@ or @1@.
+  CInt ->
+  -- | Result code.
+  IO CInt
+sqlite3_config_memstatus =
+  sqlite3_config__3 _SQLITE_CONFIG_MEMSTATUS
+
 -- | https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigmultithread
 --
 -- Set the threading mode to multi-thread.
@@ -760,6 +771,28 @@ sqlite3_config_serialized ::
   IO CInt
 sqlite3_config_serialized =
   sqlite3_config__1 _SQLITE_CONFIG_SERIALIZED
+
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigcoveringindexscan
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiggetmutex
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiggetpcache
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiggetpcache2
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiglog
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiglookaside
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigmalloc
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigmemdbmaxsize
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigmmapsize
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigmutex
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigpcache
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigpcache2
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigpcachehdrsz
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigpmasz
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigsmallmalloc
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigsorterrefsize
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigsqllog
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigstmtjrnlspill
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiguri
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigwin32heapsize
+
 
 -- | https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigsinglethread
 --

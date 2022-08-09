@@ -62,7 +62,7 @@ module Sqlite3.Bindings
     -- sqlite3_config_lookaside,
     -- sqlite3_config_malloc,
     -- sqlite3_config_memdb_maxsize,
-    -- sqlite3_config_memstatus,
+    sqlite3_config_memstatus,
     sqlite3_config_multithread,
     -- sqlite3_config_mutex,
     -- sqlite3_config_nmap_size,

@@ -767,28 +767,6 @@ sqlite3_complete sql =
     textToCString sql \c_sql ->
       pure (cintToBool (C.sqlite3_complete c_sql))
 
--- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigcoveringindexscan
--- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiggetmutex
--- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiggetpcache
--- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiggetpcache2
--- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiglog
--- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiglookaside
--- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigmalloc
--- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigmemdbmaxsize
--- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigmemstatus
--- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigmmapsize
--- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigmutex
--- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigpcache
--- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigpcache2
--- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigpcachehdrsz
--- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigpmasz
--- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigsmallmalloc
--- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigsorterrefsize
--- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigsqllog
--- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigstmtjrnlspill
--- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiguri
--- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigwin32heapsize
-
 -- | https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigheap
 --
 -- Specify memory that SQLite can use for dynamic allocations.
@@ -804,6 +782,16 @@ sqlite3_config_heap n1 n2 action =
   allocaBytesAligned n1 8 \ptr -> do
     code <- C.sqlite3_config_heap ptr (intToCInt n1) (intToCInt n2)
     action code
+
+-- | https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigmemstatus
+--
+-- Set whether memory allocation statistics are collected.
+sqlite3_config_memstatus ::
+  Bool ->
+  -- | Result code.
+  IO CInt
+sqlite3_config_memstatus b =
+  C.sqlite3_config_memstatus (boolToCInt b)
 
 -- | https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigmultithread
 --
