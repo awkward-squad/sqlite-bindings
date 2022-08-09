@@ -36,6 +36,7 @@ main = do
         testCase "commit_hook" test_commit_hook,
         testCase "compileoption_get" test_compileoption_get,
         testCase "compileoption_used" test_compileoption_used,
+        testCase "complete" test_complete,
         testCase "create_collation" test_create_collation,
         testCase "last_insert_rowid" test_last_insert_rowid,
         testCase "open / close" test_open,
@@ -295,6 +296,11 @@ test_compileoption_get = do
 test_compileoption_used :: IO ()
 test_compileoption_used = do
   assertEqual "" False (sqlite3_compileoption_used "foobar")
+
+test_complete :: IO ()
+test_complete = do
+  assertEqual "" False (sqlite3_complete "select")
+  assertEqual "" True (sqlite3_complete "select 1;")
 
 test_create_collation :: IO ()
 test_create_collation = do

@@ -4,6 +4,7 @@ import Data.Int (Int64)
 import Data.Word (Word64)
 import Foreign (FunPtr, Ptr)
 import Foreign.C (CChar (..), CDouble (..), CInt (..), CString, CUChar (..), CUInt (..))
+import Sqlite3.Bindings.C.Internal.Constants
 import Sqlite3.Bindings.C.Internal.Objects
 
 -- | https://www.sqlite.org/c3ref/aggregate_context.html
@@ -704,78 +705,103 @@ foreign import ccall unsafe
 
 -- | https://www.sqlite.org/c3ref/complete.html
 --
--- Get whether a SQL statement is complete.
+-- Get whether an SQL statement is complete.
 foreign import ccall unsafe
   sqlite3_complete ::
     -- | SQL (UTF-8).
     CString ->
-    -- | @0@ (incomplete), @1@ (complete), or @SQLITE_NOMEM@ (memory allocation failure).
+    -- | @0@ or @1@.
     CInt
 
--- | https://www.sqlite.org/c3ref/config.html
+-- | https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigmultithread
 --
--- Configure the library.
-foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__1 :: CInt -> IO CInt
+-- Set the threading mode to multi-thread.
+sqlite3_config_multithread ::
+  -- | Result code.
+  IO CInt
+sqlite3_config_multithread =
+  sqlite3_config__1 _SQLITE_CONFIG_MULTITHREAD
 
--- | https://www.sqlite.org/c3ref/config.html
+-- | https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigpagecache
 --
--- Configure the library.
-foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__2 :: CInt -> Ptr Sqlite3_mem_methods -> IO CInt
+-- Specify memory that SQLite can use for the page cache.
+sqlite3_config_pagecache ::
+  -- | Memory (8-byte aligned).
+  Ptr a ->
+  -- | Size of each page cache line, in bytes.
+  CInt ->
+  -- | Number of cache lines.
+  CInt ->
+  -- | Result code.
+  IO CInt
+sqlite3_config_pagecache =
+  sqlite3_config__2 _SQLITE_CONFIG_PAGECACHE
 
--- | https://www.sqlite.org/c3ref/config.html
+-- | https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigserialized
 --
--- Configure the library.
-foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__3 :: CInt -> Ptr a -> CInt -> CInt -> IO CInt
+-- Set the threading mode to serialized.
+sqlite3_config_serialized ::
+  -- | Result code.
+  IO CInt
+sqlite3_config_serialized =
+  sqlite3_config__1 _SQLITE_CONFIG_SERIALIZED
 
--- | https://www.sqlite.org/c3ref/config.html
+-- | https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigsinglethread
 --
--- Configure the library.
-foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__4 :: CInt -> CInt -> IO CInt
+-- Set the threading mode to single-thread.
+sqlite3_config_singlethread ::
+  -- | Result code.
+  IO CInt
+sqlite3_config_singlethread =
+  sqlite3_config__1 _SQLITE_CONFIG_SINGLETHREAD
 
--- | https://www.sqlite.org/c3ref/config.html
---
--- Configure the library.
-foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__5 :: CInt -> Ptr Sqlite3_mutex_methods -> IO CInt
+foreign import capi unsafe "sqlite3.h sqlite3_config"
+  sqlite3_config__1 ::
+    CInt -> IO CInt
 
--- | https://www.sqlite.org/c3ref/config.html
---
--- Configure the library.
-foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__6 :: CInt -> CInt -> CInt -> IO CInt
+foreign import capi unsafe "sqlite3.h sqlite3_config"
+  sqlite3_config__2 ::
+    CInt -> Ptr a -> CInt -> CInt -> IO CInt
 
--- | https://www.sqlite.org/c3ref/config.html
---
--- Configure the library.
-foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__7 :: CInt -> FunPtr (Ptr a -> CInt -> CString -> IO ()) -> Ptr a -> IO CInt
+foreign import capi unsafe "sqlite3.h sqlite3_config"
+  sqlite3_config__3 ::
+    CInt -> CInt -> IO CInt
 
--- | https://www.sqlite.org/c3ref/config.html
---
--- Configure the library.
-foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__8 :: CInt -> Ptr Sqlite3_pcache_methods2 -> IO CInt
+foreign import capi unsafe "sqlite3.h sqlite3_config"
+  sqlite3_config__4 ::
+    CInt -> Ptr Sqlite3_mutex_methods -> IO CInt
 
--- | https://www.sqlite.org/c3ref/config.html
---
--- Configure the library.
-foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__9 :: CInt -> FunPtr (Ptr a -> Ptr Sqlite3 -> CString -> CInt -> IO ()) -> Ptr a -> IO CInt
+foreign import capi unsafe "sqlite3.h sqlite3_config"
+  sqlite3_config__5 ::
+    CInt -> CInt -> CInt -> IO CInt
 
--- | https://www.sqlite.org/c3ref/config.html
---
--- Configure the library.
-foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__10 :: CInt -> Int64 -> Int64 -> IO CInt
+foreign import capi unsafe "sqlite3.h sqlite3_config"
+  sqlite3_config__6 ::
+    CInt -> FunPtr (Ptr a -> CInt -> CString -> IO ()) -> Ptr a -> IO CInt
 
--- | https://www.sqlite.org/c3ref/config.html
---
--- Configure the library.
-foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__11 :: CInt -> Ptr CInt -> IO CInt
+foreign import capi unsafe "sqlite3.h sqlite3_config"
+  sqlite3_config__7 ::
+    CInt -> Ptr Sqlite3_pcache_methods2 -> IO CInt
 
--- | https://www.sqlite.org/c3ref/config.html
---
--- Configure the library.
-foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__12 :: CInt -> CUInt -> IO CInt
+foreign import capi unsafe "sqlite3.h sqlite3_config"
+  sqlite3_config__8 ::
+    CInt -> FunPtr (Ptr a -> Ptr Sqlite3 -> CString -> CInt -> IO ()) -> Ptr a -> IO CInt
 
--- | https://www.sqlite.org/c3ref/config.html
---
--- Configure the library.
-foreign import capi unsafe "sqlite3.h sqlite3_config" sqlite3_config__13 :: CInt -> Int64 -> IO CInt
+foreign import capi unsafe "sqlite3.h sqlite3_config"
+  sqlite3_config__9 ::
+    CInt -> Int64 -> Int64 -> IO CInt
+
+foreign import capi unsafe "sqlite3.h sqlite3_config"
+  sqlite3_config__10 ::
+    CInt -> Ptr CInt -> IO CInt
+
+foreign import capi unsafe "sqlite3.h sqlite3_config"
+  sqlite3_config__11 ::
+    CInt -> CUInt -> IO CInt
+
+foreign import capi unsafe "sqlite3.h sqlite3_config"
+  sqlite3_config__12 ::
+    CInt -> Int64 -> IO CInt
 
 -- | https://www.sqlite.org/c3ref/context_db_handle.html
 --

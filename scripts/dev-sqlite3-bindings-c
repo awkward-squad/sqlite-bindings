@@ -1,0 +1,5 @@
+#!/bin/bash
+
+ghcid \
+  --command 'cabal repl sqlite3-bindings-c --repl-options=-fobject-code'
+  --restart sqlite3-bindings-c/sqlite3-bindings-c.cabal

@@ -8,7 +8,6 @@ module Sqlite3.Bindings.Internal.Objects
     C.Sqlite3_file,
     C.Sqlite3_index_info (..),
     C.Sqlite3_io_methods,
-    C.Sqlite3_mem_methods,
     C.Sqlite3_module (..),
     C.Sqlite3_mutex,
     C.Sqlite3_mutex_methods,

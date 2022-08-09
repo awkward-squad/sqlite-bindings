@@ -30,9 +30,6 @@ data {-# CTYPE "sqlite3.h" "sqlite3_index_info" #-} Sqlite3_index_info = Sqlite3
 
 data Sqlite3_io_methods
 
--- | https://www.sqlite.org/c3ref/mem_methods.html
-data {-# CTYPE "sqlite3.h" "sqlite3_mem_methods" #-} Sqlite3_mem_methods
-
 -- | https://www.sqlite.org/c3ref/module.html
 --
 -- TODO rest of the fields

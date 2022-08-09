@@ -17,7 +17,7 @@ import qualified Data.Text.Foreign as Text (I8)
 import Data.Word (Word64)
 import Foreign.C (CChar (..), CDouble (..), CInt (..), CString, CUChar (..), CUInt (..))
 import Foreign.ForeignPtr (withForeignPtr)
-import Foreign.Marshal.Alloc (alloca)
+import Foreign.Marshal.Alloc (alloca, allocaBytesAligned)
 import Foreign.Ptr (FunPtr, Ptr, castFunPtrToPtr, castPtr, castPtrToFunPtr, freeHaskellFunPtr, minusPtr, nullFunPtr, nullPtr, plusPtr)
 import Foreign.StablePtr
 import Foreign.Storable (Storable (peek))
@@ -749,7 +749,6 @@ sqlite3_compileoption_get index =
 sqlite3_compileoption_used ::
   -- | Option name.
   Text ->
-  -- | Whether the option was specified at compile-time.
   Bool
 sqlite3_compileoption_used name =
   unsafeDupablePerformIO do
@@ -758,105 +757,83 @@ sqlite3_compileoption_used name =
 
 -- | https://www.sqlite.org/c3ref/complete.html
 --
--- Get whether a SQL statement is complete.
+-- Get whether an SQL statement is complete.
 sqlite3_complete ::
-  -- | SQL (UTF-8).
-  CString ->
-  -- | @0@ (incomplete), @1@ (complete), or @SQLITE_NOMEM@ (memory allocation failure).
-  CInt
-sqlite3_complete =
-  C.sqlite3_complete
+  -- | SQL.
+  Text ->
+  Bool
+sqlite3_complete sql =
+  unsafeDupablePerformIO do
+    textToCString sql \c_sql ->
+      pure (cintToBool (C.sqlite3_complete c_sql))
 
--- | https://www.sqlite.org/c3ref/config.html
---
--- Configure the library.
-sqlite3_config__1 :: CInt -> IO CInt
-sqlite3_config__1 =
-  C.sqlite3_config__1
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigcoveringindexscan
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiggetmutex
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiggetpcache
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiggetpcache2
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigheap
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiglog
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiglookaside
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigmalloc
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigmemdbmaxsize
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigmemstatus
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigmmapsize
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigmutex
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigpcache
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigpcache2
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigpcachehdrsz
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigpmasz
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigsmallmalloc
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigsorterrefsize
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigsqllog
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigstmtjrnlspill
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiguri
+-- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigwin32heapsize
 
--- | https://www.sqlite.org/c3ref/config.html
+-- | https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigmultithread
 --
--- Configure the library.
-sqlite3_config__2 :: CInt -> Ptr C.Sqlite3_mem_methods -> IO CInt
-sqlite3_config__2 =
-  C.sqlite3_config__2
+-- Set the threading mode to multi-thread.
+sqlite3_config_multithread ::
+  -- | Result code.
+  IO CInt
+sqlite3_config_multithread =
+  C.sqlite3_config_multithread
 
--- | https://www.sqlite.org/c3ref/config.html
+-- | https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigpagecache
 --
--- Configure the library.
-sqlite3_config__3 :: CInt -> Ptr a -> CInt -> CInt -> IO CInt
-sqlite3_config__3 =
-  C.sqlite3_config__3
+-- Specify memory that SQLite can use for the page cache.
+sqlite3_config_pagecache ::
+  -- | Size of memory to allocate, in bytes.
+  Int ->
+  -- | Size of each page cache line, in bytes.
+  Int ->
+  -- | Number of cache lines.
+  Int ->
+  -- | Result code.
+  (CInt -> IO a) ->
+  IO a
+sqlite3_config_pagecache n1 n2 n3 action =
+  allocaBytesAligned n1 8 \mem -> do
+    code <- C.sqlite3_config_pagecache mem (intToCInt n2) (intToCInt n3)
+    action code
 
--- | https://www.sqlite.org/c3ref/config.html
+-- | https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigserialized
 --
--- Configure the library.
-sqlite3_config__4 :: CInt -> CInt -> IO CInt
-sqlite3_config__4 =
-  C.sqlite3_config__4
+-- Set the threading mode to serialized.
+sqlite3_config_serialized ::
+  -- | Result code.
+  IO CInt
+sqlite3_config_serialized =
+  C.sqlite3_config_serialized
 
--- | https://www.sqlite.org/c3ref/config.html
+-- | https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigsinglethread
 --
--- Configure the library.
-sqlite3_config__5 :: CInt -> Ptr C.Sqlite3_mutex_methods -> IO CInt
-sqlite3_config__5 =
-  C.sqlite3_config__5
-
--- | https://www.sqlite.org/c3ref/config.html
---
--- Configure the library.
-sqlite3_config__6 :: CInt -> CInt -> CInt -> IO CInt
-sqlite3_config__6 =
-  C.sqlite3_config__6
-
--- | https://www.sqlite.org/c3ref/config.html
---
--- Configure the library.
-sqlite3_config__7 :: CInt -> FunPtr (Ptr a -> CInt -> CString -> IO ()) -> Ptr a -> IO CInt
-sqlite3_config__7 =
-  C.sqlite3_config__7
-
--- | https://www.sqlite.org/c3ref/config.html
---
--- Configure the library.
-sqlite3_config__8 :: CInt -> Ptr C.Sqlite3_pcache_methods2 -> IO CInt
-sqlite3_config__8 =
-  C.sqlite3_config__8
-
--- | https://www.sqlite.org/c3ref/config.html
---
--- Configure the library.
-sqlite3_config__9 :: CInt -> FunPtr (Ptr a -> Ptr C.Sqlite3 -> CString -> CInt -> IO ()) -> Ptr a -> IO CInt
-sqlite3_config__9 =
-  C.sqlite3_config__9
-
--- | https://www.sqlite.org/c3ref/config.html
---
--- Configure the library.
-sqlite3_config__10 :: CInt -> Int64 -> Int64 -> IO CInt
-sqlite3_config__10 =
-  C.sqlite3_config__10
-
--- | https://www.sqlite.org/c3ref/config.html
---
--- Configure the library.
-sqlite3_config__11 :: CInt -> Ptr CInt -> IO CInt
-sqlite3_config__11 =
-  C.sqlite3_config__11
-
--- | https://www.sqlite.org/c3ref/config.html
---
--- Configure the library.
-sqlite3_config__12 :: CInt -> CUInt -> IO CInt
-sqlite3_config__12 =
-  C.sqlite3_config__12
-
--- | https://www.sqlite.org/c3ref/config.html
---
--- Configure the library.
-sqlite3_config__13 :: CInt -> Int64 -> IO CInt
-sqlite3_config__13 =
-  C.sqlite3_config__13
+-- Set the threading mode to single-thread.
+sqlite3_config_singlethread ::
+  -- | Result code.
+  IO CInt
+sqlite3_config_singlethread =
+  C.sqlite3_config_singlethread
 
 -- | https://www.sqlite.org/c3ref/context_db_handle.html
 --
