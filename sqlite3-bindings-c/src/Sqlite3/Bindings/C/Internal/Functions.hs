@@ -713,6 +713,21 @@ foreign import ccall unsafe
     -- | @0@ or @1@.
     CInt
 
+-- | https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigheap
+--
+-- Specify memory that SQLite can use for dynamic allocations.
+sqlite3_config_heap ::
+  -- | Memory (8-byte aligned).
+  Ptr a ->
+  -- | Size of memory, in bytes.
+  CInt ->
+  -- | Minimum allocation size, in bytes.
+  CInt ->
+  -- | Result code.
+  IO CInt
+sqlite3_config_heap =
+  sqlite3_config__2 _SQLITE_CONFIG_HEAP
+
 -- | https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigmultithread
 --
 -- Set the threading mode to multi-thread.

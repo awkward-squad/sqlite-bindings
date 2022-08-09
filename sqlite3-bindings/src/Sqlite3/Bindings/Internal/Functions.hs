@@ -771,7 +771,6 @@ sqlite3_complete sql =
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiggetmutex
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiggetpcache
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiggetpcache2
--- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigheap
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiglog
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiglookaside
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigmalloc
@@ -790,6 +789,22 @@ sqlite3_complete sql =
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiguri
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigwin32heapsize
 
+-- | https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigheap
+--
+-- Specify memory that SQLite can use for dynamic allocations.
+sqlite3_config_heap ::
+  -- | Size of memory, in bytes.
+  Int ->
+  -- | Minimum allocation size, in bytes.
+  Int ->
+  -- | Result code.
+  (CInt -> IO a) ->
+  IO a
+sqlite3_config_heap n1 n2 action =
+  allocaBytesAligned n1 8 \ptr -> do
+    code <- C.sqlite3_config_heap ptr (intToCInt n1) (intToCInt n2)
+    action code
+
 -- | https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigmultithread
 --
 -- Set the threading mode to multi-thread.
@@ -803,8 +818,6 @@ sqlite3_config_multithread =
 --
 -- Specify memory that SQLite can use for the page cache.
 sqlite3_config_pagecache ::
-  -- | Size of memory to allocate, in bytes.
-  Int ->
   -- | Size of each page cache line, in bytes.
   Int ->
   -- | Number of cache lines.
@@ -812,9 +825,9 @@ sqlite3_config_pagecache ::
   -- | Result code.
   (CInt -> IO a) ->
   IO a
-sqlite3_config_pagecache n1 n2 n3 action =
-  allocaBytesAligned n1 8 \mem -> do
-    code <- C.sqlite3_config_pagecache mem (intToCInt n2) (intToCInt n3)
+sqlite3_config_pagecache n1 n2 action =
+  allocaBytesAligned (n1 * n2) 8 \ptr -> do
+    code <- C.sqlite3_config_pagecache ptr (intToCInt n1) (intToCInt n2)
     action code
 
 -- | https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigserialized
