@@ -7,8 +7,10 @@ This library provides (mostly) complete bindings to SQLite.
 | Symbol | Reason |
 | --- | --- |
 | `SQLITE_CONFIG_GETMALLOC` | Uncommon |
+| `SQLITE_CONFIG_GETMUTEX` | Uncommon |
 | `SQLITE_CONFIG_GETPCACHE` | Unused |
 | `SQLITE_CONFIG_MALLOC` | Uncommon |
+| `SQLITE_CONFIG_MUTEX` | Uncommon |
 | `SQLITE_CONFIG_PCACHE` | Unused |
 | `SQLITE_CONFIG_SCRATCH` | Unused |
 | `SQLITE_OPEN_PRIVATECACHE` | Deprecated |

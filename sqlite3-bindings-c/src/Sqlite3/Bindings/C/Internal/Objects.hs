@@ -64,9 +64,6 @@ data {-# CTYPE "sqlite3.h" "sqlite3_module" #-} Sqlite3_module = Sqlite3_module
 -- | https://www.sqlite.org/c3ref/mutex.html
 data {-# CTYPE "sqlite3.h" "sqlite3_mutex" #-} Sqlite3_mutex
 
--- | https://www.sqlite.org/c3ref/mutex_methods.html
-data {-# CTYPE "sqlite3.h" "sqlite3_mutex_methods" #-} Sqlite3_mutex_methods
-
 data Sqlite3_pcache
 
 -- | https://www.sqlite.org/c3ref/pcache_methods2.html

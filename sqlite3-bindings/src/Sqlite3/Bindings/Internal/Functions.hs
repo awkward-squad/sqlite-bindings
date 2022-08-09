@@ -783,6 +783,19 @@ sqlite3_config_heap n1 n2 action =
     code <- C.sqlite3_config_heap ptr (intToCInt n1) (intToCInt n2)
     action code
 
+-- | https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiglookaside
+--
+-- Set the default lookaside memory size.
+sqlite3_config_lookaside ::
+  -- | Size of each lookaside buffer slot, in bytes.
+  Int ->
+  -- | Number of lookaside buffer slots allocated to each connection.
+  Int ->
+  -- | Result code.
+  IO CInt
+sqlite3_config_lookaside n1 n2 =
+  C.sqlite3_config_lookaside (intToCInt n1) (intToCInt n2)
+
 -- | https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigmemstatus
 --
 -- Set whether memory allocation statistics are collected.

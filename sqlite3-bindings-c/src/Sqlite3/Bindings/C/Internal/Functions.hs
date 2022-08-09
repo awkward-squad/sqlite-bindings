@@ -728,6 +728,19 @@ sqlite3_config_heap ::
 sqlite3_config_heap =
   sqlite3_config__2 _SQLITE_CONFIG_HEAP
 
+-- | https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiglookaside
+--
+-- Set the default lookaside memory size.
+sqlite3_config_lookaside ::
+  -- | Size of each lookaside buffer slot, in bytes.
+  CInt ->
+  -- | Number of lookaside buffer slots allocated to each connection.
+  CInt ->
+  -- | Result code.
+  IO CInt
+sqlite3_config_lookaside =
+  sqlite3_config__4 _SQLITE_CONFIG_LOOKASIDE
+
 -- | https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigmemstatus
 --
 -- Set whether memory allocation statistics are collected.
@@ -773,15 +786,11 @@ sqlite3_config_serialized =
   sqlite3_config__1 _SQLITE_CONFIG_SERIALIZED
 
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigcoveringindexscan
--- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiggetmutex
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiggetpcache
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiggetpcache2
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiglog
--- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiglookaside
--- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigmalloc
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigmemdbmaxsize
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigmmapsize
--- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigmutex
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigpcache
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigpcache2
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigpcachehdrsz
@@ -792,7 +801,6 @@ sqlite3_config_serialized =
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigstmtjrnlspill
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiguri
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigwin32heapsize
-
 
 -- | https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigsinglethread
 --
@@ -817,38 +825,34 @@ foreign import capi unsafe "sqlite3.h sqlite3_config"
 
 foreign import capi unsafe "sqlite3.h sqlite3_config"
   sqlite3_config__4 ::
-    CInt -> Ptr Sqlite3_mutex_methods -> IO CInt
-
-foreign import capi unsafe "sqlite3.h sqlite3_config"
-  sqlite3_config__5 ::
     CInt -> CInt -> CInt -> IO CInt
 
 foreign import capi unsafe "sqlite3.h sqlite3_config"
-  sqlite3_config__6 ::
+  sqlite3_config__5 ::
     CInt -> FunPtr (Ptr a -> CInt -> CString -> IO ()) -> Ptr a -> IO CInt
 
 foreign import capi unsafe "sqlite3.h sqlite3_config"
-  sqlite3_config__7 ::
+  sqlite3_config__6 ::
     CInt -> Ptr Sqlite3_pcache_methods2 -> IO CInt
 
 foreign import capi unsafe "sqlite3.h sqlite3_config"
-  sqlite3_config__8 ::
+  sqlite3_config__7 ::
     CInt -> FunPtr (Ptr a -> Ptr Sqlite3 -> CString -> CInt -> IO ()) -> Ptr a -> IO CInt
 
 foreign import capi unsafe "sqlite3.h sqlite3_config"
-  sqlite3_config__9 ::
+  sqlite3_config__8 ::
     CInt -> Int64 -> Int64 -> IO CInt
 
 foreign import capi unsafe "sqlite3.h sqlite3_config"
-  sqlite3_config__10 ::
+  sqlite3_config__9 ::
     CInt -> Ptr CInt -> IO CInt
 
 foreign import capi unsafe "sqlite3.h sqlite3_config"
-  sqlite3_config__11 ::
+  sqlite3_config__10 ::
     CInt -> CUInt -> IO CInt
 
 foreign import capi unsafe "sqlite3.h sqlite3_config"
-  sqlite3_config__12 ::
+  sqlite3_config__11 ::
     CInt -> Int64 -> IO CInt
 
 -- | https://www.sqlite.org/c3ref/context_db_handle.html

@@ -10,7 +10,6 @@ module Sqlite3.Bindings.Internal.Objects
     C.Sqlite3_io_methods,
     C.Sqlite3_module (..),
     C.Sqlite3_mutex,
-    C.Sqlite3_mutex_methods,
     C.Sqlite3_pcache,
     C.Sqlite3_pcache_methods2,
     C.Sqlite3_pcache_page,

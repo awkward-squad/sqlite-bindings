@@ -62,8 +62,6 @@ foreign import capi "sqlite3.h value SQLITE_CHECKPOINT_TRUNCATE" _SQLITE_CHECKPO
 
 foreign import capi "sqlite3.h value SQLITE_CONFIG_COVERING_INDEX_SCAN" _SQLITE_CONFIG_COVERING_INDEX_SCAN :: CInt
 
-foreign import capi "sqlite3.h value SQLITE_CONFIG_GETMUTEX" _SQLITE_CONFIG_GETMUTEX :: CInt
-
 foreign import capi "sqlite3.h value SQLITE_CONFIG_GETPCACHE2" _SQLITE_CONFIG_GETPCACHE2 :: CInt
 
 foreign import capi "sqlite3.h value SQLITE_CONFIG_HEAP" _SQLITE_CONFIG_HEAP :: CInt
@@ -79,8 +77,6 @@ foreign import capi "sqlite3.h value SQLITE_CONFIG_MEMSTATUS" _SQLITE_CONFIG_MEM
 foreign import capi "sqlite3.h value SQLITE_CONFIG_MMAP_SIZE" _SQLITE_CONFIG_MMAP_SIZE :: CInt
 
 foreign import capi "sqlite3.h value SQLITE_CONFIG_MULTITHREAD" _SQLITE_CONFIG_MULTITHREAD :: CInt
-
-foreign import capi "sqlite3.h value SQLITE_CONFIG_MUTEX" _SQLITE_CONFIG_MUTEX :: CInt
 
 foreign import capi "sqlite3.h value SQLITE_CONFIG_PAGECACHE" _SQLITE_CONFIG_PAGECACHE :: CInt
 
