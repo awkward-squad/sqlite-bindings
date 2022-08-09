@@ -345,8 +345,8 @@ test_last_insert_rowid = do
 
 test_libversion :: IO ()
 test_libversion = do
-  assertEqual "" "3.39.1" sqlite3_libversion
-  assertEqual "" 3039001 sqlite3_libversion_number
+  assertEqual "" "3.39.2" sqlite3_libversion
+  assertEqual "" 3039002 sqlite3_libversion_number
 
 test_open :: IO ()
 test_open = do

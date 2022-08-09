@@ -1,5 +1,9 @@
 cabal-version: 2.2
 
+description:
+  Bindings to SQLite version 3.39.2
+  .
+  See @<https://hackage.haskell.org/package/sqlite3-bindings sqlite3-bindings>@ for higher-level bindings.
 name: sqlite3-bindings-c
 version: 39.0.0.0
 
