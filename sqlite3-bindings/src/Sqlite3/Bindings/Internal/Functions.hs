@@ -1511,16 +1511,16 @@ sqlite3_last_insert_rowid =
 -- | https://www.sqlite.org/c3ref/libversion.html
 --
 -- The library version.
-sqlite3_libversion :: CString
+sqlite3_libversion :: Text
 sqlite3_libversion =
-  C.sqlite3_libversion
+  unsafeDupablePerformIO (cstringToText C.sqlite3_libversion)
 
 -- | https://www.sqlite.org/c3ref/libversion.html
 --
 -- The library version.
-sqlite3_libversion_number :: CInt
+sqlite3_libversion_number :: Int
 sqlite3_libversion_number =
-  C.sqlite3_libversion_number
+  cintToInt C.sqlite3_libversion_number
 
 -- | https://www.sqlite.org/c3ref/limit.html
 --

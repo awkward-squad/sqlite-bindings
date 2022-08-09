@@ -39,6 +39,7 @@ main = do
         testCase "complete" test_complete,
         testCase "create_collation" test_create_collation,
         testCase "last_insert_rowid" test_last_insert_rowid,
+        testCase "libversion / libversion_number" test_libversion,
         testCase "open / close" test_open,
         testCase "rollback_hook" test_rollback_hook
       ]
@@ -341,6 +342,11 @@ test_last_insert_rowid = do
     exec conn "insert into bar values (1)" >>= check
     exec conn "insert into bar values (2)" >>= check
     sqlite3_last_insert_rowid conn >>= assertEqual "" 1
+
+test_libversion :: IO ()
+test_libversion = do
+  assertEqual "" "3.39.1" sqlite3_libversion
+  assertEqual "" 3039001 sqlite3_libversion_number
 
 test_open :: IO ()
 test_open = do
