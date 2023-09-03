@@ -1,0 +1,26 @@
+cabal-version: 2.2
+
+name: junkyard
+version: 0
+
+extra-source-files:
+  cbits/junkyard.c
+  cbits/junkyard.h
+
+executable junkyard
+  build-depends:
+    base,
+    sqlite3-bindings,
+    sqlite3-bindings-c
+  default-extensions:
+    CApiFFI
+    OverloadedStrings
+  default-language: GHC2021
+  c-sources: cbits/junkyard.c
+  ghc-options: -Wall
+  hs-source-dirs: .
+  include-dirs: cbits
+  includes:
+    junkyard.h
+    sqlite3.h
+  main-is: Main.hs

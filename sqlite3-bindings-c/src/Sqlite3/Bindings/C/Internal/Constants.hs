@@ -6,6 +6,7 @@ module Sqlite3.Bindings.C.Internal.Constants where
 import Foreign.C (CInt (..), CString)
 import Foreign.Ptr (FunPtr, Ptr)
 
+-- | https://www.sqlite.org/rescode.html#abort
 foreign import capi "sqlite3.h value SQLITE_ABORT" _SQLITE_ABORT :: CInt
 
 foreign import capi "sqlite3.h value SQLITE_ABORT_ROLLBACK" _SQLITE_ABORT_ROLLBACK :: CInt
@@ -602,64 +603,64 @@ foreign import capi "sqlite3.h value SQLITE_OK_LOAD_PERMANENTLY" _SQLITE_OK_LOAD
 
 foreign import capi "sqlite3.h value SQLITE_OK_SYMLINK" _SQLITE_OK_SYMLINK :: CInt
 
--- https://www.sqlite.org/c3ref/c_open_autoproxy.html
+-- | https://www.sqlite.org/c3ref/c_open_autoproxy.html
 foreign import capi "sqlite3.h value SQLITE_OPEN_AUTOPROXY" _SQLITE_OPEN_AUTOPROXY :: CInt
 
--- https://www.sqlite.org/c3ref/c_open_autoproxy.html
+-- | https://www.sqlite.org/c3ref/c_open_autoproxy.html
 foreign import capi "sqlite3.h value SQLITE_OPEN_CREATE" _SQLITE_OPEN_CREATE :: CInt
 
--- https://www.sqlite.org/c3ref/c_open_autoproxy.html
+-- | https://www.sqlite.org/c3ref/c_open_autoproxy.html
 foreign import capi "sqlite3.h value SQLITE_OPEN_DELETEONCLOSE" _SQLITE_OPEN_DELETEONCLOSE :: CInt
 
--- https://www.sqlite.org/c3ref/c_open_autoproxy.html
+-- | https://www.sqlite.org/c3ref/c_open_autoproxy.html
 foreign import capi "sqlite3.h value SQLITE_OPEN_EXCLUSIVE" _SQLITE_OPEN_EXCLUSIVE :: CInt
 
--- https://www.sqlite.org/c3ref/c_open_autoproxy.html
+-- | https://www.sqlite.org/c3ref/c_open_autoproxy.html
 foreign import capi "sqlite3.h value SQLITE_OPEN_EXRESCODE" _SQLITE_OPEN_EXRESCODE :: CInt
 
--- https://www.sqlite.org/c3ref/c_open_autoproxy.html
+-- | https://www.sqlite.org/c3ref/c_open_autoproxy.html
 foreign import capi "sqlite3.h value SQLITE_OPEN_FULLMUTEX" _SQLITE_OPEN_FULLMUTEX :: CInt
 
--- https://www.sqlite.org/c3ref/c_open_autoproxy.html
+-- | https://www.sqlite.org/c3ref/c_open_autoproxy.html
 foreign import capi "sqlite3.h value SQLITE_OPEN_MAIN_DB" _SQLITE_OPEN_MAIN_DB :: CInt
 
--- https://www.sqlite.org/c3ref/c_open_autoproxy.html
+-- | https://www.sqlite.org/c3ref/c_open_autoproxy.html
 foreign import capi "sqlite3.h value SQLITE_OPEN_MAIN_JOURNAL" _SQLITE_OPEN_MAIN_JOURNAL :: CInt
 
--- https://www.sqlite.org/c3ref/c_open_autoproxy.html
+-- | https://www.sqlite.org/c3ref/c_open_autoproxy.html
 foreign import capi "sqlite3.h value SQLITE_OPEN_MEMORY" _SQLITE_OPEN_MEMORY :: CInt
 
--- https://www.sqlite.org/c3ref/c_open_autoproxy.html
+-- | https://www.sqlite.org/c3ref/c_open_autoproxy.html
 foreign import capi "sqlite3.h value SQLITE_OPEN_NOFOLLOW" _SQLITE_OPEN_NOFOLLOW :: CInt
 
--- https://www.sqlite.org/c3ref/c_open_autoproxy.html
+-- | https://www.sqlite.org/c3ref/c_open_autoproxy.html
 foreign import capi "sqlite3.h value SQLITE_OPEN_NOMUTEX" _SQLITE_OPEN_NOMUTEX :: CInt
 
--- https://www.sqlite.org/c3ref/c_open_autoproxy.html
+-- | https://www.sqlite.org/c3ref/c_open_autoproxy.html
 foreign import capi "sqlite3.h value SQLITE_OPEN_READONLY" _SQLITE_OPEN_READONLY :: CInt
 
--- https://www.sqlite.org/c3ref/c_open_autoproxy.html
+-- | https://www.sqlite.org/c3ref/c_open_autoproxy.html
 foreign import capi "sqlite3.h value SQLITE_OPEN_READWRITE" _SQLITE_OPEN_READWRITE :: CInt
 
--- https://www.sqlite.org/c3ref/c_open_autoproxy.html
+-- | https://www.sqlite.org/c3ref/c_open_autoproxy.html
 foreign import capi "sqlite3.h value SQLITE_OPEN_SUBJOURNAL" _SQLITE_OPEN_SUBJOURNAL :: CInt
 
--- https://www.sqlite.org/c3ref/c_open_autoproxy.html
+-- | https://www.sqlite.org/c3ref/c_open_autoproxy.html
 foreign import capi "sqlite3.h value SQLITE_OPEN_SUPER_JOURNAL" _SQLITE_OPEN_SUPER_JOURNAL :: CInt
 
--- https://www.sqlite.org/c3ref/c_open_autoproxy.html
+-- | https://www.sqlite.org/c3ref/c_open_autoproxy.html
 foreign import capi "sqlite3.h value SQLITE_OPEN_TEMP_DB" _SQLITE_OPEN_TEMP_DB :: CInt
 
--- https://www.sqlite.org/c3ref/c_open_autoproxy.html
+-- | https://www.sqlite.org/c3ref/c_open_autoproxy.html
 foreign import capi "sqlite3.h value SQLITE_OPEN_TEMP_JOURNAL" _SQLITE_OPEN_TEMP_JOURNAL :: CInt
 
--- https://www.sqlite.org/c3ref/c_open_autoproxy.html
+-- | https://www.sqlite.org/c3ref/c_open_autoproxy.html
 foreign import capi "sqlite3.h value SQLITE_OPEN_TRANSIENT_DB" _SQLITE_OPEN_TRANSIENT_DB :: CInt
 
--- https://www.sqlite.org/c3ref/c_open_autoproxy.html
+-- | https://www.sqlite.org/c3ref/c_open_autoproxy.html
 foreign import capi "sqlite3.h value SQLITE_OPEN_URI" _SQLITE_OPEN_URI :: CInt
 
--- https://www.sqlite.org/c3ref/c_open_autoproxy.html
+-- | https://www.sqlite.org/c3ref/c_open_autoproxy.html
 foreign import capi "sqlite3.h value SQLITE_OPEN_WAL" _SQLITE_OPEN_WAL :: CInt
 
 foreign import capi "sqlite3.h value SQLITE_PERM" _SQLITE_PERM :: CInt

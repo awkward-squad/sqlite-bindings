@@ -19,10 +19,15 @@ foreign import ccall unsafe
     -- | Memory.
     IO (Ptr a)
 
----- | https://www.sqlite.org/c3ref/auto_extension.html
-----
----- Register an extension that is automatically loaded by every new connection.
--- sqlite3_auto_extension = undefined
+-- | https://www.sqlite.org/c3ref/auto_extension.html
+--
+-- Register an extension that is automatically loaded by every new connection.
+foreign import ccall unsafe
+  sqlite3_auto_extension ::
+    -- | Extension entry point.
+    FunPtr (Ptr Sqlite3 -> Ptr CString -> Ptr Sqlite3_api_routines -> IO CInt) ->
+    -- | Result code.
+    IO CInt
 
 -- | https://www.sqlite.org/c3ref/autovacuum_pages.html
 --

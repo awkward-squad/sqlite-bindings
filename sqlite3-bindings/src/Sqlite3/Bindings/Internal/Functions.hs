@@ -41,7 +41,20 @@ import Sqlite3.Bindings.Internal.Utils
   )
 import System.IO.Unsafe (unsafeDupablePerformIO, unsafePerformIO)
 
-sqlite3_auto_extension = undefined
+-- | https://www.sqlite.org/c3ref/auto_extension.html
+--
+-- Register an extension that is automatically loaded by every new connection.
+sqlite3_auto_extension ::
+  -- | Extension entry point.
+  FunPtr (Sqlite3 -> Ptr CString -> Sqlite3_api_routines -> IO CInt) ->
+  -- | Result code.
+  IO CInt
+sqlite3_auto_extension callback =
+  C.sqlite3_auto_extension (coerce @ExtensionEntryPoint @CExtensionEntryPoint callback)
+
+type ExtensionEntryPoint = FunPtr (Sqlite3 -> Ptr CString -> Sqlite3_api_routines -> IO CInt)
+
+type CExtensionEntryPoint = FunPtr (Ptr C.Sqlite3 -> Ptr CString -> Ptr C.Sqlite3_api_routines -> IO CInt)
 
 -- | https://www.sqlite.org/c3ref/autovacuum_pages.html
 --
