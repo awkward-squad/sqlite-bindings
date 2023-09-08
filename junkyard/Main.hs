@@ -13,8 +13,8 @@ main = do
   0 <- sqlite3_initialize
   putStrLn "done."
 
-  putStr "Setting my_extension to auto-load... "
-  0 <- sqlite3_auto_extension my_extension
+  putStr "Setting my_entrypoint to auto-load... "
+  0 <- sqlite3_auto_extension my_entrypoint
   putStrLn "done."
 
   putStr "Opening connection... "
@@ -25,5 +25,5 @@ main = do
   0 <- sqlite3_shutdown
   putStrLn "done."
 
-foreign import capi "junkyard.h &my_extension"
-  my_extension :: FunPtr (Sqlite3 -> Ptr CString -> Sqlite3_api_routines -> IO CInt)
+foreign import capi "junkyard.h &my_entrypoint"
+  my_entrypoint :: FunPtr (Sqlite3 -> Ptr CString -> Sqlite3_api_routines -> IO CInt)
