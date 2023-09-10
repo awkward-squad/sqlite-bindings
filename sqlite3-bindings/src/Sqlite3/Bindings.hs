@@ -246,6 +246,27 @@ module Sqlite3.Bindings
     sqlite3_wal_checkpoint_v2,
     sqlite3_wal_hook,
 
+    -- * Objects
+    Sqlite3,
+    Sqlite3_api_routines,
+    Sqlite3_backup,
+    Sqlite3_blob,
+    Sqlite3_context,
+    Sqlite3_file,
+    Sqlite3_index_info (..),
+    Sqlite3_io_methods,
+    Sqlite3_module (..),
+    Sqlite3_mutex,
+    Sqlite3_pcache,
+    Sqlite3_pcache_methods2 (..),
+    Sqlite3_pcache_page (..),
+    Sqlite3_snapshot,
+    Sqlite3_stmt,
+    Sqlite3_value,
+    Sqlite3_vfs (..),
+    Sqlite3_vtab (..),
+    Sqlite3_vtab_cursor (..),
+
     -- * Constants
     _SQLITE_ABORT,
     _SQLITE_ABORT_ROLLBACK,
@@ -669,28 +690,6 @@ module Sqlite3.Bindings
     _SQLITE_WARNING_AUTOINDEX,
     _SQLITE_WIN32_DATA_DIRECTORY_TYPE,
     _SQLITE_WIN32_TEMP_DIRECTORY_TYPE,
-
-    -- * Objects
-    Sqlite3,
-    Sqlite3_api_routines,
-    Sqlite3_backup,
-    Sqlite3_blob,
-    Sqlite3_context,
-    Sqlite3_file,
-    Sqlite3_index_info (..),
-    Sqlite3_io_methods,
-    Sqlite3_module (..),
-    Sqlite3_mutex,
-    Sqlite3_pcache,
-    Sqlite3_pcache_methods2 (..),
-    Sqlite3_pcache_page,
-    Sqlite3_snapshot,
-    Sqlite3_stmt,
-    Sqlite3_temp_directory,
-    Sqlite3_value,
-    Sqlite3_vfs (..),
-    Sqlite3_vtab,
-    Sqlite3_vtab_cursor,
   )
 where
 

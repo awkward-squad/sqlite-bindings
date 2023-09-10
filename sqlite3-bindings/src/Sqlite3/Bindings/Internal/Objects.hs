@@ -11,19 +11,18 @@ module Sqlite3.Bindings.Internal.Objects
     C.Sqlite3_mutex,
     C.Sqlite3_pcache,
     C.Sqlite3_pcache_methods2 (..),
-    C.Sqlite3_pcache_page,
+    C.Sqlite3_pcache_page (..),
     C.Sqlite3_snapshot,
     Sqlite3_stmt (..),
-    C.Sqlite3_temp_directory,
     Sqlite3_value (..),
     C.Sqlite3_vfs (..),
-    C.Sqlite3_vtab,
-    C.Sqlite3_vtab_cursor,
+    C.Sqlite3_vtab (..),
+    C.Sqlite3_vtab_cursor (..),
   )
 where
 
 import Foreign.Ptr (Ptr)
-import qualified Sqlite3.Bindings.C as C
+import Sqlite3.Bindings.C qualified as C
 
 -- | https://www.sqlite.org/c3ref/sqlite3.html
 newtype Sqlite3

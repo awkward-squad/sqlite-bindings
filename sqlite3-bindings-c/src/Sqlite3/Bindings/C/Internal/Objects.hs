@@ -1,7 +1,7 @@
 module Sqlite3.Bindings.C.Internal.Objects where
 
 import Foreign (FunPtr, Ptr)
-import Foreign.C (CInt, CLLong, CString, CUInt)
+import Foreign.C (CDouble, CInt, CLLong, CString, CUInt)
 
 -- | https://www.sqlite.org/c3ref/sqlite3.html
 --
@@ -16,22 +16,22 @@ data {-# CTYPE "sqlite3.h" "sqlite3_api_routines" #-} Sqlite3_api_routines
 
 -- | https://www.sqlite.org/c3ref/backup.html
 --
--- An online backup object.
+-- An online backup.
 data {-# CTYPE "sqlite3.h" "sqlite3_backup" #-} Sqlite3_backup
 
 -- | https://www.sqlite.org/c3ref/blob.html
 --
--- A blob object.
+-- A blob.
 data {-# CTYPE "sqlite3.h" "sqlite3_blob" #-} Sqlite3_blob
 
 -- | https://www.sqlite.org/c3ref/context.html
 --
--- A function context object.
+-- A function context.
 data {-# CTYPE "sqlite3.h" "sqlite3_context" #-} Sqlite3_context
 
 -- | https://www.sqlite.org/c3ref/file.html
 --
--- A file object.
+-- A file.
 data {-# CTYPE "sqlite3.h" "sqlite3_file" #-} Sqlite3_file
 
 -- | https://www.sqlite.org/c3ref/index_info.html
@@ -46,7 +46,7 @@ data Sqlite3_io_methods
 
 -- | https://www.sqlite.org/c3ref/module.html
 --
--- TODO document
+-- A virtual table module.
 data {-# CTYPE "sqlite3.h" "sqlite3_module" #-} Sqlite3_module a = Sqlite3_module
   { iVersion :: {-# UNPACK #-} !CInt,
     xCreate ::
@@ -55,7 +55,7 @@ data {-# CTYPE "sqlite3.h" "sqlite3_module" #-} Sqlite3_module a = Sqlite3_modul
                             Ptr a ->
                             CInt ->
                             Ptr CString ->
-                            Ptr (Ptr Sqlite3_vtab) ->
+                            Ptr (Ptr (Sqlite3_vtab a)) ->
                             Ptr CString ->
                             IO CInt
                           )
@@ -66,19 +66,19 @@ data {-# CTYPE "sqlite3.h" "sqlite3_module" #-} Sqlite3_module a = Sqlite3_modul
                             Ptr a ->
                             CInt ->
                             Ptr CString ->
-                            Ptr (Ptr Sqlite3_vtab) ->
+                            Ptr (Ptr (Sqlite3_vtab a)) ->
                             Ptr CString ->
                             IO CInt
                           )
                       ),
-    xBestIndex :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vtab -> Ptr Sqlite3_index_info -> IO CInt)),
-    xDisconnect :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vtab -> IO CInt)),
-    xDestroy :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vtab -> IO CInt)),
-    xOpen :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vtab -> Ptr (Ptr Sqlite3_vtab_cursor) -> IO CInt)),
-    xClose :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vtab_cursor -> IO CInt)),
+    xBestIndex :: {-# UNPACK #-} !(FunPtr (Ptr (Sqlite3_vtab a) -> Ptr Sqlite3_index_info -> IO CInt)),
+    xDisconnect :: {-# UNPACK #-} !(FunPtr (Ptr (Sqlite3_vtab a) -> IO CInt)),
+    xDestroy :: {-# UNPACK #-} !(FunPtr (Ptr (Sqlite3_vtab a) -> IO CInt)),
+    xOpen :: {-# UNPACK #-} !(FunPtr (Ptr (Sqlite3_vtab a) -> Ptr (Ptr (Sqlite3_vtab_cursor a)) -> IO CInt)),
+    xClose :: {-# UNPACK #-} !(FunPtr (Ptr (Sqlite3_vtab_cursor a) -> IO CInt)),
     xFilter ::
       {-# UNPACK #-} !( FunPtr
-                          ( Ptr Sqlite3_vtab_cursor ->
+                          ( Ptr (Sqlite3_vtab_cursor a) ->
                             CInt ->
                             CString ->
                             CInt ->
@@ -86,19 +86,18 @@ data {-# CTYPE "sqlite3.h" "sqlite3_module" #-} Sqlite3_module a = Sqlite3_modul
                             IO CInt
                           )
                       ),
-    xNext :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vtab_cursor -> IO CInt)),
-    xEof :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vtab_cursor -> IO CInt)),
-    xColumn :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vtab_cursor -> Ptr Sqlite3_context -> CInt -> IO CInt)),
-    xRowid :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vtab_cursor -> Ptr CLLong -> IO CInt)),
-    xUpdate :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vtab -> CInt -> Ptr (Ptr Sqlite3_value) -> Ptr CLLong -> IO CInt)),
-    xBegin :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vtab -> IO CInt)),
-    xSync :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vtab -> IO CInt)),
-    xCommit :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vtab -> IO CInt)),
-    xRollback :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vtab -> IO CInt)),
+    xNext :: {-# UNPACK #-} !(FunPtr (Ptr (Sqlite3_vtab_cursor a) -> IO CInt)),
+    xEof :: {-# UNPACK #-} !(FunPtr (Ptr (Sqlite3_vtab_cursor a) -> IO CInt)),
+    xColumn :: {-# UNPACK #-} !(FunPtr (Ptr (Sqlite3_vtab_cursor a) -> Ptr Sqlite3_context -> CInt -> IO CInt)),
+    xRowid :: {-# UNPACK #-} !(FunPtr (Ptr (Sqlite3_vtab_cursor a) -> Ptr CLLong -> IO CInt)),
+    xUpdate :: {-# UNPACK #-} !(FunPtr (Ptr (Sqlite3_vtab a) -> CInt -> Ptr (Ptr Sqlite3_value) -> Ptr CLLong -> IO CInt)),
+    xBegin :: {-# UNPACK #-} !(FunPtr (Ptr (Sqlite3_vtab a) -> IO CInt)),
+    xSync :: {-# UNPACK #-} !(FunPtr (Ptr (Sqlite3_vtab a) -> IO CInt)),
+    xCommit :: {-# UNPACK #-} !(FunPtr (Ptr (Sqlite3_vtab a) -> IO CInt)),
+    xRollback :: {-# UNPACK #-} !(FunPtr (Ptr (Sqlite3_vtab a) -> IO CInt)),
     xFindFunction ::
-      {-# UNPACK #-} !( forall x.
-                        FunPtr
-                          ( Ptr Sqlite3_vtab ->
+      {-# UNPACK #-} !( FunPtr
+                          ( Ptr (Sqlite3_vtab a) ->
                             CInt ->
                             CString ->
                             Ptr
@@ -108,24 +107,26 @@ data {-# CTYPE "sqlite3.h" "sqlite3_module" #-} Sqlite3_module a = Sqlite3_modul
                                     Ptr (Ptr Sqlite3_value)
                                   )
                               ) ->
-                            Ptr (Ptr x) ->
+                            Ptr (Ptr ()) ->
                             IO CInt
                           )
                       ),
-    xRename :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vtab -> CString -> IO CInt)),
-    xSavepoint :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vtab -> CInt -> IO CInt)),
-    xRelease :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vtab -> CInt -> IO CInt)),
-    xRollbackTo :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vtab -> CInt -> IO CInt)),
+    xRename :: {-# UNPACK #-} !(FunPtr (Ptr (Sqlite3_vtab a) -> CString -> IO CInt)),
+    xSavepoint :: {-# UNPACK #-} !(FunPtr (Ptr (Sqlite3_vtab a) -> CInt -> IO CInt)),
+    xRelease :: {-# UNPACK #-} !(FunPtr (Ptr (Sqlite3_vtab a) -> CInt -> IO CInt)),
+    xRollbackTo :: {-# UNPACK #-} !(FunPtr (Ptr (Sqlite3_vtab a) -> CInt -> IO CInt)),
     xShadowName :: {-# UNPACK #-} !(FunPtr (CString -> IO CInt))
   }
 
 -- | https://www.sqlite.org/c3ref/mutex.html
 --
--- TODO document
+-- A mutex.
 data {-# CTYPE "sqlite3.h" "sqlite3_mutex" #-} Sqlite3_mutex
 
--- | TODO document
-data Sqlite3_pcache
+-- | https://www.sqlite.org/c3ref/pcache.html
+--
+-- A page cache.
+data {-# CTYPE "sqlite3.h" "sqlite3_pcache" #-} Sqlite3_pcache
 
 -- | https://www.sqlite.org/c3ref/pcache_methods2.html
 --
@@ -146,40 +147,69 @@ data {-# CTYPE "sqlite3.h" "sqlite3_pcache_methods2" #-} Sqlite3_pcache_methods2
     xShrink :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_pcache -> IO ()))
   }
 
--- | TODO document
-data Sqlite3_pcache_page
+-- | https://www.sqlite.org/c3ref/pcache_page.html
+--
+-- A page cache page.
+data Sqlite3_pcache_page = Sqlite3_pcache_page
+  { pBuf :: {-# UNPACK #-} !(Ptr ()),
+    pExtra :: {-# UNPACK #-} !(Ptr ())
+  }
 
 -- | https://www.sqlite.org/c3ref/snapshot.html
 --
--- TODO document
+-- A database snapshot.
 data {-# CTYPE "sqlite3.h" "sqlite3_snapshot" #-} Sqlite3_snapshot
 
 -- | https://www.sqlite.org/c3ref/stmt.html
 --
--- TODO document
+-- A prepared statement.
 data {-# CTYPE "sqlite3.h" "sqlite3_stmt" #-} Sqlite3_stmt
-
--- | TODO document
-data Sqlite3_temp_directory
 
 -- | https://www.sqlite.org/c3ref/value.html
 --
--- TODO document
+-- A value (integer, real number, string, blob, or null).
 data {-# CTYPE "sqlite3.h" "sqlite3_value" #-} Sqlite3_value
 
 -- | https://www.sqlite.org/c3ref/vfs.html
 --
--- TODO rest of the fields
--- TODO document
+-- A virtual filesystem.
 data {-# CTYPE "sqlite3.h" "sqlite3_vfs" #-} Sqlite3_vfs = Sqlite3_vfs
   { iVersion :: {-# UNPACK #-} !CInt,
     szOsFile :: {-# UNPACK #-} !CInt,
     mxPathname :: {-# UNPACK #-} !CInt,
-    pNext :: {-# UNPACK #-} !(Ptr Sqlite3_vfs)
+    pNext :: {-# UNPACK #-} !(Ptr Sqlite3_vfs),
+    zName :: {-# UNPACK #-} !CString,
+    pAppData :: {-# UNPACK #-} !(Ptr ()),
+    xOpen :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vfs -> CString -> Ptr Sqlite3_file -> CInt -> Ptr CInt -> IO CInt)),
+    xDelete :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vfs -> CString -> CInt -> IO CInt)),
+    xAccess :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vfs -> CString -> CInt -> Ptr CInt -> IO CInt)),
+    xFullPathname :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vfs -> CString -> CInt -> CString -> IO CInt)),
+    xDlOpen :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vfs -> CString -> IO (Ptr ()))),
+    xDlError :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vfs -> CInt -> CString -> IO ())),
+    xDlSym :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vfs -> Ptr () -> CString -> IO (FunPtr (IO ())))),
+    xDlClose :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vfs -> Ptr () -> IO ())),
+    xRandomness :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vfs -> CInt -> CString -> IO CInt)),
+    xSleep :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vfs -> CInt -> IO CInt)),
+    xCurrentTime :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vfs -> Ptr CDouble -> IO CInt)),
+    xGetLastError :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vfs -> CInt -> CString -> IO CInt)),
+    xCurrentTimeInt64 :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vfs -> Ptr CLLong -> IO CInt)),
+    xSetSystemCall :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vfs -> CString -> FunPtr (IO ()) -> IO CInt)),
+    xGetSystemCall :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vfs -> CString -> IO (FunPtr (IO ())))),
+    xNextSystemCall :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vfs -> CString -> IO CString))
   }
 
--- | TODO document
-data Sqlite3_vtab
+-- | https://www.sqlite.org/c3ref/vtab.html
+--
+-- A virtual table instance.
+data {-# CTYPE "sqlite3.h" "sqlite3_vtab" #-} Sqlite3_vtab a = Sqlite3_vtab
+  { pModule :: {-# UNPACK #-} !(Ptr (Sqlite3_module a)),
+    nRef :: {-# UNPACK #-} !CInt,
+    zErrMsg :: {-# UNPACK #-} !CString
+  }
 
--- | TODO document
-data Sqlite3_vtab_cursor
+-- | https://www.sqlite.org/c3ref/vtab_cursor.html
+--
+-- A virtual table cursor.
+data {-# CTYPE "sqlite3.h" "sqlite3_vtab_cursor" #-} Sqlite3_vtab_cursor a = Sqlite3_vtab_cursor
+  { pVtab :: {-# UNPACK #-} !(Ptr (Sqlite3_vtab a))
+  }
