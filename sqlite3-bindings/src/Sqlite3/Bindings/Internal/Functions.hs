@@ -1794,26 +1794,39 @@ sqlite3_prepare_v3 ::
 sqlite3_prepare_v3 =
   C.sqlite3_prepare_v3
 
--- -- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
--- sqlite3_preupdate_blobwrite ::
---   Ptr C.Sqlite3 ->
---   IO CInt
--- sqlite3_preupdate_blobwrite =
---   C.sqlite3_preupdate_blobwrite
+-- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
+--
+-- Get the index of the column being written with 'sqlite3_blob_write'.
+sqlite3_preupdate_blobwrite ::
+  -- | Connection.
+  Sqlite3 ->
+  -- | Column index, or @-1@.
+  IO CInt
+sqlite3_preupdate_blobwrite =
+  coerce C.sqlite3_preupdate_blobwrite
 
--- -- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
--- sqlite3_preupdate_count ::
---   Ptr C.Sqlite3 ->
---   IO CInt
--- sqlite3_preupdate_count =
---   C.sqlite3_preupdate_count
+-- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
+--
+-- Get the number of columns in the row being updated.
+sqlite3_preupdate_count ::
+  -- | Connection.
+  Sqlite3 ->
+  -- | Number of columns.
+  IO CInt
+sqlite3_preupdate_count =
+  coerce C.sqlite3_preupdate_count
 
--- -- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
--- sqlite3_preupdate_depth ::
---   Ptr C.Sqlite3 ->
---   IO CInt
--- sqlite3_preupdate_depth =
---   C.sqlite3_preupdate_depth
+-- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
+--
+-- Get the "trigger depth" of this update, i.e. @0@ for a direct update, or @n@ for an update caused by a trigger that
+-- was invoked by a depth @n-1@ update.
+sqlite3_preupdate_depth ::
+  -- | Connection.
+  Sqlite3 ->
+  -- | Trigger depth.
+  IO CInt
+sqlite3_preupdate_depth =
+  coerce C.sqlite3_preupdate_depth
 
 -- -- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
 -- sqlite3_preupdate_hook ::

@@ -6,6 +6,7 @@ This library provides (mostly) complete bindings to SQLite.
 
 | Symbol | Reason |
 | --- | --- |
+| `SQLITE_CONFIG_COVERING_INDEX_SCAN` | Uncommon |
 | `SQLITE_CONFIG_GETMALLOC` | Uncommon |
 | `SQLITE_CONFIG_GETMUTEX` | Uncommon |
 | `SQLITE_CONFIG_GETPCACHE` | Unused |

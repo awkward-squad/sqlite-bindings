@@ -803,18 +803,40 @@ sqlite3_config_serialized ::
 sqlite3_config_serialized =
   sqlite3_config__1 _SQLITE_CONFIG_SERIALIZED
 
--- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigcoveringindexscan
+-- TODO
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiggetpcache2
+
+-- TODO
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigmemdbmaxsize
+
+-- TODO
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigmmapsize
+
+-- TODO
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigpcache2
+
+-- TODO
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigpcachehdrsz
+
+-- TODO
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigpmasz
+
+-- TODO
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigsmallmalloc
+
+-- TODO
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigsorterrefsize
+
+-- TODO
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigsqllog
+
+-- TODO
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigstmtjrnlspill
+
+-- TODO
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfiguri
+
+-- TODO
 -- https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigwin32heapsize
 
 -- | https://www.sqlite.org/c3ref/c_config_covering_index_scan.html#sqliteconfigsinglethread
@@ -1081,17 +1103,29 @@ foreign import ccall safe
 -- | https://www.sqlite.org/c3ref/db_config.html
 --
 -- Configure a connection.
-foreign import capi unsafe "sqlite3.h sqlite3_db_config" sqlite3_db_config__1 :: Ptr Sqlite3 -> CInt -> CString -> IO CInt
+--
+-- TODO/FIXME
+foreign import capi unsafe "sqlite3.h sqlite3_db_config"
+  sqlite3_db_config__1 ::
+    Ptr Sqlite3 -> CInt -> CString -> IO CInt
 
 -- | https://www.sqlite.org/c3ref/db_config.html
 --
 -- Configure a connection.
-foreign import capi unsafe "sqlite3.h sqlite3_db_config" sqlite3_db_config__2 :: Ptr Sqlite3 -> CInt -> Ptr a -> CInt -> CInt -> IO CInt
+--
+-- TODO/FIXME
+foreign import capi unsafe "sqlite3.h sqlite3_db_config"
+  sqlite3_db_config__2 ::
+    Ptr Sqlite3 -> CInt -> Ptr a -> CInt -> CInt -> IO CInt
 
 -- | https://www.sqlite.org/c3ref/db_config.html
 --
 -- Configure a connection.
-foreign import capi unsafe "sqlite3.h sqlite3_db_config" sqlite3_db_config__3 :: Ptr Sqlite3 -> CInt -> CInt -> Ptr CInt -> IO CInt
+--
+-- TODO/FIXME
+foreign import capi unsafe "sqlite3.h sqlite3_db_config"
+  sqlite3_db_config__3 ::
+    Ptr Sqlite3 -> CInt -> CInt -> Ptr CInt -> IO CInt
 
 -- | https://www.sqlite.org/c3ref/db_filename.html
 --
@@ -1683,18 +1717,38 @@ foreign import ccall safe
     -- | Result code.
     IO CInt
 
--- -- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
--- foreign import ccall unsafe
---   sqlite3_preupdate_blobwrite :: Ptr Sqlite3 -> IO CInt
+-- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
+--
+-- Get the index of the column being written with 'sqlite3_blob_write'.
+foreign import ccall unsafe
+  sqlite3_preupdate_blobwrite ::
+    -- | Connection.
+    Ptr Sqlite3 ->
+    -- | Column index, or @-1@.
+    IO CInt
 
--- -- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
--- foreign import ccall unsafe
---   sqlite3_preupdate_count :: Ptr Sqlite3 -> IO CInt
+-- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
+--
+-- Get the number of columns in the row being updated.
+foreign import ccall unsafe
+  sqlite3_preupdate_count ::
+    -- | Connection.
+    Ptr Sqlite3 ->
+    -- | Number of columns.
+    IO CInt
 
--- -- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
--- foreign import ccall unsafe
---   sqlite3_preupdate_depth :: Ptr Sqlite3 -> IO CInt
+-- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
+--
+-- Get the "trigger depth" of this update, i.e. @0@ for a direct update, or @n@ for an update caused by a trigger that
+-- was invoked by a depth @n-1@ update.
+foreign import ccall unsafe
+  sqlite3_preupdate_depth ::
+    -- | Connection.
+    Ptr Sqlite3 ->
+    -- | Trigger depth.
+    IO CInt
 
+-- TODO
 -- -- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
 -- foreign import ccall unsafe
 --   sqlite3_preupdate_hook ::
@@ -1703,6 +1757,7 @@ foreign import ccall safe
 --     Ptr a ->
 --     IO (Ptr b)
 
+-- TODO
 -- -- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
 -- foreign import ccall unsafe
 --   sqlite3_preupdate_new ::
@@ -1711,6 +1766,7 @@ foreign import ccall safe
 --     Ptr (Ptr Sqlite3_value) ->
 --     IO CInt
 
+-- TODO
 -- -- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
 -- foreign import ccall unsafe
 --   sqlite3_preupdate_old ::
@@ -2247,6 +2303,7 @@ foreign import ccall unsafe
     -- | @0@ or @1@.
     IO CInt
 
+-- TODO
 -- -- | https://www.sqlite.org/c3ref/stmt_scanstatus.html
 -- foreign import ccall unsafe
 --   sqlite3_stmt_scanstatus ::
@@ -2256,6 +2313,7 @@ foreign import ccall unsafe
 --     Ptr a ->
 --     IO CInt
 
+-- TODO
 -- -- | https://www.sqlite.org/c3ref/stmt_scanstatus_reset.html
 -- foreign import ccall unsafe
 --   sqlite3_stmt_scanstatus_reset ::
@@ -2689,12 +2747,20 @@ foreign import ccall unsafe
 -- | https://www.sqlite.org/c3ref/vtab_config.html
 --
 -- Configure a virtual table.
-foreign import capi unsafe "sqlite3.h sqlite3_vtab_config" sqlite3_vtab_config__1 :: Ptr Sqlite3 -> CInt -> CInt -> IO CInt
+--
+-- TODO/FIXME
+foreign import capi unsafe "sqlite3.h sqlite3_vtab_config"
+  sqlite3_vtab_config__1 ::
+    Ptr Sqlite3 -> CInt -> CInt -> IO CInt
 
 -- | https://www.sqlite.org/c3ref/vtab_config.html
 --
 -- Configure a virtual table.
-foreign import capi unsafe "sqlite3.h sqlite3_vtab_config" sqlite3_vtab_config__2 :: Ptr Sqlite3 -> CInt -> IO CInt
+--
+-- TODO/FIXME
+foreign import capi unsafe "sqlite3.h sqlite3_vtab_config"
+  sqlite3_vtab_config__2 ::
+    Ptr Sqlite3 -> CInt -> IO CInt
 
 -- | https://www.sqlite.org/c3ref/vtab_distinct.html
 --
