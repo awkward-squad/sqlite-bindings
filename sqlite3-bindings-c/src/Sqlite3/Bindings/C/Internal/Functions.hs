@@ -870,7 +870,7 @@ foreign import capi unsafe "sqlite3.h sqlite3_config"
 
 foreign import capi unsafe "sqlite3.h sqlite3_config"
   sqlite3_config__6 ::
-    CInt -> Ptr Sqlite3_pcache_methods2 -> IO CInt
+    CInt -> Ptr (Sqlite3_pcache_methods2 a) -> IO CInt
 
 foreign import capi unsafe "sqlite3.h sqlite3_config"
   sqlite3_config__7 ::
