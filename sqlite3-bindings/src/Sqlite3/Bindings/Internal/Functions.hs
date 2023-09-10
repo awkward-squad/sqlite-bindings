@@ -1005,7 +1005,7 @@ sqlite3_create_module ::
   -- | Module name (UTF-8).
   CString ->
   -- | Module.
-  Ptr C.Sqlite3_module ->
+  Ptr (C.Sqlite3_module a) ->
   -- | Application data.
   Ptr a ->
   -- | Result code.
@@ -1022,7 +1022,7 @@ sqlite3_create_module_v2 ::
   -- | Module name (UTF-8).
   CString ->
   -- | Module.
-  Ptr C.Sqlite3_module ->
+  Ptr (C.Sqlite3_module a) ->
   -- | Application data.
   Ptr a ->
   -- | Application data destructor.

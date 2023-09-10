@@ -1018,7 +1018,7 @@ foreign import ccall unsafe
     -- | Module name (UTF-8).
     CString ->
     -- | Module.
-    Ptr Sqlite3_module ->
+    Ptr (Sqlite3_module a) ->
     -- | Application data.
     Ptr a ->
     -- | Result code.
@@ -1034,7 +1034,7 @@ foreign import ccall unsafe
     -- | Module name (UTF-8).
     CString ->
     -- | Module.
-    Ptr Sqlite3_module ->
+    Ptr (Sqlite3_module a) ->
     -- | Application data.
     Ptr a ->
     -- | Application data destructor.

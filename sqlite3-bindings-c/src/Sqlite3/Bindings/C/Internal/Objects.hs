@@ -1,7 +1,7 @@
 module Sqlite3.Bindings.C.Internal.Objects where
 
 import Foreign (FunPtr, Ptr)
-import Foreign.C (CInt, CString, CUInt)
+import Foreign.C (CInt, CLLong, CString, CUInt)
 
 -- | https://www.sqlite.org/c3ref/sqlite3.html
 --
@@ -29,49 +29,94 @@ data {-# CTYPE "sqlite3.h" "sqlite3_blob" #-} Sqlite3_blob
 -- A function context object.
 data {-# CTYPE "sqlite3.h" "sqlite3_context" #-} Sqlite3_context
 
--- TODO
-data Sqlite3_file
+-- | https://www.sqlite.org/c3ref/file.html
+--
+-- A file object.
+data {-# CTYPE "sqlite3.h" "sqlite3_file" #-} Sqlite3_file
 
 -- | https://www.sqlite.org/c3ref/index_info.html
 --
 -- TODO rest of the fields
 -- TODO document
 data {-# CTYPE "sqlite3.h" "sqlite3_index_info" #-} Sqlite3_index_info = Sqlite3_index_info
-  { nConstraint :: !CInt
+  { nConstraint :: {-# UNPACK #-} !CInt
   }
 
 data Sqlite3_io_methods
 
 -- | https://www.sqlite.org/c3ref/module.html
 --
--- TODO rest of the fields
 -- TODO document
-data {-# CTYPE "sqlite3.h" "sqlite3_module" #-} Sqlite3_module = Sqlite3_module
-  { iVersion :: !CInt,
+data {-# CTYPE "sqlite3.h" "sqlite3_module" #-} Sqlite3_module a = Sqlite3_module
+  { iVersion :: {-# UNPACK #-} !CInt,
     xCreate ::
-      !( forall a.
-         FunPtr
-           ( Ptr Sqlite3 ->
-             Ptr a ->
-             CInt ->
-             Ptr CString ->
-             Ptr (Ptr Sqlite3_vtab) ->
-             Ptr CString ->
-             IO CInt
-           )
-       ),
+      {-# UNPACK #-} !( FunPtr
+                          ( Ptr Sqlite3 ->
+                            Ptr a ->
+                            CInt ->
+                            Ptr CString ->
+                            Ptr (Ptr Sqlite3_vtab) ->
+                            Ptr CString ->
+                            IO CInt
+                          )
+                      ),
     xConnect ::
-      !( forall a.
-         FunPtr
-           ( Ptr Sqlite3 ->
-             Ptr a ->
-             CInt ->
-             Ptr CString ->
-             Ptr (Ptr Sqlite3_vtab) ->
-             Ptr CString ->
-             IO CInt
-           )
-       )
+      {-# UNPACK #-} !( FunPtr
+                          ( Ptr Sqlite3 ->
+                            Ptr a ->
+                            CInt ->
+                            Ptr CString ->
+                            Ptr (Ptr Sqlite3_vtab) ->
+                            Ptr CString ->
+                            IO CInt
+                          )
+                      ),
+    xBestIndex :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vtab -> Ptr Sqlite3_index_info -> IO CInt)),
+    xDisconnect :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vtab -> IO CInt)),
+    xDestroy :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vtab -> IO CInt)),
+    xOpen :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vtab -> Ptr (Ptr Sqlite3_vtab_cursor) -> IO CInt)),
+    xClose :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vtab_cursor -> IO CInt)),
+    xFilter ::
+      {-# UNPACK #-} !( FunPtr
+                          ( Ptr Sqlite3_vtab_cursor ->
+                            CInt ->
+                            CString ->
+                            CInt ->
+                            Ptr (Ptr Sqlite3_value) ->
+                            IO CInt
+                          )
+                      ),
+    xNext :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vtab_cursor -> IO CInt)),
+    xEof :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vtab_cursor -> IO CInt)),
+    xColumn :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vtab_cursor -> Ptr Sqlite3_context -> CInt -> IO CInt)),
+    xRowid :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vtab_cursor -> Ptr CLLong -> IO CInt)),
+    xUpdate :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vtab -> CInt -> Ptr (Ptr Sqlite3_value) -> Ptr CLLong -> IO CInt)),
+    xBegin :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vtab -> IO CInt)),
+    xSync :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vtab -> IO CInt)),
+    xCommit :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vtab -> IO CInt)),
+    xRollback :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vtab -> IO CInt)),
+    xFindFunction ::
+      {-# UNPACK #-} !( forall x.
+                        FunPtr
+                          ( Ptr Sqlite3_vtab ->
+                            CInt ->
+                            CString ->
+                            Ptr
+                              ( FunPtr
+                                  ( Ptr Sqlite3_context ->
+                                    CInt ->
+                                    Ptr (Ptr Sqlite3_value)
+                                  )
+                              ) ->
+                            Ptr (Ptr x) ->
+                            IO CInt
+                          )
+                      ),
+    xRename :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vtab -> CString -> IO CInt)),
+    xSavepoint :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vtab -> CInt -> IO CInt)),
+    xRelease :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vtab -> CInt -> IO CInt)),
+    xRollbackTo :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vtab -> CInt -> IO CInt)),
+    xShadowName :: {-# UNPACK #-} !(FunPtr (CString -> IO CInt))
   }
 
 -- | https://www.sqlite.org/c3ref/mutex.html
@@ -86,19 +131,19 @@ data Sqlite3_pcache
 --
 -- TODO document
 data {-# CTYPE "sqlite3.h" "sqlite3_pcache_methods2" #-} Sqlite3_pcache_methods2 a = Sqlite3_pcache_methods2
-  { iVersion :: !CInt,
-    pArg :: !(Ptr a),
-    xInit :: !(FunPtr (Ptr a -> IO CInt)),
-    xShutdown :: !(FunPtr (Ptr a -> IO ())),
-    xCreate :: !(FunPtr (CInt -> CInt -> CInt -> IO (Ptr Sqlite3_pcache))),
-    xCachesize :: !(FunPtr (Ptr Sqlite3_pcache -> CInt -> IO ())),
-    xPagecount :: !(FunPtr (Ptr Sqlite3_pcache -> IO CInt)),
-    xFetch :: !(FunPtr (Ptr Sqlite3_pcache -> CUInt -> CInt -> IO (Ptr Sqlite3_pcache_page))),
-    xUnpin :: !(FunPtr (Ptr Sqlite3_pcache -> Ptr Sqlite3_pcache_page -> CInt -> IO ())),
-    xRekey :: !(FunPtr (Ptr Sqlite3_pcache -> Ptr Sqlite3_pcache_page -> CUInt -> CUInt -> IO ())),
-    xTruncate :: !(FunPtr (Ptr Sqlite3_pcache -> CUInt -> IO ())),
-    xDestroy :: !(FunPtr (Ptr Sqlite3_pcache -> IO ())),
-    xShrink :: !(FunPtr (Ptr Sqlite3_pcache -> IO ()))
+  { iVersion :: {-# UNPACK #-} !CInt,
+    pArg :: {-# UNPACK #-} !(Ptr a),
+    xInit :: {-# UNPACK #-} !(FunPtr (Ptr a -> IO CInt)),
+    xShutdown :: {-# UNPACK #-} !(FunPtr (Ptr a -> IO ())),
+    xCreate :: {-# UNPACK #-} !(FunPtr (CInt -> CInt -> CInt -> IO (Ptr Sqlite3_pcache))),
+    xCachesize :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_pcache -> CInt -> IO ())),
+    xPagecount :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_pcache -> IO CInt)),
+    xFetch :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_pcache -> CUInt -> CInt -> IO (Ptr Sqlite3_pcache_page))),
+    xUnpin :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_pcache -> Ptr Sqlite3_pcache_page -> CInt -> IO ())),
+    xRekey :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_pcache -> Ptr Sqlite3_pcache_page -> CUInt -> CUInt -> IO ())),
+    xTruncate :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_pcache -> CUInt -> IO ())),
+    xDestroy :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_pcache -> IO ())),
+    xShrink :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_pcache -> IO ()))
   }
 
 -- | TODO document
@@ -127,10 +172,10 @@ data {-# CTYPE "sqlite3.h" "sqlite3_value" #-} Sqlite3_value
 -- TODO rest of the fields
 -- TODO document
 data {-# CTYPE "sqlite3.h" "sqlite3_vfs" #-} Sqlite3_vfs = Sqlite3_vfs
-  { iVersion :: !CInt,
-    szOsFile :: !CInt,
-    mxPathname :: !CInt,
-    pNext :: !(Ptr Sqlite3_vfs)
+  { iVersion :: {-# UNPACK #-} !CInt,
+    szOsFile :: {-# UNPACK #-} !CInt,
+    mxPathname :: {-# UNPACK #-} !CInt,
+    pNext :: {-# UNPACK #-} !(Ptr Sqlite3_vfs)
   }
 
 -- | TODO document
