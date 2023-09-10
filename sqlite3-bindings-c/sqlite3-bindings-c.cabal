@@ -3,21 +3,22 @@ cabal-version: 2.2
 description:
   Bindings to SQLite version 3.39.2
   .
+  This package does /not/ use the PVP. Rather, the first version number corresponds to the underlying SQLite 3 minor
+  version number, and the second version number is a monotonically increasing number that has no inherent meaning.
+  (Please see the changelog for a detailed description of changes).
+  .
+  In other words, version @X.Y@ of this package corresponds to SQLite version @3.X.Z@, where @Y@ and @Z@ are unrelated.
+  .
   See @<https://hackage.haskell.org/package/sqlite3-bindings sqlite3-bindings>@ for higher-level bindings.
 name: sqlite3-bindings-c
-version: 39.0.0.0
+version: 39.0
 
 extra-source-files:
   README.md
   cbits/sqlite.c
   cbits/sqlite.h
 
-common component
-  default-language: Haskell2010
-  ghc-options: -Wall
-
 library
-  import: component
   build-depends: base
   c-sources: cbits/sqlite3.c
   cc-options:
@@ -37,8 +38,9 @@ library
   default-extensions:
     CApiFFI
     DuplicateRecordFields
-    RankNTypes
+  default-language: GHC2021
   exposed-modules: Sqlite3.Bindings.C
+  ghc-options: -Wall
   hs-source-dirs: src
   include-dirs: cbits
   includes: sqlite3.h

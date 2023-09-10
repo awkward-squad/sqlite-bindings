@@ -1,8 +1,6 @@
 - Make accurate safe/unsafe bindings
 - Expose compile-time options as flags?
   - https://www.sqlite.org/compile.html
-- Figure out versioning scheme
-  - thinking: sqlite major version + pvp, e.g. 39.
 - auto extension xEntryPoint fiasco
 - make sure all pure funcs don't have IO
 - objects
@@ -21,6 +19,7 @@
   check all these for safety
 - look over / improve life cycles of all allocated FunPtrs - many can be freed when connection closes, others maybe
   should return deallocator so as to not leak
+- make sure all exported constants are actually useful, the config ones may not be
 
 question: do we want to support providing your own system sqlite (not bundled)?
   - seems like we do, but it might be more annoying to write this package. more cabal flags and less guarantees, etc.
