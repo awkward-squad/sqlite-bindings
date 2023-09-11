@@ -11,6 +11,7 @@ import Data.ByteString (ByteString)
 import Data.ByteString.Internal qualified as ByteString
 import Data.ByteString.Unsafe qualified as ByteString
 import Data.Coerce (coerce)
+import Data.Functor (void)
 import Data.Int (Int64)
 import Data.Text (Text)
 import Data.Text qualified as Text
@@ -101,14 +102,16 @@ sqlite3_backup_init ::
   Sqlite3 ->
   -- | Source database name.
   Text ->
-  -- | Backup.
-  IO (Maybe Sqlite3_backup)
+  -- | Backup, or result code on failure.
+  IO (Either CInt Sqlite3_backup)
 sqlite3_backup_init (Sqlite3 dstConnection) dstName (Sqlite3 srcConnection) srcName = do
   c_backup <-
     textToCString dstName \c_dstName ->
       textToCString srcName \c_srcName ->
         C.sqlite3_backup_init dstConnection c_dstName srcConnection c_srcName
-  pure if c_backup == nullPtr then Nothing else Just (Sqlite3_backup c_backup)
+  if c_backup == nullPtr
+    then Left <$> sqlite3_errcode (Sqlite3 dstConnection)
+    else pure (Right (Sqlite3_backup c_backup))
 
 -- | https://www.sqlite.org/c3ref/backup_finish.html
 --
@@ -1787,13 +1790,19 @@ sqlite3_overload_function =
 -- | https://www.sqlite.org/c3ref/prepare.html
 --
 -- Compile a statement.
+--
+-- Unlike the underlying SQLite library, this library considers both of the following errors, and will return
+-- @SQLITE_ERROR@:
+--
+--     * Compiling an empty statement, as in the strings @""@ or @"-- comment"@.
+--     * Compiling a statement with trailing syntax, as in the string @"select 1; select 2"@
 sqlite3_prepare_v2 ::
   -- | Connection.
   Sqlite3 ->
   -- | SQL.
   Text ->
-  -- | Statement, unused SQL, result code.
-  IO (Maybe Sqlite3_stmt, Text, CInt)
+  -- | Statement, or error code.
+  IO (Either CInt Sqlite3_stmt)
 sqlite3_prepare_v2 (Sqlite3 connection) sql =
   textToCStringLen sql \c_sql c_sql_len ->
     alloca \statementPtr ->
@@ -1802,11 +1811,14 @@ sqlite3_prepare_v2 (Sqlite3 connection) sql =
         statement <- peek statementPtr
         c_unused_sql <- peek unusedSqlPtr
         let unusedSqlLen = (c_sql `plusPtr` c_sql_len) `minusPtr` c_unused_sql
-        unusedSql <-
-          if unusedSqlLen > 0
-            then cstringLenToText c_unused_sql (fromIntegral @Int @Text.I8 unusedSqlLen)
-            else pure Text.empty
-        pure (if statement == nullPtr then Nothing else Just (Sqlite3_stmt statement), unusedSql, code)
+        if statement == nullPtr
+          then pure (Left (if code == _SQLITE_OK then _SQLITE_ERROR else code))
+          else
+            if unusedSqlLen > 0
+              then do
+                void (C.sqlite3_finalize statement)
+                pure (Left _SQLITE_ERROR)
+              else pure (Right (Sqlite3_stmt statement))
 
 -- | https://www.sqlite.org/c3ref/prepare.html
 --
