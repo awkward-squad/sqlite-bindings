@@ -3,15 +3,9 @@ cabal-version: 2.2
 description:
   Bindings to SQLite version 3.39.2
   .
-  This package does /not/ use the PVP. Rather, the first version number corresponds to the underlying SQLite 3 minor
-  version number, and the second version number is a monotonically increasing number that has no inherent meaning.
-  (Please see the changelog for a detailed description of changes).
-  .
-  In other words, version @X.Y@ of this package corresponds to SQLite version @3.X.Z@, where @Y@ and @Z@ are unrelated.
-  .
   See @<https://hackage.haskell.org/package/sqlite3-bindings-c sqlite3-bindings-c>@ for lower-level bindings.
 name: sqlite3-bindings
-version: 39.0
+version: 0.1.0
 
 extra-source-files:
   README.md

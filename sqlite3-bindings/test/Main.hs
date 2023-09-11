@@ -20,11 +20,6 @@ import Test.Tasty.HUnit
 -- TODO:
 --
 -- -- sqlite3_auto_extension,
--- sqlite3_backup_finish,
--- sqlite3_backup_init,
--- sqlite3_backup_pagecount,
--- sqlite3_backup_remaining,
--- sqlite3_backup_step,
 -- sqlite3_bind_blob,
 -- sqlite3_bind_double,
 -- sqlite3_bind_int,
@@ -126,7 +121,6 @@ import Test.Tasty.HUnit
 -- sqlite3_filename_database,
 -- sqlite3_filename_journal,
 -- sqlite3_filename_wal,
--- sqlite3_finalize,
 -- sqlite3_free,
 -- sqlite3_free_filename,
 -- sqlite3_get_autocommit,
@@ -155,8 +149,6 @@ import Test.Tasty.HUnit
 -- sqlite3_open,
 -- sqlite3_open_v2,
 -- sqlite3_overload_function,
--- sqlite3_prepare_v2,
--- sqlite3_prepare_v3,
 -- sqlite3_preupdate_blobwrite,
 -- sqlite3_preupdate_count,
 -- sqlite3_preupdate_depth,
@@ -266,8 +258,8 @@ main :: IO ()
 main = do
   withSqliteLibrary do
     (defaultMain . testGroup "tests")
-      [ testCase "autovacuum_pages" test_autovacuum_pages,
-        testCase "backup_*" test_backup,
+      [ testCase "autovacuum pages callback" test_autovacuum_pages,
+        testCase "backup" test_backup,
         testCase "bind_*" test_bind,
         testCase "blob_*" test_blob,
         testCase "busy_handler" test_busy_handler,
@@ -286,8 +278,8 @@ main = do
         testCase "create_collation" test_create_collation,
         testCase "last_insert_rowid" test_last_insert_rowid,
         testCase "libversion / libversion_number" test_libversion,
-        testCase "open / close" test_open,
-        testCase "prepare_v2" test_prepare_v2,
+        testCase "open/close connections" test_open,
+        testCase "prepare/finalize statements" test_prepare,
         testCase "rollback_hook" test_rollback_hook
       ]
 
@@ -612,8 +604,9 @@ test_open = do
 
 -- sqlite3_finalize
 -- sqlite3_prepare_v2
-test_prepare_v2 :: IO ()
-test_prepare_v2 = do
+-- sqlite3_prepare_v3
+test_prepare :: IO ()
+test_prepare = do
   withConnection ":memory:" \conn -> do
     -- assert that bogus zero-statement strings results in SQLITE_ERROR
     sqlite3_prepare_v2 conn "" & assertLeft _SQLITE_ERROR
@@ -622,6 +615,11 @@ test_prepare_v2 = do
     sqlite3_prepare_v2 conn "select 1; select 2" & assertLeft _SQLITE_ERROR
     -- observe that a semicolon by itself doesn't count as trailing syntax
     statement <- sqlite3_prepare_v2 conn "select 1;" & assertRight
+    sqlite3_finalize statement & assertCode _SQLITE_OK
+
+  withConnection ":memory:" \conn -> do
+    -- v3 isn't that interesting, so just happy-path test it
+    statement <- sqlite3_prepare_v3 conn "select 1;" (SQLITE_PREPARE_NO_VTAB <> SQLITE_PREPARE_PERSISTENT) & assertRight
     sqlite3_finalize statement & assertCode _SQLITE_OK
 
 test_rollback_hook :: IO ()

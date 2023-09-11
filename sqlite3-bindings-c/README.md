@@ -17,6 +17,7 @@ This library provides (mostly) complete bindings to SQLite.
 | `SQLITE_CONFIG_SCRATCH` | Unused |
 | `SQLITE_OPEN_PRIVATECACHE` | Deprecated |
 | `SQLITE_OPEN_SHAREDCACHE` | Deprecated |
+| `SQLITE_PREPARE_NORMALIZE` | Unused |
 | `sqlite3_aggregate_count` | Deprecated |
 | `sqlite3_enable_load_extension` | Insecure |
 | `sqlite3_enable_shared_cache` | Deprecated |

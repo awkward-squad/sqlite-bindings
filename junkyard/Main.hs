@@ -25,7 +25,7 @@ main = do
   putStrLn "done."
 
   putStr "Preparing statement... "
-  (Just statement, "", _SQLITE_OK) <- sqlite3_prepare_v2 conn "SELECT toUpper('foo')"
+  Right statement <- sqlite3_prepare_v2 conn "SELECT toUpper('foo')"
   putStrLn "done."
 
   putStr "Stepping statement... "

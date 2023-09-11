@@ -3,7 +3,7 @@
 
 module Sqlite3.Bindings.C.Internal.Constants where
 
-import Foreign.C (CInt (..), CString)
+import Foreign.C (CInt (..), CString, CUInt (..))
 import Foreign.Ptr (FunPtr, Ptr)
 
 -- | https://www.sqlite.org/rescode.html#abort
@@ -667,11 +667,9 @@ foreign import capi "sqlite3.h value SQLITE_PERM" _SQLITE_PERM :: CInt
 
 foreign import capi "sqlite3.h value SQLITE_PRAGMA" _SQLITE_PRAGMA :: CInt
 
-foreign import capi "sqlite3.h value SQLITE_PREPARE_NORMALIZE" _SQLITE_PREPARE_NORMALIZE :: CInt
+foreign import capi "sqlite3.h value SQLITE_PREPARE_NO_VTAB" _SQLITE_PREPARE_NO_VTAB :: CUInt
 
-foreign import capi "sqlite3.h value SQLITE_PREPARE_NO_VTAB" _SQLITE_PREPARE_NO_VTAB :: CInt
-
-foreign import capi "sqlite3.h value SQLITE_PREPARE_PERSISTENT" _SQLITE_PREPARE_PERSISTENT :: CInt
+foreign import capi "sqlite3.h value SQLITE_PREPARE_PERSISTENT" _SQLITE_PREPARE_PERSISTENT :: CUInt
 
 foreign import capi "sqlite3.h value SQLITE_PROTOCOL" _SQLITE_PROTOCOL :: CInt
 

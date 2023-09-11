@@ -16,6 +16,9 @@ module Sqlite3.Bindings.Internal.Constants
     pattern SQLITE_OPEN_READONLY,
     pattern SQLITE_OPEN_READWRITE,
     pattern SQLITE_OPEN_CREATE,
+    SQLITE_PREPARE_FLAGS (..),
+    pattern SQLITE_PREPARE_NO_VTAB,
+    pattern SQLITE_PREPARE_PERSISTENT,
     C._SQLITE_ABORT,
     C._SQLITE_ABORT_ROLLBACK,
     C._SQLITE_ACCESS_EXISTS,
@@ -305,9 +308,6 @@ module Sqlite3.Bindings.Internal.Constants
     C._SQLITE_OPEN_WAL,
     C._SQLITE_PERM,
     C._SQLITE_PRAGMA,
-    C._SQLITE_PREPARE_NORMALIZE,
-    C._SQLITE_PREPARE_NO_VTAB,
-    C._SQLITE_PREPARE_PERSISTENT,
     C._SQLITE_PROTOCOL,
     C._SQLITE_RANGE,
     C._SQLITE_READ,
@@ -427,8 +427,11 @@ where
 
 import Data.Bits ((.|.))
 import Data.Coerce (coerce)
-import Foreign.C (CInt (..))
-import qualified Sqlite3.Bindings.C as C
+import Foreign.C (CInt (..), CUInt)
+import Sqlite3.Bindings.C qualified as C
+
+------------------------------------------------------------------------------------------------------------------------
+-- Datatype
 
 -- | https://www.sqlite.org/c3ref/c_blob.html
 newtype SQLITE_DATATYPE
@@ -480,6 +483,9 @@ pattern SQLITE_NULL <-
   SQLITE_BLOB,
   SQLITE_NULL
   #-}
+
+------------------------------------------------------------------------------------------------------------------------
+-- Open flags
 
 -- | https://www.sqlite.org/c3ref/c_open_autoproxy.html
 newtype SQLITE_OPEN_FLAGS
@@ -539,6 +545,9 @@ pattern SQLITE_OPEN_URI <-
   SQLITE_OPEN_URI
   #-}
 
+------------------------------------------------------------------------------------------------------------------------
+-- Open mode
+
 -- | https://www.sqlite.org/c3ref/c_open_autoproxy.html
 newtype SQLITE_OPEN_MODE
   = SQLITE_OPEN_MODE CInt
@@ -570,3 +579,41 @@ pattern SQLITE_OPEN_CREATE <-
       SQLITE_OPEN_MODE (C._SQLITE_OPEN_READWRITE .|. C._SQLITE_OPEN_CREATE)
 
 {-# COMPLETE SQLITE_OPEN_READONLY, SQLITE_OPEN_READWRITE, SQLITE_OPEN_CREATE #-}
+
+------------------------------------------------------------------------------------------------------------------------
+-- Prepare flags
+
+-- | https://www.sqlite.org/c3ref/c_prepare_normalize.html#sqlitepreparepersistent
+newtype SQLITE_PREPARE_FLAGS
+  = SQLITE_PREPARE_FLAGS CUInt
+  deriving stock (Eq)
+
+instance Monoid SQLITE_PREPARE_FLAGS where
+  mappend = (<>)
+  mempty = SQLITE_PREPARE_FLAGS 0
+
+instance Semigroup SQLITE_PREPARE_FLAGS where
+  (<>) =
+    coerce ((.|.) :: CUInt -> CUInt -> CUInt)
+
+instance Show SQLITE_PREPARE_FLAGS where
+  show = \case
+    SQLITE_PREPARE_NO_VTAB -> "SQLITE_PREPARE_NO_VTAB"
+    SQLITE_PREPARE_PERSISTENT -> "SQLITE_PREPARE_PERSISTENT"
+
+-- | Cause the SQL compiler to return @SQL_ERROR@ if the statement uses any virtual tables.
+pattern SQLITE_PREPARE_NO_VTAB :: SQLITE_PREPARE_FLAGS
+pattern SQLITE_PREPARE_NO_VTAB <-
+  ((== SQLITE_PREPARE_FLAGS C._SQLITE_PREPARE_NO_VTAB) -> True)
+  where
+    SQLITE_PREPARE_NO_VTAB = SQLITE_PREPARE_FLAGS C._SQLITE_PREPARE_NO_VTAB
+
+-- | Hint to the query planner that a prepared statement will be retained for a long time and probably reused many
+-- times.
+pattern SQLITE_PREPARE_PERSISTENT :: SQLITE_PREPARE_FLAGS
+pattern SQLITE_PREPARE_PERSISTENT <-
+  ((== SQLITE_PREPARE_FLAGS C._SQLITE_PREPARE_PERSISTENT) -> True)
+  where
+    SQLITE_PREPARE_PERSISTENT = SQLITE_PREPARE_FLAGS C._SQLITE_PREPARE_PERSISTENT
+
+{-# COMPLETE SQLITE_PREPARE_NO_VTAB, SQLITE_PREPARE_PERSISTENT #-}

@@ -1791,11 +1791,10 @@ sqlite3_overload_function =
 --
 -- Compile a statement.
 --
--- Unlike the underlying SQLite library, this library considers both of the following errors, and will return
--- @SQLITE_ERROR@:
+-- Unlike the underlying SQLite library, this library returns @SQLITE_ERROR@ in both of the following cases:
 --
---     * Compiling an empty statement, as in the strings @""@ or @"-- comment"@.
---     * Compiling a statement with trailing syntax, as in the string @"select 1; select 2"@
+--     * Trying to compile an empty statement, as in the strings @""@ or @"-- comment"@.
+--     * Trying to compile a statement with trailing syntax, as in the string @"select 1; select 2"@
 sqlite3_prepare_v2 ::
   -- | Connection.
   Sqlite3 ->
@@ -1803,11 +1802,40 @@ sqlite3_prepare_v2 ::
   Text ->
   -- | Statement, or error code.
   IO (Either CInt Sqlite3_stmt)
-sqlite3_prepare_v2 (Sqlite3 connection) sql =
+sqlite3_prepare_v2 =
+  prepare_ C.sqlite3_prepare_v2
+
+-- | https://www.sqlite.org/c3ref/prepare.html
+--
+-- Compile a statement.
+--
+-- Unlike the underlying SQLite library, this library returns @SQLITE_ERROR@ in both of the following cases:
+--
+--     * Trying to compile an empty statement, as in the strings @""@ or @"-- comment"@.
+--     * Trying to compile a statement with trailing syntax, as in the string @"select 1; select 2"@
+sqlite3_prepare_v3 ::
+  -- | Connection.
+  Sqlite3 ->
+  -- | SQL.
+  Text ->
+  -- | Flags.
+  SQLITE_PREPARE_FLAGS ->
+  -- | Statement, or error code.
+  IO (Either CInt Sqlite3_stmt)
+sqlite3_prepare_v3 connection sql (SQLITE_PREPARE_FLAGS flags) =
+  prepare_ (\a b c -> C.sqlite3_prepare_v3 a b c flags) connection sql
+
+-- Shared helper of sqlite_prepare_v2 and sqlite_prepare_v3
+prepare_ ::
+  (Ptr C.Sqlite3 -> Ptr CChar -> CInt -> Ptr (Ptr C.Sqlite3_stmt) -> Ptr (Ptr CChar) -> IO CInt) ->
+  Sqlite3 ->
+  Text ->
+  IO (Either CInt Sqlite3_stmt)
+prepare_ doPrepare (Sqlite3 connection) sql =
   textToCStringLen sql \c_sql c_sql_len ->
     alloca \statementPtr ->
       alloca \unusedSqlPtr -> do
-        code <- C.sqlite3_prepare_v2 connection c_sql (intToCInt c_sql_len) statementPtr unusedSqlPtr
+        code <- doPrepare connection c_sql (intToCInt c_sql_len) statementPtr unusedSqlPtr
         statement <- peek statementPtr
         c_unused_sql <- peek unusedSqlPtr
         let unusedSqlLen = (c_sql `plusPtr` c_sql_len) `minusPtr` c_unused_sql
@@ -1819,27 +1847,7 @@ sqlite3_prepare_v2 (Sqlite3 connection) sql =
                 void (C.sqlite3_finalize statement)
                 pure (Left _SQLITE_ERROR)
               else pure (Right (Sqlite3_stmt statement))
-
--- | https://www.sqlite.org/c3ref/prepare.html
---
--- Compile a statement.
-sqlite3_prepare_v3 ::
-  -- | Connection.
-  Ptr C.Sqlite3 ->
-  -- | SQL (UTF-8).
-  Ptr CChar ->
-  -- | Size of SQL, in bytes.
-  CInt ->
-  -- | Flags.
-  CUInt ->
-  -- | /Out/: statement.
-  Ptr (Ptr C.Sqlite3_stmt) ->
-  -- | /Out/: unused SQL.
-  Ptr (Ptr CChar) ->
-  -- | Result code.
-  IO CInt
-sqlite3_prepare_v3 =
-  C.sqlite3_prepare_v3
+{-# INLINE prepare_ #-}
 
 -- | https://www.sqlite.org/c3ref/preupdate_blobwrite.html
 --
