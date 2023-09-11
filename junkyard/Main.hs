@@ -51,23 +51,21 @@ main = do
 myEntrypoint :: Sqlite3 -> Ptr CString -> IO CInt
 myEntrypoint connection errMsg = do
   putStrLn "Hello from myEntrypoint!"
+
   sqlite3_create_function
     connection
     "toUpper"
     1
     (_SQLITE_UTF8 .|. _SQLITE_DETERMINISTIC)
     \context args -> do
-      case length args of
-        1 -> do
-          let value = args Array.! 0
-          ty <- sqlite3_value_type value
-          if ty == SQLITE_TEXT
-            then do
-              text <- sqlite3_value_text value
-              sqlite3_result_text context (Text.toUpper text)
-            else do
-              sqlite3_result_text context "not text"
-        _ -> sqlite3_result_text context "not 1 arg"
+      let value = args Array.! 0
+      ty <- sqlite3_value_type value
+      if ty == SQLITE_TEXT
+        then do
+          text <- sqlite3_value_text value
+          sqlite3_result_text context (Text.toUpper text)
+        else do
+          sqlite3_result_text context "not text"
 
   pure _SQLITE_OK
 

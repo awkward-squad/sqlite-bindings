@@ -1,7 +1,4 @@
 {-# LANGUAGE CApiFFI #-}
-{-# LANGUAGE CPP #-}
-
-#include "MachDeps.h"
 
 module Sqlite3.Bindings.Internal.Functions where
 
@@ -18,13 +15,14 @@ import Data.Int (Int64)
 import Data.Text (Text)
 import Data.Text qualified as Text
 import Data.Text.Foreign qualified as Text (I8)
+import Data.Traversable (for)
 import Data.Word (Word64)
 import Foreign.C (CChar (..), CDouble (..), CInt (..), CString, CUChar (..), CUInt (..))
 import Foreign.ForeignPtr (withForeignPtr)
 import Foreign.Marshal.Alloc (alloca, allocaBytesAligned)
 import Foreign.Ptr (FunPtr, Ptr, castFunPtrToPtr, castPtr, castPtrToFunPtr, freeHaskellFunPtr, minusPtr, nullFunPtr, nullPtr, plusPtr)
 import Foreign.StablePtr
-import Foreign.Storable (Storable (peek))
+import Foreign.Storable (Storable (peek), peekElemOff)
 import Sqlite3.Bindings.C qualified as C
 import Sqlite3.Bindings.Internal.Constants
 import Sqlite3.Bindings.Internal.Objects
@@ -968,14 +966,13 @@ sqlite3_create_function (Sqlite3 connection) name nargs flags func =
   textToCString name \c_name ->
     mask_ do
       c_func <-
-        makeCallback8 \c_context argc argv ->
+        makeCallback8 \c_context argc argv -> do
           let maxIndex = cintToInt argc - 1
-           in func
-                (Sqlite3_context c_context)
-                ( Array.array
-                    (0, maxIndex)
-                    (map (\i -> (i, Sqlite3_value (plusPtr argv (i * SIZEOF_HSPTR)))) [0 .. maxIndex])
-                )
+          args <-
+            for [0 .. maxIndex] \i -> do
+              value <- peekElemOff argv i
+              pure (i, Sqlite3_value value)
+          func (Sqlite3_context c_context) (Array.array (0, maxIndex) args)
       C.sqlite3_create_function_v2
         connection
         c_name
