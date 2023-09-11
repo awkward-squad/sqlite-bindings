@@ -863,6 +863,7 @@ foreign import capi "sqlite3.h value SQLITE_TRACE_STMT" _SQLITE_TRACE_STMT :: CI
 
 foreign import capi "sqlite3.h value SQLITE_TRANSACTION" _SQLITE_TRANSACTION :: CInt
 
+-- | https://www.sqlite.org/c3ref/c_static.html
 foreign import capi "sqlite3.h value SQLITE_TRANSIENT" _SQLITE_TRANSIENT :: FunPtr (Ptr a -> IO ())
 
 foreign import capi "sqlite3.h value SQLITE_TXN_NONE" _SQLITE_TXN_NONE :: CInt

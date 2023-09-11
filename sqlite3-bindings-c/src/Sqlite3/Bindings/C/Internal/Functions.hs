@@ -2683,7 +2683,7 @@ foreign import ccall unsafe
   sqlite3_value_text ::
     -- | Value.
     Ptr Sqlite3_value ->
-    -- | String (UTF-8)
+    -- | String (UTF-8).
     IO (Ptr CUChar)
 
 -- | https://www.sqlite.org/c3ref/value_blob.html

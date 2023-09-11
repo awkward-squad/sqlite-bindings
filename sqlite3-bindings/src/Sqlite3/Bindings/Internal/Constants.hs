@@ -23,7 +23,6 @@ module Sqlite3.Bindings.Internal.Constants
     C._SQLITE_ACCESS_READWRITE,
     C._SQLITE_ALTER_TABLE,
     C._SQLITE_ANALYZE,
-    C._SQLITE_ANY,
     C._SQLITE_ATTACH,
     C._SQLITE_AUTH,
     C._SQLITE_AUTH_USER,

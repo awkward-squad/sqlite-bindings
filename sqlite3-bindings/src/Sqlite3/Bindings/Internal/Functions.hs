@@ -1,19 +1,23 @@
 {-# LANGUAGE CApiFFI #-}
+{-# LANGUAGE CPP #-}
+
+#include "MachDeps.h"
 
 module Sqlite3.Bindings.Internal.Functions where
 
 import Control.Exception (mask_)
 import Control.Monad (when)
 import Data.Array (Array)
+import Data.Array qualified as Array
 import Data.Bits ((.|.))
 import Data.ByteString (ByteString)
-import qualified Data.ByteString.Internal as ByteString
-import qualified Data.ByteString.Unsafe as ByteString
+import Data.ByteString.Internal qualified as ByteString
+import Data.ByteString.Unsafe qualified as ByteString
 import Data.Coerce (coerce)
 import Data.Int (Int64)
 import Data.Text (Text)
-import qualified Data.Text as Text
-import qualified Data.Text.Foreign as Text (I8)
+import Data.Text qualified as Text
+import Data.Text.Foreign qualified as Text (I8)
 import Data.Word (Word64)
 import Foreign.C (CChar (..), CDouble (..), CInt (..), CString, CUChar (..), CUInt (..))
 import Foreign.ForeignPtr (withForeignPtr)
@@ -21,7 +25,7 @@ import Foreign.Marshal.Alloc (alloca, allocaBytesAligned)
 import Foreign.Ptr (FunPtr, Ptr, castFunPtrToPtr, castPtr, castPtrToFunPtr, freeHaskellFunPtr, minusPtr, nullFunPtr, nullPtr, plusPtr)
 import Foreign.StablePtr
 import Foreign.Storable (Storable (peek))
-import qualified Sqlite3.Bindings.C as C
+import Sqlite3.Bindings.C qualified as C
 import Sqlite3.Bindings.Internal.Constants
 import Sqlite3.Bindings.Internal.Objects
 import Sqlite3.Bindings.Internal.Utils
@@ -949,30 +953,42 @@ sqlite3_create_filename =
 -- Create a function or aggregate function.
 sqlite3_create_function ::
   -- | Connection.
-  Ptr C.Sqlite3 ->
+  Sqlite3 ->
   -- | Function name (UTF-8).
-  CString ->
+  Text ->
   -- | Number of function arguments.
-  CInt ->
+  Int ->
   -- | Encoding and flags.
   CInt ->
-  -- | Application data.
-  Ptr a ->
   -- | Function.
-  FunPtr (Ptr C.Sqlite3_context -> CInt -> Ptr (Ptr C.Sqlite3_value) -> IO ()) ->
-  -- | Aggregate function step.
-  FunPtr (Ptr C.Sqlite3_context -> CInt -> Ptr (Ptr C.Sqlite3_value) -> IO ()) ->
-  -- | Aggregate function finalize.
-  FunPtr (Ptr C.Sqlite3_context -> IO ()) ->
+  (Sqlite3_context -> Array Int Sqlite3_value -> IO ()) ->
   -- | Result code.
   IO CInt
-sqlite3_create_function =
-  C.sqlite3_create_function
+sqlite3_create_function (Sqlite3 connection) name nargs flags func =
+  textToCString name \c_name ->
+    mask_ do
+      c_func <-
+        makeCallback8 \c_context argc argv ->
+          let maxIndex = cintToInt argc - 1
+           in func
+                (Sqlite3_context c_context)
+                ( Array.array
+                    (0, maxIndex)
+                    (map (\i -> (i, Sqlite3_value (plusPtr argv (i * SIZEOF_HSPTR)))) [0 .. maxIndex])
+                )
+      C.sqlite3_create_function_v2
+        connection
+        c_name
+        (intToCInt nargs)
+        flags
+        (castFunPtrToPtr c_func)
+        c_func
+        nullFunPtr
+        nullFunPtr
+        hs_free_fun_ptr
 
--- | https://www.sqlite.org/c3ref/create_function.html
---
--- Create a function or aggregate function.
-sqlite3_create_function_v2 ::
+-- | TODO
+sqlite3_create_aggregate_function ::
   -- | Connection.
   Ptr C.Sqlite3 ->
   -- | Function name (UTF-8).
@@ -981,20 +997,42 @@ sqlite3_create_function_v2 ::
   CInt ->
   -- | Encoding and flags.
   CInt ->
-  -- | Application data.
-  Ptr a ->
-  -- | Function.
-  FunPtr (Ptr C.Sqlite3_context -> CInt -> Ptr (Ptr C.Sqlite3_value) -> IO ()) ->
   -- | Aggregate function step.
   FunPtr (Ptr C.Sqlite3_context -> CInt -> Ptr (Ptr C.Sqlite3_value) -> IO ()) ->
   -- | Aggregate function finalize.
   FunPtr (Ptr C.Sqlite3_context -> IO ()) ->
-  -- | Application data destructor.
-  FunPtr (Ptr a -> IO ()) ->
   -- | Result code.
   IO CInt
-sqlite3_create_function_v2 =
-  C.sqlite3_create_function_v2
+sqlite3_create_aggregate_function = undefined
+
+-- | https://www.sqlite.org/c3ref/create_function.html
+--
+-- Delete a function or aggregate function.
+--
+-- TODO
+sqlite3_delete_function ::
+  -- | Connection.
+  Sqlite3 ->
+  -- | Function name (UTF-8).
+  Text ->
+  -- | Number of function arguments.
+  Int ->
+  -- | Encoding and flags.
+  CInt ->
+  -- | Result code.
+  IO CInt
+sqlite3_delete_function (Sqlite3 connection) name nargs flags =
+  textToCString name \c_name ->
+    C.sqlite3_create_function_v2
+      connection
+      c_name
+      (intToCInt nargs)
+      flags
+      nullPtr
+      nullFunPtr
+      nullFunPtr
+      nullFunPtr
+      nullFunPtr
 
 -- | https://www.sqlite.org/c3ref/create_module.html
 --
@@ -2093,16 +2131,13 @@ sqlite3_result_subtype =
 -- Return a string from a function.
 sqlite3_result_text ::
   -- | Function context.
-  Ptr C.Sqlite3_context ->
-  -- | String (UTF-8).
-  Ptr CChar ->
-  -- | Size of string, in bytes.
-  CInt ->
-  -- | String destructor, @SQLITE_STATIC@, or @SQLITE_TRANSIENT@.
-  FunPtr (Ptr a -> IO ()) ->
+  Sqlite3_context ->
+  -- | String.
+  Text ->
   IO ()
-sqlite3_result_text =
-  C.sqlite3_result_text
+sqlite3_result_text (Sqlite3_context context) string =
+  textToCStringLen string \c_string len ->
+    C.sqlite3_result_text context c_string (intToCInt len) C._SQLITE_TRANSIENT
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
 --
@@ -2836,22 +2871,23 @@ sqlite3_value_subtype =
 -- Get the string of a protected value.
 sqlite3_value_text ::
   -- | Value.
-  Ptr C.Sqlite3_value ->
-  -- | String (UTF-8)
-  IO (Ptr CUChar)
-sqlite3_value_text =
-  C.sqlite3_value_text
+  Sqlite3_value ->
+  -- | String.
+  IO Text
+sqlite3_value_text (Sqlite3_value value) = do
+  text <- C.sqlite3_value_text value
+  cstringToText (castPtr @CUChar @CChar text)
 
 -- | https://www.sqlite.org/c3ref/value_blob.html
 --
 -- Get the type of a protected value.
 sqlite3_value_type ::
   -- | Value.
-  Ptr C.Sqlite3_value ->
+  Sqlite3_value ->
   -- | Type.
-  IO CInt
+  IO SQLITE_DATATYPE
 sqlite3_value_type =
-  C.sqlite3_value_type
+  coerce C.sqlite3_value_type
 
 -- | https://www.sqlite.org/c3ref/libversion.html
 sqlite3_version :: CString
@@ -3136,3 +3172,8 @@ foreign import ccall "wrapper"
   makeCallback7 ::
     (Ptr a -> Ptr C.Sqlite3 -> CInt -> CString -> IO ()) ->
     IO (FunPtr (Ptr a -> Ptr C.Sqlite3 -> CInt -> CString -> IO ()))
+
+foreign import ccall "wrapper"
+  makeCallback8 ::
+    (Ptr C.Sqlite3_context -> CInt -> Ptr (Ptr C.Sqlite3_value) -> IO ()) ->
+    IO (FunPtr (Ptr C.Sqlite3_context -> CInt -> Ptr (Ptr C.Sqlite3_value) -> IO ()))

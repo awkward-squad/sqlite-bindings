@@ -21,6 +21,11 @@
   should return deallocator so as to not leak
 - make sure all exported constants are actually useful, the config ones may not be
 
+- because sqlite3_create_function was split into sqlite3_create_function/sqlite3_delete_function, do the same for other
+  things that take null pointer to mean delete
+
+- pattern synonyms all the constants
+
 question: do we want to support providing your own system sqlite (not bundled)?
   - seems like we do, but it might be more annoying to write this package. more cabal flags and less guarantees, etc.
 

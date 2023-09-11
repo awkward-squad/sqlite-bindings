@@ -2,6 +2,8 @@
 
 module Sqlite3.Bindings
   ( -- * Functions
+
+    -- sqlite3_aggregate_context,
     sqlite3_auto_extension,
     sqlite3_autovacuum_pages,
     sqlite3_backup_finish,
@@ -78,7 +80,6 @@ module Sqlite3.Bindings
     sqlite3_create_collation,
     sqlite3_create_filename,
     sqlite3_create_function,
-    sqlite3_create_function_v2,
     sqlite3_create_module,
     sqlite3_create_module_v2,
     sqlite3_create_window_function,
@@ -96,6 +97,7 @@ module Sqlite3.Bindings
     sqlite3_db_release_memory,
     sqlite3_db_status,
     sqlite3_declare_vtab,
+    sqlite3_delete_function,
     sqlite3_deserialize,
     sqlite3_drop_modules,
     sqlite3_errcode,
@@ -275,7 +277,6 @@ module Sqlite3.Bindings
     _SQLITE_ACCESS_READWRITE,
     _SQLITE_ALTER_TABLE,
     _SQLITE_ANALYZE,
-    _SQLITE_ANY,
     _SQLITE_ATTACH,
     _SQLITE_AUTH,
     _SQLITE_AUTH_USER,
@@ -690,6 +691,9 @@ module Sqlite3.Bindings
     _SQLITE_WARNING_AUTOINDEX,
     _SQLITE_WIN32_DATA_DIRECTORY_TYPE,
     _SQLITE_WIN32_TEMP_DIRECTORY_TYPE,
+
+    -- * Internal
+    pattern Sqlite3,
   )
 where
 

@@ -9,10 +9,13 @@ extra-source-files:
 
 executable junkyard
   build-depends:
+    array,
     base,
     sqlite3-bindings,
-    sqlite3-bindings-c
+    sqlite3-bindings-c,
+    text,
   default-extensions:
+    BlockArguments
     CApiFFI
     OverloadedStrings
   default-language: GHC2021
@@ -22,5 +25,5 @@ executable junkyard
   include-dirs: cbits
   includes:
     junkyard.h
-    sqlite3.h
+    sqlite3ext.h
   main-is: Main.hs
