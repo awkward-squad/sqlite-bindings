@@ -1,7 +1,8 @@
 module Sqlite3.Bindings.C.Internal.Objects where
 
+import Data.Int (Int64)
 import Foreign (FunPtr, Ptr)
-import Foreign.C (CDouble, CInt, CLLong, CString, CUInt)
+import Foreign.C (CDouble, CInt, CString, CUInt)
 
 -- | https://www.sqlite.org/c3ref/sqlite3.html
 --
@@ -89,8 +90,8 @@ data {-# CTYPE "sqlite3.h" "sqlite3_module" #-} Sqlite3_module a = Sqlite3_modul
     xNext :: {-# UNPACK #-} !(FunPtr (Ptr (Sqlite3_vtab_cursor a) -> IO CInt)),
     xEof :: {-# UNPACK #-} !(FunPtr (Ptr (Sqlite3_vtab_cursor a) -> IO CInt)),
     xColumn :: {-# UNPACK #-} !(FunPtr (Ptr (Sqlite3_vtab_cursor a) -> Ptr Sqlite3_context -> CInt -> IO CInt)),
-    xRowid :: {-# UNPACK #-} !(FunPtr (Ptr (Sqlite3_vtab_cursor a) -> Ptr CLLong -> IO CInt)),
-    xUpdate :: {-# UNPACK #-} !(FunPtr (Ptr (Sqlite3_vtab a) -> CInt -> Ptr (Ptr Sqlite3_value) -> Ptr CLLong -> IO CInt)),
+    xRowid :: {-# UNPACK #-} !(FunPtr (Ptr (Sqlite3_vtab_cursor a) -> Ptr Int64 -> IO CInt)),
+    xUpdate :: {-# UNPACK #-} !(FunPtr (Ptr (Sqlite3_vtab a) -> CInt -> Ptr (Ptr Sqlite3_value) -> Ptr Int64 -> IO CInt)),
     xBegin :: {-# UNPACK #-} !(FunPtr (Ptr (Sqlite3_vtab a) -> IO CInt)),
     xSync :: {-# UNPACK #-} !(FunPtr (Ptr (Sqlite3_vtab a) -> IO CInt)),
     xCommit :: {-# UNPACK #-} !(FunPtr (Ptr (Sqlite3_vtab a) -> IO CInt)),
@@ -192,7 +193,7 @@ data {-# CTYPE "sqlite3.h" "sqlite3_vfs" #-} Sqlite3_vfs = Sqlite3_vfs
     xSleep :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vfs -> CInt -> IO CInt)),
     xCurrentTime :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vfs -> Ptr CDouble -> IO CInt)),
     xGetLastError :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vfs -> CInt -> CString -> IO CInt)),
-    xCurrentTimeInt64 :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vfs -> Ptr CLLong -> IO CInt)),
+    xCurrentTimeInt64 :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vfs -> Ptr Int64 -> IO CInt)),
     xSetSystemCall :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vfs -> CString -> FunPtr (IO ()) -> IO CInt)),
     xGetSystemCall :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vfs -> CString -> IO (FunPtr (IO ())))),
     xNextSystemCall :: {-# UNPACK #-} !(FunPtr (Ptr Sqlite3_vfs -> CString -> IO CString))

@@ -12,7 +12,7 @@ module Sqlite3.Bindings.Internal.Objects
     C.Sqlite3_pcache,
     C.Sqlite3_pcache_methods2 (..),
     C.Sqlite3_pcache_page (..),
-    C.Sqlite3_snapshot,
+    Sqlite3_snapshot (..),
     Sqlite3_stmt (..),
     Sqlite3_value (..),
     C.Sqlite3_vfs (..),
@@ -53,6 +53,12 @@ newtype Sqlite3_blob
 -- A function context.
 newtype Sqlite3_context
   = Sqlite3_context (Ptr C.Sqlite3_context)
+
+-- | https://www.sqlite.org/c3ref/snapshot.html
+--
+-- A database snapshot.
+newtype Sqlite3_snapshot
+  = Sqlite3_snapshot (Ptr C.Sqlite3_snapshot)
 
 -- | https://www.sqlite.org/c3ref/stmt.html
 --

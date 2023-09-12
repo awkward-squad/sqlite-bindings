@@ -102,7 +102,7 @@ sqlite3_backup_init ::
   Sqlite3 ->
   -- | Source database name.
   Text ->
-  -- | Backup, or result code on failure.
+  -- | Backup, or error code on failure.
   IO (Either CInt Sqlite3_backup)
 sqlite3_backup_init (Sqlite3 dstConnection) dstName (Sqlite3 srcConnection) srcName = do
   c_backup <-
@@ -390,7 +390,7 @@ sqlite3_blob_read ::
   Int ->
   -- | Byte offset into blob to read from.
   Int ->
-  -- | Result code, or bytes.
+  -- | Bytes, or error code on failure.
   IO (Either CInt ByteString)
 sqlite3_blob_read (Sqlite3_blob blob) len offset = do
   foreignPtr <- ByteString.mallocByteString len
@@ -1723,11 +1723,11 @@ sqlite3_next_stmt =
 -- Get the normalized SQL of a statement.
 sqlite3_normalized_sql ::
   -- | Statement.
-  Ptr C.Sqlite3_stmt ->
+  Sqlite3_stmt ->
   -- | SQL (UTF-8).
   IO CString
 sqlite3_normalized_sql =
-  C.sqlite3_normalized_sql
+  coerce C.sqlite3_normalized_sql
 
 -- | https://www.sqlite.org/c3ref/open.html
 --
@@ -1800,7 +1800,7 @@ sqlite3_prepare_v2 ::
   Sqlite3 ->
   -- | SQL.
   Text ->
-  -- | Statement, or error code.
+  -- | Statement, or error code on failure.
   IO (Either CInt Sqlite3_stmt)
 sqlite3_prepare_v2 =
   prepare_ C.sqlite3_prepare_v2
@@ -1820,7 +1820,7 @@ sqlite3_prepare_v3 ::
   Text ->
   -- | Flags.
   SQLITE_PREPARE_FLAGS ->
-  -- | Statement, or error code.
+  -- | Statement, or error code on failure.
   IO (Either CInt Sqlite3_stmt)
 sqlite3_prepare_v3 connection sql (SQLITE_PREPARE_FLAGS flags) =
   prepare_ (\a b c -> C.sqlite3_prepare_v3 a b c flags) connection sql
@@ -1855,7 +1855,7 @@ prepare_ doPrepare (Sqlite3 connection) sql =
 sqlite3_preupdate_blobwrite ::
   -- | Connection.
   Sqlite3 ->
-  -- | Column index, or @-1@.
+  -- | Column index, or @-1@ on failure.
   IO CInt
 sqlite3_preupdate_blobwrite =
   coerce C.sqlite3_preupdate_blobwrite
@@ -2098,22 +2098,22 @@ sqlite3_result_int =
 -- Return an integer from a function.
 sqlite3_result_int64 ::
   -- | Function context.
-  Ptr C.Sqlite3_context ->
+  Sqlite3_context ->
   -- | Integer.
   Int64 ->
   IO ()
 sqlite3_result_int64 =
-  C.sqlite3_result_int64
+  coerce C.sqlite3_result_int64
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
 --
 -- Return null from a function.
 sqlite3_result_null ::
   -- | Function context.
-  Ptr C.Sqlite3_context ->
+  Sqlite3_context ->
   IO ()
 sqlite3_result_null =
-  C.sqlite3_result_null
+  coerce C.sqlite3_result_null
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
 --
@@ -2136,12 +2136,12 @@ sqlite3_result_pointer =
 -- Set the subtype of the return value of a function.
 sqlite3_result_subtype ::
   -- | Function context.
-  Ptr C.Sqlite3_context ->
+  Sqlite3_context ->
   -- | Subtype.
   CUInt ->
   IO ()
 sqlite3_result_subtype =
-  C.sqlite3_result_subtype
+  coerce C.sqlite3_result_subtype
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
 --
@@ -2179,24 +2179,24 @@ sqlite3_result_text64 =
 -- Return a value from a function.
 sqlite3_result_value ::
   -- | Function context.
-  Ptr C.Sqlite3_context ->
+  Sqlite3_context ->
   -- | Value.
-  Ptr C.Sqlite3_value ->
+  Sqlite3_value ->
   IO ()
 sqlite3_result_value =
-  C.sqlite3_result_value
+  coerce C.sqlite3_result_value
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
 --
 -- Return a blob of zeroes from a function.
 sqlite3_result_zeroblob ::
   -- | Function context.
-  Ptr C.Sqlite3_context ->
+  Sqlite3_context ->
   -- | Size of blob, in bytes.
-  CInt ->
+  Int ->
   IO ()
-sqlite3_result_zeroblob =
-  C.sqlite3_result_zeroblob
+sqlite3_result_zeroblob (Sqlite3_context context) size =
+  C.sqlite3_result_zeroblob context (intToCInt size)
 
 -- | https://www.sqlite.org/c3ref/result_blob.html
 --
@@ -2300,34 +2300,34 @@ sqlite3_shutdown =
 -- Suspend execution.
 sqlite3_sleep ::
   -- | Duration, in milliseconds.
-  CInt ->
+  Int ->
   -- | Duration actually suspended, in milliseconds.
-  IO CInt
+  IO Int
 sqlite3_sleep =
-  C.sqlite3_sleep
+  fmap cintToInt . C.sqlite3_sleep . intToCInt
 
 -- | https://www.sqlite.org/c3ref/snapshot_cmp.html
 --
 -- Compare the ages of two snapshots of the same database.
 sqlite3_snapshot_cmp ::
   -- | First snapshot.
-  Ptr C.Sqlite3_snapshot ->
+  Sqlite3_snapshot ->
   -- | Second snapshot.
-  Ptr C.Sqlite3_snapshot ->
-  -- | Negative if first snapshot is older, @0@ if the snapshots are equal, or positive if the first snapshot is newer.
-  IO CInt
-sqlite3_snapshot_cmp =
-  C.sqlite3_snapshot_cmp
+  Sqlite3_snapshot ->
+  -- | @LT@ if first snapshot is older, @EQ@ if the snapshots are equal, or @GT@ if the first snapshot is newer.
+  IO Ordering
+sqlite3_snapshot_cmp (Sqlite3_snapshot snapshot0) (Sqlite3_snapshot snapshot1) =
+  (`compare` 0) <$> C.sqlite3_snapshot_cmp snapshot0 snapshot1
 
 -- | https://www.sqlite.org/c3ref/snapshot_free.html
 --
 -- Release a snapshot.
 sqlite3_snapshot_free ::
   -- | Snapshot.
-  Ptr C.Sqlite3_snapshot ->
+  Sqlite3_snapshot ->
   IO ()
 sqlite3_snapshot_free =
-  C.sqlite3_snapshot_free
+  coerce C.sqlite3_snapshot_free
 
 -- | https://www.sqlite.org/c3ref/snapshot_get.html
 --
